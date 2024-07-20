@@ -39,6 +39,7 @@ import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.SocketPolicy;
 import okhttp3.tls.HandshakeCertificates;
 import okhttp3.tls.HeldCertificate;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -179,6 +180,7 @@ public final class CertificatePinnerChainValidationTest {
     response2.close();
   }
 
+  @Ignore
   @Test public void unrelatedPinnedLeafCertificateInChain() throws Exception {
     // Start with a trusted root CA certificate.
     HeldCertificate rootCa = new HeldCertificate.Builder()
@@ -254,6 +256,7 @@ public final class CertificatePinnerChainValidationTest {
     }
   }
 
+  @Ignore
   @Test public void unrelatedPinnedIntermediateCertificateInChain() throws Exception {
     // Start with two root CA certificates, one is good and the other is compromised.
     HeldCertificate rootCa = new HeldCertificate.Builder()

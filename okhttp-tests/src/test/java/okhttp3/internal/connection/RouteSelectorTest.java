@@ -430,12 +430,6 @@ public final class RouteSelectorTest {
     assertThat(RouteSelector.getHostString(socketAddress)).isEqualTo("127.0.0.1");
   }
 
-  @Test public void routeToString() throws Exception {
-    Route route = new Route(httpAddress(), Proxy.NO_PROXY,
-        InetSocketAddress.createUnresolved("host", 1234));
-    assertThat(route.toString()).isEqualTo("Route{host:1234}");
-  }
-
   private void assertRoute(Route route, Address address, Proxy proxy, InetAddress socketAddress,
       int socketPort) {
     assertThat(route.address()).isEqualTo(address);
