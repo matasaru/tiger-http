@@ -29,7 +29,6 @@ import java.net.ProxySelector;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URL;
@@ -3426,8 +3425,6 @@ public final class URLConnectionTest {
     } catch (SSLException expected) {
       // JDK 1.9 response to the FAIL_HANDSHAKE
       // javax.net.ssl.SSLException: Unexpected handshake message: client_hello
-    } catch (SocketException expected) {
-      // Conscrypt's response to the FAIL_HANDSHAKE
     }
   }
 

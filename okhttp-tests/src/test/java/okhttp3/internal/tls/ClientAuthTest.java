@@ -275,8 +275,6 @@ public final class ClientAuthTest {
   }
 
   private SSLSocketFactory buildServerSslSocketFactory() {
-    // The test uses JDK default SSL Context instead of the Platform provided one
-    // as Conscrypt seems to have some differences, we only want to test client side here.
     try {
       X509KeyManager keyManager = newKeyManager(
           null, serverCert, serverIntermediateCa.certificate());

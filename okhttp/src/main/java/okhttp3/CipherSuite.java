@@ -32,9 +32,6 @@ import java.util.Map;
  *
  * <p>See <a href="https://docs.oracle.com/javase/10/security/oracle-providers.htm">JDK 10 Providers</a>
  * which lists the cipher suites supported by Oracle.
- *
- * <p>See <a href="https://github.com/google/conscrypt/blob/master/common/src/main/java/org/conscrypt/NativeCrypto.java">NativeCrypto.java</a>
- * from conscrypt, which lists the cipher suites supported by Conscrypt.
  */
 // TODO see if this class is necessary and, if it is, bring it up to date
 public final class CipherSuite {

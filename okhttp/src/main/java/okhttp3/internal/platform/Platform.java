@@ -21,7 +21,6 @@ import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
-import java.security.Security;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -33,7 +32,6 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
 import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
-import okhttp3.internal.Util;
 import okhttp3.internal.tls.BasicCertificateChainCleaner;
 import okhttp3.internal.tls.BasicTrustRootIndex;
 import okhttp3.internal.tls.CertificateChainCleaner;
@@ -164,30 +162,12 @@ public class Platform {
     return buildCertificateChainCleaner(trustManager);
   }
 
-  public static boolean isConscryptPreferred() {
-    // mainly to allow tests to run cleanly
-    if ("conscrypt".equals(Util.getSystemProperty("okhttp.platform", null))) {
-      return true;
-    }
-
-    // check if Provider manually installed
-    String preferredProvider = Security.getProviders()[0].getName();
-    return "Conscrypt".equals(preferredProvider);
-  }
-
   /** Attempt to match the host runtime to a capable Platform implementation. */
   private static Platform findPlatform() {
       return findJvmPlatform();
   }
 
   private static Platform findJvmPlatform() {
-    if (isConscryptPreferred()) {
-      Platform conscrypt = ConscryptPlatform.buildIfSupported();
-
-      if (conscrypt != null) {
-        return conscrypt;
-      }
-    }
 
     Platform jdk9 = Jdk9Platform.buildIfSupported();
 
