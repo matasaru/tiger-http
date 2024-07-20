@@ -35,8 +35,9 @@ import okio.Source;
  * <p>This interface is less ambitious than {@link java.nio.file.FileSystem} introduced in Java 7.
  * It lacks important features like file watching, metadata, permissions, and disk space
  * information. In exchange for these limitations, this interface is easier to implement and works
- * on all versions of Java and Android.
+ * on all versions of Java.
  */
+// TODO review and see if this class is really necessary
 public interface FileSystem {
   /** The host machine's local file system. */
   FileSystem SYSTEM = new FileSystem() {

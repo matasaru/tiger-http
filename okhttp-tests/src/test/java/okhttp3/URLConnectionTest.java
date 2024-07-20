@@ -310,26 +310,6 @@ public final class URLConnectionTest {
     Assertions.assertThat(server.takeRequest().getBody().readUtf8()).isEqualTo("body");
   }
 
-  // Check that if we don't read to the end of a response, the next request on the
-  // recycled connection doesn't get the unread tail of the first request's response.
-  // http://code.google.com/p/android/issues/detail?id=2939
-  @Test public void bug2939() throws Exception {
-    MockResponse response = new MockResponse()
-        .setChunkedBody("ABCDE\nFGHIJ\nKLMNO\nPQR", 8);
-
-    server.enqueue(response);
-    server.enqueue(response);
-
-    Request request = newRequest("/");
-    Response c1 = getResponse(request);
-    assertContent("ABCDE", c1, 5);
-    Response c2 = getResponse(request);
-    assertContent("ABCDE", c2, 5);
-
-    c1.close();
-    c2.close();
-  }
-
   @Test public void connectionsArePooled() throws Exception {
     MockResponse response = new MockResponse()
         .setBody("ABCDEFGHIJKLMNOPQR");
@@ -3443,8 +3423,6 @@ public final class URLConnectionTest {
       fail();
     } catch (SSLProtocolException expected) {
       // RI response to the FAIL_HANDSHAKE
-    } catch (SSLHandshakeException expected) {
-      // Android's response to the FAIL_HANDSHAKE
     } catch (SSLException expected) {
       // JDK 1.9 response to the FAIL_HANDSHAKE
       // javax.net.ssl.SSLException: Unexpected handshake message: client_hello

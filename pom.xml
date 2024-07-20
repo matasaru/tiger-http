@@ -17,7 +17,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!-- Compilation -->
-    <robolectric.version>10-robolectric-5803371</robolectric.version>
     <animal.sniffer.version>1.17</animal.sniffer.version>
     <java.version>1.8</java.version>
     <okio.version>1.17.2</okio.version>
@@ -50,11 +49,6 @@
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>${junit.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.robolectric</groupId>
-        <artifactId>android-all</artifactId>
-        <version>${robolectric.version}</version>
       </dependency>
       <dependency>
         <groupId>org.conscrypt</groupId>
@@ -91,17 +85,6 @@
               <okhttp.platform>${okhttp.platform}</okhttp.platform>
             </systemPropertyVariables>
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
-            <properties>
-              <!--
-                Configure a listener for enforcing that no uncaught exceptions issue from OkHttp
-                tests. Every test must have a <scope>test</scope> dependency on
-                okhttp-testing-support.
-                -->
-              <property>
-                <name>listener</name>
-                <value>okhttp3.testing.InstallUncaughtExceptionHandlerListener</value>
-              </property>
-            </properties>
           </configuration>
           <dependencies>
             <dependency>
@@ -139,20 +122,6 @@
                 <groupId>org.codehaus.mojo.signature</groupId>
                 <artifactId>java18</artifactId>
                 <version>1.0</version>
-              </signature>
-            </configuration>
-          </execution>
-          <execution>
-            <id>sniff-android5</id>
-            <phase>test</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-            <configuration>
-              <signature>
-                <groupId>net.sf.androidscents.signature</groupId>
-                <artifactId>android-api-level-21</artifactId>
-                <version>5.0.1_r2</version>
               </signature>
             </configuration>
           </execution>

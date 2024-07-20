@@ -28,11 +28,7 @@ import java.util.Map;
  *
  * <p><strong>Not all cipher suites are supported on all platforms.</strong> As newer cipher suites
  * are created (for stronger privacy, better performance, etc.) they will be adopted by the platform
- * and then exposed here. Cipher suites that are not available on either Android (through API level
- * 24) or Java (through JDK 9) are omitted for brevity.
- *
- * <p>See <a href="https://developer.android.com/reference/javax/net/ssl/SSLEngine.html">Android SSLEngine</a>
- * which lists the cipher suites supported by Android.
+ * and then exposed here. Cipher suites that are not available on Java are omitted for brevity.
  *
  * <p>See <a href="https://docs.oracle.com/javase/10/security/oracle-providers.htm">JDK 10 Providers</a>
  * which lists the cipher suites supported by Oracle.
@@ -40,6 +36,7 @@ import java.util.Map;
  * <p>See <a href="https://github.com/google/conscrypt/blob/master/common/src/main/java/org/conscrypt/NativeCrypto.java">NativeCrypto.java</a>
  * from conscrypt, which lists the cipher suites supported by Conscrypt.
  */
+// TODO see if this class is necessary and, if it is, bring it up to date
 public final class CipherSuite {
   /**
    * Compares cipher suites names like "TLS_RSA_WITH_NULL_MD5" and "SSL_RSA_WITH_NULL_MD5", ignoring

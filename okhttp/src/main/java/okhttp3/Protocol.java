@@ -55,7 +55,7 @@ public enum Protocol {
    * requests on the same socket, and server-push. HTTP/1.1 semantics are layered on HTTP/2.
    *
    * <p>HTTP/2 requires deployments of HTTP/2 that use TLS 1.2 support {@linkplain
-   * CipherSuite#TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256} , present in Java 8+ and Android 5+. Servers
+   * CipherSuite#TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256} , present in Java 8+. Servers
    * that enforce this may send an exception message including the string {@code
    * INADEQUATE_SECURITY}.
    */

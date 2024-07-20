@@ -45,35 +45,13 @@ import okio.Buffer;
  *
  * <h3>Server name indication (SNI)</h3>
  *
- * <p>Supported on Android 2.3+.
- *
- * <p>Supported on OpenJDK 7+
- *
- * <h3>Session Tickets</h3>
- *
- * <p>Supported on Android 2.3+.
- *
- * <h3>Android Traffic Stats (Socket Tagging)</h3>
- *
- * <p>Supported on Android 4.0+.
- *
  * <h3>ALPN (Application Layer Protocol Negotiation)</h3>
- *
- * <p>Supported on Android 5.0+. The APIs were present in Android 4.4, but that implementation was
- * unstable.
  *
  * <p>Supported on OpenJDK 8 via the JettyALPN-boot library.
  *
  * <p>Supported on OpenJDK 9+ via SSLParameters and SSLSocket features.
  *
  * <h3>Trust Manager Extraction</h3>
- *
- * <p>Supported on Android 2.3+ and OpenJDK 7+. There are no public APIs to recover the trust
- * manager that was used to create an {@link SSLSocketFactory}.
- *
- * <h3>Android Cleartext Permit Detection</h3>
- *
- * <p>Supported on Android 6.0+ via {@code NetworkSecurityPolicy}.
  */
 public class Platform {
   private static final Platform PLATFORM = findPlatform();
@@ -199,17 +177,7 @@ public class Platform {
 
   /** Attempt to match the host runtime to a capable Platform implementation. */
   private static Platform findPlatform() {
-    if (isAndroid()) {
-      return findAndroidPlatform();
-    } else {
       return findJvmPlatform();
-    }
-  }
-
-  public static boolean isAndroid() {
-    // This explicit check avoids activating in Android Studio with Android specific classes
-    // available when running plugins inside the IDE.
-    return "Dalvik".equals(System.getProperty("java.vm.name"));
   }
 
   private static Platform findJvmPlatform() {
@@ -235,22 +203,6 @@ public class Platform {
 
     // Probably an Oracle JDK like OpenJDK.
     return new Platform();
-  }
-
-  private static Platform findAndroidPlatform() {
-    Platform android10 = Android10Platform.buildIfSupported();
-
-    if (android10 != null) {
-      return android10;
-    }
-
-    Platform android = AndroidPlatform.buildIfSupported();
-
-    if (android == null) {
-      throw new NullPointerException("No platform found on Android");
-    }
-
-    return android;
   }
 
   /**

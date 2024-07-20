@@ -325,10 +325,6 @@ public final class CertificatePinnerChainValidationTest {
     try {
       call.execute();
       fail();
-    } catch (SSLHandshakeException expected) {
-      // On Android, the handshake fails before the certificate pinner runs.
-      String message = expected.getMessage();
-      assertThat(message).contains("Could not validate certificate");
     } catch (SSLPeerUnverifiedException expected) {
       // On OpenJDK, the handshake succeeds but the certificate pinner fails.
       String message = expected.getMessage();

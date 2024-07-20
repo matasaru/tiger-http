@@ -1154,8 +1154,7 @@ public final class CallTest {
     RecordedResponse response = executeSynchronously("/");
     response.assertFailure(
             SSLException.class, // JDK 11 response to the FAIL_HANDSHAKE
-            SSLProtocolException.class, // RI response to the FAIL_HANDSHAKE
-            SSLHandshakeException.class // Android's response to the FAIL_HANDSHAKE
+            SSLProtocolException.class // RI response to the FAIL_HANDSHAKE
     );
     assertThat(client.connectionSpecs().contains(ConnectionSpec.COMPATIBLE_TLS)).isFalse();
   }
@@ -1249,8 +1248,6 @@ public final class CallTest {
       fail();
     } catch (SSLProtocolException expected) {
       // RI response to the FAIL_HANDSHAKE
-    } catch (SSLHandshakeException expected) {
-      // Android's response to the FAIL_HANDSHAKE
     } catch (SSLException expected) {
       // JDK 11 response to the FAIL_HANDSHAKE
       String jvmVersion = System.getProperty("java.specification.version");

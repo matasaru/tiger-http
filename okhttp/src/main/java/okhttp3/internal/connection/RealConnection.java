@@ -73,7 +73,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static okhttp3.internal.Util.closeQuietly;
 
 public final class RealConnection extends Http2Connection.Listener implements Connection {
-  private static final String NPE_THROW_WITH_NULL = "throw with null exception";
+
   private static final int MAX_TUNNEL_ATTEMPTS = 21;
 
   public final RealConnectionPool connectionPool;
@@ -267,18 +267,8 @@ public final class RealConnection extends Http2Connection.Listener implements Co
       throw ce;
     }
 
-    // The following try/catch block is a pseudo hacky way to get around a crash on Android 7.0
-    // More details:
-    // https://github.com/square/okhttp/issues/3245
-    // https://android-review.googlesource.com/#/c/271775/
-    try {
-      source = Okio.buffer(Okio.source(rawSocket));
-      sink = Okio.buffer(Okio.sink(rawSocket));
-    } catch (NullPointerException npe) {
-      if (NPE_THROW_WITH_NULL.equals(npe.getMessage())) {
-        throw new IOException(npe);
-      }
-    }
+    source = Okio.buffer(Okio.source(rawSocket));
+    sink = Okio.buffer(Okio.sink(rawSocket));
   }
 
   private void establishProtocol(ConnectionSpecSelector connectionSpecSelector,
@@ -370,9 +360,6 @@ public final class RealConnection extends Http2Connection.Listener implements Co
           ? Protocol.get(maybeProtocol)
           : Protocol.HTTP_1_1;
       success = true;
-    } catch (AssertionError e) {
-      if (Util.isAndroidGetsocknameError(e)) throw new IOException(e);
-      throw e;
     } finally {
       if (sslSocket != null) {
         Platform.get().afterHandshake(sslSocket);
