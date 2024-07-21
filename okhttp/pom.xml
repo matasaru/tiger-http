@@ -22,6 +22,49 @@
       <artifactId>jsr305</artifactId>
       <scope>provided</scope>
     </dependency>
+
+    <!-- test deps-->
+    <dependency>
+      <groupId>${okhttp3.groupId}</groupId>
+      <artifactId>okhttp-testing-support</artifactId>
+      <version>${okhttp3.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>${okhttp3.groupId}</groupId>
+      <artifactId>okhttp-tls</artifactId>
+      <version>${okhttp3.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>${okhttp3.groupId}</groupId>
+      <artifactId>okhttp-urlconnection</artifactId>
+      <version>${okhttp3.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>${okhttp3.groupId}</groupId>
+      <artifactId>mockwebserver</artifactId>
+      <version>${okhttp3.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>${okhttp3.groupId}</groupId>
+      <artifactId>logging-interceptor</artifactId>
+      <version>${okhttp3.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

@@ -10,7 +10,6 @@
 
   <modules>
     <module>okhttp</module>
-    <module>okhttp-tests</module>
   </modules>
 
   <properties>
