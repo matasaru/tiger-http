@@ -21,16 +21,20 @@ import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
-import okhttp3.internal.platform.Platform;
 import okio.ByteString;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public final class WebSocketRecorder extends WebSocketListener {
+
+  private static final Logger logger = Logger.getLogger(WebSocketRecorder.class.getName());
+
   private final String name;
   private final BlockingQueue<Object> events = new LinkedBlockingQueue<>();
   private WebSocketListener delegate;
@@ -45,7 +49,7 @@ public final class WebSocketRecorder extends WebSocketListener {
   }
 
   @Override public void onOpen(WebSocket webSocket, Response response) {
-    Platform.get().log(Platform.INFO, "[WS " + name + "] onOpen", null);
+    logger.info("[WS " + name + "] onOpen");
 
     WebSocketListener delegate = this.delegate;
     if (delegate != null) {
@@ -57,7 +61,7 @@ public final class WebSocketRecorder extends WebSocketListener {
   }
 
   @Override public void onMessage(WebSocket webSocket, ByteString bytes) {
-    Platform.get().log(Platform.INFO, "[WS " + name + "] onMessage", null);
+    logger.info("[WS " + name + "] onMessage");
 
     WebSocketListener delegate = this.delegate;
     if (delegate != null) {
@@ -70,7 +74,7 @@ public final class WebSocketRecorder extends WebSocketListener {
   }
 
   @Override public void onMessage(WebSocket webSocket, String text) {
-    Platform.get().log(Platform.INFO, "[WS " + name + "] onMessage", null);
+    logger.info("[WS " + name + "] onMessage");
 
     WebSocketListener delegate = this.delegate;
     if (delegate != null) {
@@ -83,7 +87,7 @@ public final class WebSocketRecorder extends WebSocketListener {
   }
 
   @Override public void onClosing(WebSocket webSocket, int code, String reason) {
-    Platform.get().log(Platform.INFO, "[WS " + name + "] onClosing " + code, null);
+    logger.info("[WS " + name + "] onClosing " + code);
 
     WebSocketListener delegate = this.delegate;
     if (delegate != null) {
@@ -95,7 +99,7 @@ public final class WebSocketRecorder extends WebSocketListener {
   }
 
   @Override public void onClosed(WebSocket webSocket, int code, String reason) {
-    Platform.get().log(Platform.INFO, "[WS " + name + "] onClosed " + code, null);
+    logger.info("[WS " + name + "] onClosed " + code);
 
     WebSocketListener delegate = this.delegate;
     if (delegate != null) {
@@ -107,7 +111,7 @@ public final class WebSocketRecorder extends WebSocketListener {
   }
 
   @Override public void onFailure(WebSocket webSocket, Throwable t, @Nullable Response response)  {
-    Platform.get().log(Platform.INFO, "[WS " + name + "] onFailure", t);
+    logger.log(Level.INFO, "[WS " + name + "] onFailure", t);
 
     WebSocketListener delegate = this.delegate;
     if (delegate != null) {

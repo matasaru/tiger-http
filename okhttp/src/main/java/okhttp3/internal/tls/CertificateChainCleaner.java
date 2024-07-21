@@ -21,7 +21,6 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.X509TrustManager;
-import okhttp3.internal.platform.Platform;
 
 /**
  * Computes the effective certificate chain from the raw array returned by Java's built in TLS APIs.
@@ -38,7 +37,7 @@ public abstract class CertificateChainCleaner {
       throws SSLPeerUnverifiedException;
 
   public static CertificateChainCleaner get(X509TrustManager trustManager) {
-    return Platform.get().buildCertificateChainCleaner(trustManager);
+    return new BasicCertificateChainCleaner(new BasicTrustRootIndex(trustManager.getAcceptedIssuers()));
   }
 
   public static CertificateChainCleaner get(X509Certificate... caCerts) {

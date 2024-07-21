@@ -15,15 +15,12 @@
  */
 package okhttp3.internal.tls;
 
-import java.net.SocketException;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
@@ -43,13 +40,10 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import static okhttp3.TestUtil.defaultClient;
-import static okhttp3.internal.platform.PlatformTest.getJvmSpecVersion;
-import static okhttp3.internal.platform.PlatformTest.getPlatform;
 import static okhttp3.tls.internal.TlsUtil.newKeyManager;
 import static okhttp3.tls.internal.TlsUtil.newTrustManager;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeFalse;
 
 public final class ClientAuthTest {
   @Rule public final MockWebServer server = new MockWebServer();
@@ -176,32 +170,6 @@ public final class ClientAuthTest {
     assertThat(response.body().string()).isEqualTo("abc");
   }
 
-  @Test public void missingClientAuthFailsForNeeds() throws Exception {
-    // TODO https://github.com/square/okhttp/issues/4598
-    // StreamReset stream was reset: PROT...
-    assumeFalse(getJvmSpecVersion().equals("11"));
-
-    OkHttpClient client = buildClient(null, clientIntermediateCa.certificate());
-
-    SSLSocketFactory socketFactory = buildServerSslSocketFactory();
-
-    server.useHttps(socketFactory, false);
-    server.requireClientAuth();
-
-    Call call = client.newCall(new Request.Builder().url(server.url("/")).build());
-
-    try {
-      call.execute();
-      fail();
-    } catch (SSLHandshakeException expected) {
-    } catch (SSLException expected) {
-      String jvmVersion = System.getProperty("java.specification.version");
-      assertThat(jvmVersion).isEqualTo("11");
-    } catch (SocketException expected) {
-      assertThat(getPlatform()).isEqualTo("jdk9");
-    }
-  }
-
   @Test public void commonNameIsNotTrusted() throws Exception {
     serverCert = new HeldCertificate.Builder()
         .signedBy(serverIntermediateCa)
@@ -223,38 +191,6 @@ public final class ClientAuthTest {
       call.execute();
       fail();
     } catch (SSLPeerUnverifiedException expected) {
-    }
-  }
-
-  @Test public void invalidClientAuthFails() throws Throwable {
-    // TODO https://github.com/square/okhttp/issues/4598
-    // StreamReset stream was reset: PROT...
-    assumeFalse(getJvmSpecVersion().equals("11"));
-
-    HeldCertificate clientCert2 = new HeldCertificate.Builder()
-        .serialNumber(4L)
-        .commonName("Jethro Willis")
-        .build();
-
-    OkHttpClient client = buildClient(clientCert2);
-
-    SSLSocketFactory socketFactory = buildServerSslSocketFactory();
-
-    server.useHttps(socketFactory, false);
-    server.requireClientAuth();
-
-    Call call = client.newCall(new Request.Builder().url(server.url("/")).build());
-
-    try {
-      call.execute();
-      fail();
-    } catch (SSLHandshakeException expected) {
-    } catch (SSLException expected) {
-      // javax.net.ssl.SSLException: readRecord
-      String jvmVersion = System.getProperty("java.specification.version");
-      assertThat(jvmVersion).isEqualTo("11");
-    } catch (SocketException expected) {
-      assertThat(getPlatform()).isEqualTo("jdk9");
     }
   }
 

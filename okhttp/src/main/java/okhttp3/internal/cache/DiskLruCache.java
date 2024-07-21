@@ -30,19 +30,18 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import okhttp3.internal.Util;
 import okhttp3.internal.io.FileSystem;
-import okhttp3.internal.platform.Platform;
 import okio.BufferedSink;
 import okio.BufferedSource;
 import okio.Okio;
 import okio.Sink;
 import okio.Source;
-
-import static okhttp3.internal.platform.Platform.WARN;
 
 /**
  * A cache that uses a bounded amount of space on a filesystem. Each cache entry has a string key
@@ -85,6 +84,9 @@ import static okhttp3.internal.platform.Platform.WARN;
  * IOException} and responding appropriately.
  */
 public final class DiskLruCache implements Closeable, Flushable {
+
+  private static final Logger logger = Logger.getLogger(DiskLruCache.class.getName());
+
   static final String JOURNAL_FILE = "journal";
   static final String JOURNAL_FILE_TEMP = "journal.tmp";
   static final String JOURNAL_FILE_BACKUP = "journal.bkp";
@@ -230,7 +232,7 @@ public final class DiskLruCache implements Closeable, Flushable {
         initialized = true;
         return;
       } catch (IOException journalIsCorrupt) {
-        Platform.get().log(WARN, "DiskLruCache " + directory + " is corrupt: "
+        logger.log(Level.WARNING, "DiskLruCache " + directory + " is corrupt: "
             + journalIsCorrupt.getMessage() + ", removing", journalIsCorrupt);
       }
 

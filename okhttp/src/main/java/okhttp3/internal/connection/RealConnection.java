@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 import javax.net.ssl.SSLPeerUnverifiedException;
+import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -60,7 +61,6 @@ import okhttp3.internal.http2.Http2Connection;
 import okhttp3.internal.http2.Http2ExchangeCodec;
 import okhttp3.internal.http2.Http2Stream;
 import okhttp3.internal.http2.StreamResetException;
-import okhttp3.internal.platform.Platform;
 import okhttp3.internal.tls.OkHostnameVerifier;
 import okhttp3.internal.ws.RealWebSocket;
 import okio.BufferedSink;
@@ -159,11 +159,6 @@ public final class RealConnection extends Http2Connection.Listener implements Co
         throw new RouteException(new UnknownServiceException(
             "CLEARTEXT communication not enabled for client"));
       }
-      String host = route.address().url().host();
-      if (!Platform.get().isCleartextTrafficPermitted(host)) {
-        throw new RouteException(new UnknownServiceException(
-            "CLEARTEXT communication to " + host + " not permitted by network security policy"));
-      }
     } else {
       if (route.address().protocols().contains(Protocol.H2_PRIOR_KNOWLEDGE)) {
         throw new RouteException(new UnknownServiceException(
@@ -260,7 +255,7 @@ public final class RealConnection extends Http2Connection.Listener implements Co
     eventListener.connectStart(call, route.socketAddress(), proxy);
     rawSocket.setSoTimeout(readTimeout);
     try {
-      Platform.get().connectSocket(rawSocket, route.socketAddress(), connectTimeout);
+      rawSocket.connect(route.socketAddress(), connectTimeout);
     } catch (ConnectException e) {
       ConnectException ce = new ConnectException("Failed to connect to " + route.socketAddress());
       ce.initCause(e);
@@ -318,8 +313,20 @@ public final class RealConnection extends Http2Connection.Listener implements Co
       // Configure the socket's ciphers, TLS versions, and extensions.
       ConnectionSpec connectionSpec = connectionSpecSelector.configureSecureSocket(sslSocket);
       if (connectionSpec.supportsTlsExtensions()) {
-        Platform.get().configureTlsExtensions(
-            sslSocket, address.url().host(), address.protocols());
+        List<Protocol> protocols = address.protocols();
+        String[] names = new String[protocols.size()];
+        for (int i = 0; i < protocols.size(); i++) {
+          Protocol protocol = protocols.get(i);
+          if (protocol != Protocol.HTTP_1_0) {
+            // No HTTP/1.0 for ALPN.
+            names[i] = protocol.toString();
+          }
+        }
+
+        SSLParameters sslParameters = sslSocket.getSSLParameters();
+        sslParameters.setApplicationProtocols(names);
+
+        sslSocket.setSSLParameters(sslParameters);
       }
 
       // Force handshake. This can throw!
@@ -349,21 +356,22 @@ public final class RealConnection extends Http2Connection.Listener implements Co
           unverifiedHandshake.peerCertificates());
 
       // Success! Save the handshake and the ALPN protocol.
-      String maybeProtocol = connectionSpec.supportsTlsExtensions()
-          ? Platform.get().getSelectedProtocol(sslSocket)
-          : null;
       socket = sslSocket;
       source = Okio.buffer(Okio.source(socket));
       sink = Okio.buffer(Okio.sink(socket));
       handshake = unverifiedHandshake;
-      protocol = maybeProtocol != null
-          ? Protocol.get(maybeProtocol)
-          : Protocol.HTTP_1_1;
+      protocol = Protocol.HTTP_1_1;
+      if (connectionSpec.supportsTlsExtensions()) {
+        String maybeProtocol = sslSocket.getApplicationProtocol();
+        // SSLSocket.getApplicationProtocol returns "" if application protocols values will not be used.
+        // Observed if you didn't specify SSLParameters.setApplicationProtocols.
+        if (maybeProtocol != null && !maybeProtocol.isEmpty()) {
+          protocol = Protocol.get(maybeProtocol);
+        }
+      }
+
       success = true;
     } finally {
-      if (sslSocket != null) {
-        Platform.get().afterHandshake(sslSocket);
-      }
       if (!success) {
         closeQuietly(sslSocket);
       }

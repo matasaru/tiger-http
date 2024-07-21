@@ -63,7 +63,6 @@ import okhttp3.internal.RecordingAuthenticator;
 import okhttp3.internal.RecordingOkAuthenticator;
 import okhttp3.internal.Util;
 import okhttp3.internal.Version;
-import okhttp3.internal.platform.Platform;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -102,7 +101,6 @@ import static org.hamcrest.CoreMatchers.either;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeTrue;
 
 /** Android's URLConnectionTest, ported to exercise OkHttp's Call API. */
 public final class URLConnectionTest {
@@ -551,7 +549,7 @@ public final class URLConnectionTest {
     Response response1 = getResponse(newRequest("/"));
     assertContent("this response comes via HTTPS", response1);
 
-    SSLContext sslContext2 = Platform.get().getSSLContext();
+    SSLContext sslContext2 = SSLContext.getInstance("TLS");
     sslContext2.init(null, null, null);
     SSLSocketFactory sslSocketFactory2 = sslContext2.getSocketFactory();
 
@@ -2420,7 +2418,7 @@ public final class URLConnectionTest {
     RecordingHostnameVerifier hostnameVerifier = new RecordingHostnameVerifier();
     RecordingTrustManager trustManager =
         new RecordingTrustManager(handshakeCertificates.trustManager());
-    SSLContext sslContext = Platform.get().getSSLContext();
+    SSLContext sslContext = SSLContext.getInstance("TLS");
     sslContext.init(null, new TrustManager[] {trustManager}, null);
 
     client = client.newBuilder()
@@ -3457,14 +3455,6 @@ public final class URLConnectionTest {
     Assertions.assertThat(requestB.getSequenceNumber()).isEqualTo(1);
   }
 
-  @Test public void nullSSLSocketFactory_throws() {
-    try {
-      client.newBuilder().sslSocketFactory(null);
-      fail();
-    } catch (NullPointerException expected) {
-    }
-  }
-
   /**
    * We had a bug where we weren't closing Gzip streams on redirects.
    * https://github.com/square/okhttp/issues/441
@@ -3556,17 +3546,6 @@ public final class URLConnectionTest {
       HttpUrl.get("http://host\u0001/");
       fail();
     } catch (IllegalArgumentException expected) {
-    }
-  }
-
-  @Test public void setSslSocketFactoryFailsOnJdk9() {
-    assumeTrue(getPlatform().equals("jdk9"));
-
-    try {
-      client.newBuilder()
-          .sslSocketFactory(handshakeCertificates.sslSocketFactory());
-      fail();
-    } catch (UnsupportedOperationException expected) {
     }
   }
 
@@ -3836,9 +3815,5 @@ public final class URLConnectionTest {
    */
   private FallbackTestClientSocketFactory suppressTlsFallbackClientSocketFactory() {
     return new FallbackTestClientSocketFactory(handshakeCertificates.sslSocketFactory());
-  }
-
-  private String getPlatform() {
-    return System.getProperty("okhttp.platform", "platform");
   }
 }

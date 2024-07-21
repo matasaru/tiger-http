@@ -26,9 +26,9 @@ import java.util.Map;
  * <a href="https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml">TLS cipher
  * suites</a>.
  *
- * <p><strong>Not all cipher suites are supported on all platforms.</strong> As newer cipher suites
- * are created (for stronger privacy, better performance, etc.) they will be adopted by the platform
- * and then exposed here. Cipher suites that are not available on Java are omitted for brevity.
+ * <p>As newer cipher suites are created (for stronger privacy, better performance, etc.) they will
+ * be adopted by the platform and then exposed here. Cipher suites that are not available on Java are
+ * omitted for brevity.
  *
  * <p>See <a href="https://docs.oracle.com/javase/10/security/oracle-providers.htm">JDK 10 Providers</a>
  * which lists the cipher suites supported by Oracle.

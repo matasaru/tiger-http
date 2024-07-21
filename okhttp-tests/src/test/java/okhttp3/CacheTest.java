@@ -36,7 +36,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.net.ssl.HostnameVerifier;
 import okhttp3.internal.Internal;
 import okhttp3.internal.io.InMemoryFileSystem;
-import okhttp3.internal.platform.Platform;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -2066,7 +2065,7 @@ public final class CacheTest {
   @Test public void testGoldenCacheHttpsResponseOkHttp27() throws Exception {
     HttpUrl url = server.url("/");
     String urlKey = Cache.key(url);
-    String prefix = Platform.get().getPrefix();
+    String prefix = "OkHttp";
     String entryMetadata = ""
         + "" + url + "\n"
         + "GET\n"
@@ -2115,7 +2114,7 @@ public final class CacheTest {
   @Test public void testGoldenCacheHttpsResponseOkHttp30() throws Exception {
     HttpUrl url = server.url("/");
     String urlKey = Cache.key(url);
-    String prefix = Platform.get().getPrefix();
+    String prefix = "OkHttp";
     String entryMetadata = ""
         + "" + url + "\n"
         + "GET\n"
@@ -2164,7 +2163,7 @@ public final class CacheTest {
   @Test public void testGoldenCacheHttpResponseOkHttp30() throws Exception {
     HttpUrl url = server.url("/");
     String urlKey = Cache.key(url);
-    String prefix = Platform.get().getPrefix();
+    String prefix = "OkHttp";
     String entryMetadata = ""
         + "" + url + "\n"
         + "GET\n"

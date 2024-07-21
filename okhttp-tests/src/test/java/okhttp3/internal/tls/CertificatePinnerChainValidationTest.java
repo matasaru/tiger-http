@@ -21,7 +21,6 @@ import java.security.cert.X509Certificate;
 import java.util.Collections;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
@@ -33,7 +32,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.RecordingHostnameVerifier;
 import okhttp3.Request;
 import okhttp3.Response;
-import okhttp3.internal.platform.Platform;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.SocketPolicy;
@@ -44,8 +42,6 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import static okhttp3.TestUtil.defaultClient;
-import static okhttp3.internal.platform.PlatformTest.getJvmSpecVersion;
-import static okhttp3.internal.platform.PlatformTest.getPlatform;
 import static okhttp3.tls.internal.TlsUtil.newKeyManager;
 import static okhttp3.tls.internal.TlsUtil.newTrustManager;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -58,7 +54,6 @@ public final class CertificatePinnerChainValidationTest {
   /** The pinner should pull the root certificate from the trust manager. */
   @Test public void pinRootNotPresentInChain() throws Exception {
     // TODO https://github.com/square/okhttp/issues/4703
-    assumeFalse(getJvmSpecVersion().equals("11"));
 
     HeldCertificate rootCa = new HeldCertificate.Builder()
         .serialNumber(1L)
@@ -118,7 +113,6 @@ public final class CertificatePinnerChainValidationTest {
   /** The pinner should accept an intermediate from the server's chain. */
   @Test public void pinIntermediatePresentInChain() throws Exception {
     // TODO https://github.com/square/okhttp/issues/4703
-    assumeFalse(getJvmSpecVersion().equals("11"));
 
     HeldCertificate rootCa = new HeldCertificate.Builder()
         .serialNumber(1L)
@@ -339,10 +333,9 @@ public final class CertificatePinnerChainValidationTest {
     // at sun.security.pkcs12.PKCS12KeyStore.setKeyEntry
     // http://openjdk.java.net/jeps/229
     // http://hg.openjdk.java.net/jdk9/jdk9/jdk/file/2c1c21d11e58/src/share/classes/sun/security/pkcs12/PKCS12KeyStore.java#l596
-    String keystoreType = getPlatform().equals("jdk9") ? "JKS" : null;
-    X509KeyManager x509KeyManager = newKeyManager(keystoreType, heldCertificate, intermediates);
-    X509TrustManager trustManager = newTrustManager(keystoreType, Collections.emptyList());
-    SSLContext sslContext = Platform.get().getSSLContext();
+    X509KeyManager x509KeyManager = newKeyManager(null, heldCertificate, intermediates);
+    X509TrustManager trustManager = newTrustManager(null, Collections.emptyList());
+    SSLContext sslContext = SSLContext.getInstance("TLS");
     sslContext.init(new KeyManager[] { x509KeyManager }, new TrustManager[] { trustManager },
         new SecureRandom());
     return sslContext.getSocketFactory();

@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+
 import okhttp3.internal.NamedRunnable;
 import okhttp3.internal.cache.CacheInterceptor;
 import okhttp3.internal.connection.ConnectInterceptor;
@@ -30,11 +32,9 @@ import okhttp3.internal.http.BridgeInterceptor;
 import okhttp3.internal.http.CallServerInterceptor;
 import okhttp3.internal.http.RealInterceptorChain;
 import okhttp3.internal.http.RetryAndFollowUpInterceptor;
-import okhttp3.internal.platform.Platform;
 import okio.Timeout;
 
 import static okhttp3.internal.Util.closeQuietly;
-import static okhttp3.internal.platform.Platform.INFO;
 
 final class RealCall implements Call {
   final OkHttpClient client;
@@ -175,7 +175,7 @@ final class RealCall implements Call {
       } catch (IOException e) {
         if (signalledCallback) {
           // Do not signal the callback twice!
-          Platform.get().log(INFO, "Callback failure for " + toLoggableString(), e);
+          OkHttpClient.logger.log(Level.INFO, "Callback failure for " + toLoggableString(), e);
         } else {
           responseCallback.onFailure(RealCall.this, e);
         }

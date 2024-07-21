@@ -20,6 +20,7 @@ import java.io.InterruptedIOException;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.net.Socket;
+import java.util.logging.Level;
 import javax.annotation.Nullable;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
@@ -34,7 +35,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.internal.Internal;
 import okhttp3.internal.http.ExchangeCodec;
-import okhttp3.internal.platform.Platform;
 import okio.AsyncTimeout;
 import okio.Timeout;
 
@@ -113,7 +113,10 @@ public final class Transmitter {
   }
 
   public void callStart() {
-    this.callStackTrace = Platform.get().getStackTraceForCloseable("response.body().close()");
+    if (OkHttpClient.logger.isLoggable(Level.FINE)) {
+      // These are expensive to allocate
+      this.callStackTrace = new Throwable("response.body().close()");
+    }
     eventListener.callStart(call);
   }
 

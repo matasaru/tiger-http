@@ -38,7 +38,6 @@ import okhttp3.internal.http.HttpHeaders;
 import okhttp3.internal.http.HttpMethod;
 import okhttp3.internal.http.StatusLine;
 import okhttp3.internal.io.FileSystem;
-import okhttp3.internal.platform.Platform;
 import okio.Buffer;
 import okio.BufferedSink;
 import okio.BufferedSource;
@@ -474,10 +473,10 @@ public final class Cache implements Closeable, Flushable {
 
   private static final class Entry {
     /** Synthetic response header: the local time when the request was sent. */
-    private static final String SENT_MILLIS = Platform.get().getPrefix() + "-Sent-Millis";
+    private static final String SENT_MILLIS = "OkHttp-Sent-Millis";
 
     /** Synthetic response header: the local time when the response was received. */
-    private static final String RECEIVED_MILLIS = Platform.get().getPrefix() + "-Received-Millis";
+    private static final String RECEIVED_MILLIS = "OkHttp-Received-Millis";
 
     private final String url;
     private final Headers varyHeaders;

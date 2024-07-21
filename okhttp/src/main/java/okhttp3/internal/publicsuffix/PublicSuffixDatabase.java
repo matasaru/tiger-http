@@ -21,7 +21,9 @@ import java.io.InterruptedIOException;
 import java.net.IDN;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
-import okhttp3.internal.platform.Platform;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import okio.BufferedSource;
 import okio.GzipSource;
 import okio.Okio;
@@ -33,6 +35,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * <a href="https://publicsuffix.org/">publicsuffix.org</a>.
  */
 public final class PublicSuffixDatabase {
+  private static final Logger logger = Logger.getLogger(PublicSuffixDatabase.class.getName());
+
   public static final String PUBLIC_SUFFIX_RESOURCE = "publicsuffixes.gz";
 
   private static final byte[] WILDCARD_LABEL = new byte[]{'*'};
@@ -294,7 +298,7 @@ public final class PublicSuffixDatabase {
           Thread.interrupted(); // Temporarily clear the interrupted state.
           interrupted = true;
         } catch (IOException e) {
-          Platform.get().log(Platform.WARN, "Failed to read public suffix list", e);
+          logger.log(Level.WARNING, "Failed to read public suffix list", e);
           return;
         }
       }

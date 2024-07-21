@@ -28,12 +28,13 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import javax.annotation.Nullable;
 import okhttp3.Address;
+import okhttp3.OkHttpClient;
 import okhttp3.Route;
 import okhttp3.internal.Util;
 import okhttp3.internal.connection.Transmitter.TransmitterReference;
-import okhttp3.internal.platform.Platform;
 
 import static okhttp3.internal.Util.closeQuietly;
 
@@ -231,9 +232,12 @@ public final class RealConnectionPool {
 
       // We've discovered a leaked transmitter. This is an application bug.
       TransmitterReference transmitterRef = (TransmitterReference) reference;
-      String message = "A connection to " + connection.route().address().url()
-          + " was leaked. Did you forget to close a response body?";
-      Platform.get().logCloseableLeak(message, transmitterRef.callStackTrace);
+      String message = "A connection to " + connection.route().address().url() + " was leaked. Did you forget to close a response body?";
+      if (transmitterRef.callStackTrace == null) {
+        message += " To see where this was allocated, set the OkHttpClient logger level to FINE: "
+                + "Logger.getLogger(OkHttpClient.class.getName()).setLevel(Level.FINE);";
+      }
+      OkHttpClient.logger.log(Level.WARNING, message, (Throwable) transmitterRef.callStackTrace);
 
       references.remove(i);
       connection.noNewExchanges = true;

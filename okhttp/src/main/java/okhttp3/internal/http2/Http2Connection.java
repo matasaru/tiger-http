@@ -34,11 +34,12 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import javax.annotation.Nullable;
 import okhttp3.Headers;
+import okhttp3.OkHttpClient;
 import okhttp3.internal.NamedRunnable;
 import okhttp3.internal.Util;
-import okhttp3.internal.platform.Platform;
 import okio.Buffer;
 import okio.BufferedSink;
 import okio.BufferedSource;
@@ -48,7 +49,6 @@ import okio.Okio;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static okhttp3.internal.http2.ErrorCode.REFUSED_STREAM;
 import static okhttp3.internal.http2.Settings.DEFAULT_INITIAL_WINDOW_SIZE;
-import static okhttp3.internal.platform.Platform.INFO;
 
 /**
  * A socket connection to a remote peer. A connection hosts streams which can send and receive
@@ -730,8 +730,7 @@ public final class Http2Connection implements Closeable {
               try {
                 listener.onStream(newStream);
               } catch (IOException e) {
-                Platform.get().log(
-                    INFO, "Http2Connection.Listener failure for " + connectionName, e);
+                OkHttpClient.logger.log(Level.INFO, "Http2Connection.Listener failure for " + connectionName, e);
                 try {
                   newStream.close(ErrorCode.PROTOCOL_ERROR, e);
                 } catch (IOException ignored) {

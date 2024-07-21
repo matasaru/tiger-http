@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
@@ -39,14 +40,12 @@ import okhttp3.internal.Util;
 import okhttp3.internal.cache.InternalCache;
 import okhttp3.internal.connection.Exchange;
 import okhttp3.internal.connection.RealConnectionPool;
-import okhttp3.internal.platform.Platform;
 import okhttp3.internal.proxy.NullProxySelector;
 import okhttp3.internal.tls.CertificateChainCleaner;
 import okhttp3.internal.tls.OkHostnameVerifier;
 import okhttp3.internal.ws.RealWebSocket;
 import okio.Sink;
 import okio.Source;
-import org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement;
 
 import static okhttp3.internal.Util.checkDuration;
 
@@ -121,6 +120,9 @@ import static okhttp3.internal.Util.checkDuration;
  * remain idle.
  */
 public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory {
+  // TODO review the usage of this logger
+  public static final Logger logger = Logger.getLogger(OkHttpClient.class.getName());
+
   static final List<Protocol> DEFAULT_PROTOCOLS = Util.immutableList(
       Protocol.HTTP_2, Protocol.HTTP_1_1);
 
@@ -230,10 +232,6 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
       this.certificateChainCleaner = CertificateChainCleaner.get(trustManager);
     }
 
-    if (sslSocketFactory != null) {
-      Platform.get().configureSslSocketFactory(sslSocketFactory);
-    }
-
     this.hostnameVerifier = builder.hostnameVerifier;
     this.certificatePinner = builder.certificatePinner.withCertificateChainCleaner(
         certificateChainCleaner);
@@ -260,7 +258,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
 
   private static SSLSocketFactory newSslSocketFactory(X509TrustManager trustManager) {
     try {
-      SSLContext sslContext = Platform.get().getSSLContext();
+      SSLContext sslContext = SSLContext.getInstance("TLS");
       sslContext.init(null, new TrustManager[] { trustManager }, null);
       return sslContext.getSocketFactory();
     } catch (GeneralSecurityException e) {
@@ -527,7 +525,6 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
      *
      * <p>The default value is 0 which imposes no timeout.
      */
-    @IgnoreJRERequirement
     public Builder callTimeout(Duration duration) {
       callTimeout = checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
       return this;
@@ -554,7 +551,6 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
      * <p>The connect timeout is applied when connecting a TCP socket to the target host.
      * The default value is 10 seconds.
      */
-    @IgnoreJRERequirement
     public Builder connectTimeout(Duration duration) {
       connectTimeout = checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
       return this;
@@ -585,7 +581,6 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
      * @see Socket#setSoTimeout(int)
      * @see Source#timeout()
      */
-    @IgnoreJRERequirement
     public Builder readTimeout(Duration duration) {
       readTimeout = checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
       return this;
@@ -614,7 +609,6 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
      *
      * @see Sink#timeout()
      */
-    @IgnoreJRERequirement
     public Builder writeTimeout(Duration duration) {
       writeTimeout = checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
       return this;
@@ -651,7 +645,6 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
      *
      * <p>The default value of 0 disables client-initiated pings.
      */
-    @IgnoreJRERequirement
     public Builder pingInterval(Duration duration) {
       pingInterval = checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
       return this;
@@ -725,22 +718,6 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
         throw new IllegalArgumentException("socketFactory instanceof SSLSocketFactory");
       }
       this.socketFactory = socketFactory;
-      return this;
-    }
-
-    /**
-     * Sets the socket factory used to secure HTTPS connections. If unset, the system default will
-     * be used.
-     *
-     * @deprecated {@code SSLSocketFactory} does not expose its {@link X509TrustManager}, which is
-     *     a field that OkHttp needs to build a clean certificate chain. This method instead must
-     *     use reflection to extract the trust manager. Applications should prefer to call {@link
-     *     #sslSocketFactory(SSLSocketFactory, X509TrustManager)}, which avoids such reflection.
-     */
-    public Builder sslSocketFactory(SSLSocketFactory sslSocketFactory) {
-      if (sslSocketFactory == null) throw new NullPointerException("sslSocketFactory == null");
-      this.sslSocketFactory = sslSocketFactory;
-      this.certificateChainCleaner = Platform.get().buildCertificateChainCleaner(sslSocketFactory);
       return this;
     }
 
