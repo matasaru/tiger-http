@@ -10,10 +10,6 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <!-- Compilation -->
-    <java.version>1.8</java.version>
-
-    <!-- Test Dependencies -->
     <okhttp3.groupId>com.squareup.okhttp3</okhttp3.groupId>
     <okhttp3.version>3.14.9</okhttp3.version>
   </properties>
@@ -95,8 +91,7 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.13.0</version>
         <configuration>
-          <source>${java.version}</source>
-          <target>${java.version}</target>
+          <release>22</release>
         </configuration>
       </plugin>
       <plugin>
