@@ -19,7 +19,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.Nullable;
 import okhttp3.internal.connection.Exchange;
 import okhttp3.internal.http.HttpHeaders;
 import okio.Buffer;
@@ -46,17 +45,17 @@ public final class Response implements Closeable {
   final Protocol protocol;
   final int code;
   final String message;
-  final @Nullable Handshake handshake;
+  final Handshake handshake;
   final Headers headers;
-  final @Nullable ResponseBody body;
-  final @Nullable Response networkResponse;
-  final @Nullable Response cacheResponse;
-  final @Nullable Response priorResponse;
+  final ResponseBody body;
+  final Response networkResponse;
+  final Response cacheResponse;
+  final Response priorResponse;
   final long sentRequestAtMillis;
   final long receivedResponseAtMillis;
-  final @Nullable Exchange exchange;
+  final Exchange exchange;
 
-  private volatile @Nullable CacheControl cacheControl; // Lazily initialized.
+  private volatile CacheControl cacheControl; // Lazily initialized.
 
   Response(Builder builder) {
     this.request = builder.request;
@@ -118,7 +117,7 @@ public final class Response implements Closeable {
    * Returns the TLS handshake of the connection that carried this response, or null if the response
    * was received without TLS.
    */
-  public @Nullable Handshake handshake() {
+  public Handshake handshake() {
     return handshake;
   }
 
@@ -126,11 +125,11 @@ public final class Response implements Closeable {
     return headers.values(name);
   }
 
-  public @Nullable String header(String name) {
+  public String header(String name) {
     return header(name, null);
   }
 
-  public @Nullable String header(String name, @Nullable String defaultValue) {
+  public String header(String name, String defaultValue) {
     String result = headers.get(name);
     return result != null ? result : defaultValue;
   }
@@ -175,7 +174,7 @@ public final class Response implements Closeable {
    * <p>This always returns null on responses returned from {@link #cacheResponse}, {@link
    * #networkResponse}, and {@link #priorResponse()}.
    */
-  public @Nullable ResponseBody body() {
+  public ResponseBody body() {
     return body;
   }
 
@@ -203,7 +202,7 @@ public final class Response implements Closeable {
    * the network, such as when the response is fully cached. The body of the returned response
    * should not be read.
    */
-  public @Nullable Response networkResponse() {
+  public Response networkResponse() {
     return networkResponse;
   }
 
@@ -212,7 +211,7 @@ public final class Response implements Closeable {
    * cache. For conditional get requests the cache response and network response may both be
    * non-null. The body of the returned response should not be read.
    */
-  public @Nullable Response cacheResponse() {
+  public Response cacheResponse() {
     return cacheResponse;
   }
 
@@ -222,7 +221,7 @@ public final class Response implements Closeable {
    * returned response should not be read because it has already been consumed by the redirecting
    * client.
    */
-  public @Nullable Response priorResponse() {
+  public Response priorResponse() {
     return priorResponse;
   }
 
@@ -303,19 +302,19 @@ public final class Response implements Closeable {
   }
 
   public static class Builder {
-    @Nullable Request request;
-    @Nullable Protocol protocol;
+    Request request;
+    Protocol protocol;
     int code = -1;
     String message;
-    @Nullable Handshake handshake;
+    Handshake handshake;
     Headers.Builder headers;
-    @Nullable ResponseBody body;
-    @Nullable Response networkResponse;
-    @Nullable Response cacheResponse;
-    @Nullable Response priorResponse;
+    ResponseBody body;
+    Response networkResponse;
+    Response cacheResponse;
+    Response priorResponse;
     long sentRequestAtMillis;
     long receivedResponseAtMillis;
-    @Nullable Exchange exchange;
+    Exchange exchange;
 
     public Builder() {
       headers = new Headers.Builder();
@@ -357,7 +356,7 @@ public final class Response implements Closeable {
       return this;
     }
 
-    public Builder handshake(@Nullable Handshake handshake) {
+    public Builder handshake(Handshake handshake) {
       this.handshake = handshake;
       return this;
     }
@@ -392,18 +391,18 @@ public final class Response implements Closeable {
       return this;
     }
 
-    public Builder body(@Nullable ResponseBody body) {
+    public Builder body(ResponseBody body) {
       this.body = body;
       return this;
     }
 
-    public Builder networkResponse(@Nullable Response networkResponse) {
+    public Builder networkResponse(Response networkResponse) {
       if (networkResponse != null) checkSupportResponse("networkResponse", networkResponse);
       this.networkResponse = networkResponse;
       return this;
     }
 
-    public Builder cacheResponse(@Nullable Response cacheResponse) {
+    public Builder cacheResponse(Response cacheResponse) {
       if (cacheResponse != null) checkSupportResponse("cacheResponse", cacheResponse);
       this.cacheResponse = cacheResponse;
       return this;
@@ -421,7 +420,7 @@ public final class Response implements Closeable {
       }
     }
 
-    public Builder priorResponse(@Nullable Response priorResponse) {
+    public Builder priorResponse(Response priorResponse) {
       if (priorResponse != null) checkPriorResponse(priorResponse);
       this.priorResponse = priorResponse;
       return this;

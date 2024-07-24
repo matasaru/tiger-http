@@ -24,7 +24,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import javax.annotation.Nullable;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import okhttp3.internal.tls.CertificateChainCleaner;
 import okio.ByteString;
@@ -128,14 +127,14 @@ public final class CertificatePinner {
   public static final CertificatePinner DEFAULT = new Builder().build();
 
   private final Set<Pin> pins;
-  private final @Nullable CertificateChainCleaner certificateChainCleaner;
+  private final CertificateChainCleaner certificateChainCleaner;
 
-  CertificatePinner(Set<Pin> pins, @Nullable CertificateChainCleaner certificateChainCleaner) {
+  CertificatePinner(Set<Pin> pins, CertificateChainCleaner certificateChainCleaner) {
     this.pins = pins;
     this.certificateChainCleaner = certificateChainCleaner;
   }
 
-  @Override public boolean equals(@Nullable Object other) {
+  @Override public boolean equals(Object other) {
     if (other == this) return true;
     return other instanceof CertificatePinner
         && (Objects.equals(certificateChainCleaner,
@@ -227,7 +226,7 @@ public final class CertificatePinner {
 
   /** Returns a certificate pinner that uses {@code certificateChainCleaner}. */
   CertificatePinner withCertificateChainCleaner(
-      @Nullable CertificateChainCleaner certificateChainCleaner) {
+      CertificateChainCleaner certificateChainCleaner) {
     return Objects.equals(this.certificateChainCleaner, certificateChainCleaner)
         ? this
         : new CertificatePinner(pins, certificateChainCleaner);

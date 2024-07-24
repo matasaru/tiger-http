@@ -29,7 +29,6 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
-import javax.annotation.Nullable;
 import okhttp3.Address;
 import okhttp3.OkHttpClient;
 import okhttp3.Route;
@@ -103,7 +102,7 @@ public final class RealConnectionPool {
    * {@code square.com} and {@code square.ca}.
    */
   boolean transmitterAcquirePooledConnection(Address address, Transmitter transmitter,
-      @Nullable List<Route> routes, boolean requireMultiplexed) {
+      List<Route> routes, boolean requireMultiplexed) {
     assert (Thread.holdsLock(this));
     for (RealConnection connection : connections) {
       if (requireMultiplexed && !connection.isMultiplexed()) continue;

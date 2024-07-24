@@ -16,7 +16,6 @@
 package okhttp3;
 
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nullable;
 import okhttp3.internal.http.HttpHeaders;
 
 /**
@@ -55,12 +54,12 @@ public final class CacheControl {
   private final boolean noTransform;
   private final boolean immutable;
 
-  @Nullable String headerValue; // Lazily computed, null if absent.
+  String headerValue; // Lazily computed, null if absent.
 
   private CacheControl(boolean noCache, boolean noStore, int maxAgeSeconds, int sMaxAgeSeconds,
       boolean isPrivate, boolean isPublic, boolean mustRevalidate, int maxStaleSeconds,
       int minFreshSeconds, boolean onlyIfCached, boolean noTransform, boolean immutable,
-      @Nullable String headerValue) {
+      String headerValue) {
     this.noCache = noCache;
     this.noStore = noStore;
     this.maxAgeSeconds = maxAgeSeconds;

@@ -28,7 +28,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import javax.annotation.Nullable;
 import okhttp3.internal.Util;
 import okhttp3.internal.cache.CacheRequest;
 import okhttp3.internal.cache.CacheStrategy;
@@ -140,11 +139,11 @@ public final class Cache implements Closeable, Flushable {
   private static final int ENTRY_COUNT = 2;
 
   final InternalCache internalCache = new InternalCache() {
-    @Override public @Nullable Response get(Request request) throws IOException {
+    @Override public Response get(Request request) throws IOException {
       return Cache.this.get(request);
     }
 
-    @Override public @Nullable CacheRequest put(Response response) throws IOException {
+    @Override public CacheRequest put(Response response) throws IOException {
       return Cache.this.put(response);
     }
 
@@ -189,7 +188,7 @@ public final class Cache implements Closeable, Flushable {
     return ByteString.encodeUtf8(url.toString()).md5().hex();
   }
 
-  @Nullable Response get(Request request) {
+  Response get(Request request) {
     String key = key(request.url());
     DiskLruCache.Snapshot snapshot;
     Entry entry;
@@ -220,7 +219,7 @@ public final class Cache implements Closeable, Flushable {
     return response;
   }
 
-  @Nullable CacheRequest put(Response response) {
+  CacheRequest put(Response response) {
     String requestMethod = response.request().method();
 
     if (HttpMethod.invalidatesCache(response.request().method())) {
@@ -276,7 +275,7 @@ public final class Cache implements Closeable, Flushable {
     }
   }
 
-  private void abortQuietly(@Nullable DiskLruCache.Editor editor) {
+  private void abortQuietly(DiskLruCache.Editor editor) {
     // Give up because the cache cannot be written.
     try {
       if (editor != null) {
@@ -330,7 +329,7 @@ public final class Cache implements Closeable, Flushable {
     return new Iterator<String>() {
       final Iterator<DiskLruCache.Snapshot> delegate = cache.snapshots();
 
-      @Nullable String nextUrl;
+      String nextUrl;
       boolean canRemove;
 
       @Override public boolean hasNext() {
@@ -485,7 +484,7 @@ public final class Cache implements Closeable, Flushable {
     private final int code;
     private final String message;
     private final Headers responseHeaders;
-    private final @Nullable Handshake handshake;
+    private final Handshake handshake;
     private final long sentRequestMillis;
     private final long receivedResponseMillis;
 
@@ -733,8 +732,8 @@ public final class Cache implements Closeable, Flushable {
   private static class CacheResponseBody extends ResponseBody {
     final DiskLruCache.Snapshot snapshot;
     private final BufferedSource bodySource;
-    private final @Nullable String contentType;
-    private final @Nullable String contentLength;
+    private final String contentType;
+    private final String contentLength;
 
     CacheResponseBody(final DiskLruCache.Snapshot snapshot,
         String contentType, String contentLength) {

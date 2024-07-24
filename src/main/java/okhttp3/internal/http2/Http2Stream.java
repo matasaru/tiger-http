@@ -22,7 +22,6 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
-import javax.annotation.Nullable;
 import okhttp3.Headers;
 import okhttp3.internal.Util;
 import okio.AsyncTimeout;
@@ -74,13 +73,13 @@ public final class Http2Stream {
    * close this stream (such as both peers closing it near-simultaneously) then this is the first
    * reason known to this peer.
    */
-  @Nullable ErrorCode errorCode;
+  ErrorCode errorCode;
 
   /** The exception that explains {@code errorCode}. Null if no exception was provided. */
-  @Nullable IOException errorException;
+  IOException errorException;
 
   Http2Stream(int id, Http2Connection connection, boolean outFinished, boolean inFinished,
-      @Nullable Headers headers) {
+      Headers headers) {
     if (connection == null) throw new NullPointerException("connection == null");
 
     this.id = id;
@@ -257,7 +256,7 @@ public final class Http2Stream {
    * Abnormally terminate this stream. This blocks until the {@code RST_STREAM} frame has been
    * transmitted.
    */
-  public void close(ErrorCode rstStatusCode, @Nullable IOException errorException)
+  public void close(ErrorCode rstStatusCode, IOException errorException)
       throws IOException {
     if (!closeInternal(rstStatusCode, errorException)) {
       return; // Already closed.
@@ -277,7 +276,7 @@ public final class Http2Stream {
   }
 
   /** Returns true if this stream was closed. */
-  private boolean closeInternal(ErrorCode errorCode, @Nullable IOException errorException) {
+  private boolean closeInternal(ErrorCode errorCode, IOException errorException) {
     assert (!Thread.holdsLock(this));
     synchronized (this) {
       if (this.errorCode != null) {

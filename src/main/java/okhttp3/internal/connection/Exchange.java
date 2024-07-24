@@ -18,7 +18,6 @@ package okhttp3.internal.connection;
 import java.io.IOException;
 import java.net.ProtocolException;
 import java.net.SocketException;
-import javax.annotation.Nullable;
 import okhttp3.Call;
 import okhttp3.EventListener;
 import okhttp3.Headers;
@@ -110,7 +109,7 @@ public final class Exchange {
     eventListener.responseHeadersStart(call);
   }
 
-  public @Nullable Response.Builder readResponseHeaders(boolean expectContinue) throws IOException {
+  public Response.Builder readResponseHeaders(boolean expectContinue) throws IOException {
     try {
       Response.Builder result = codec.readResponseHeaders(expectContinue);
       if (result != null) {
@@ -182,8 +181,8 @@ public final class Exchange {
     codec.connection().trackFailure(e);
   }
 
-  @Nullable IOException bodyComplete(
-      long bytesRead, boolean responseDone, boolean requestDone, @Nullable IOException e) {
+  IOException bodyComplete(
+      long bytesRead, boolean responseDone, boolean requestDone, IOException e) {
     if (e != null) {
       trackFailure(e);
     }
@@ -257,7 +256,7 @@ public final class Exchange {
       }
     }
 
-    private @Nullable IOException complete(@Nullable IOException e) {
+    private IOException complete(IOException e) {
       if (completed) return e;
       completed = true;
       return bodyComplete(bytesReceived, false, true, e);
@@ -317,7 +316,7 @@ public final class Exchange {
       }
     }
 
-    @Nullable IOException complete(@Nullable IOException e) {
+    IOException complete(IOException e) {
       if (completed) return e;
       completed = true;
       return bodyComplete(bytesReceived, true, false, e);

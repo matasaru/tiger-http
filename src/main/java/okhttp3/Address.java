@@ -19,7 +19,6 @@ import java.net.Proxy;
 import java.net.ProxySelector;
 import java.util.List;
 import java.util.Objects;
-import javax.annotation.Nullable;
 import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
@@ -42,15 +41,15 @@ public final class Address {
   final List<Protocol> protocols;
   final List<ConnectionSpec> connectionSpecs;
   final ProxySelector proxySelector;
-  final @Nullable Proxy proxy;
-  final @Nullable SSLSocketFactory sslSocketFactory;
-  final @Nullable HostnameVerifier hostnameVerifier;
-  final @Nullable CertificatePinner certificatePinner;
+  final Proxy proxy;
+  final SSLSocketFactory sslSocketFactory;
+  final HostnameVerifier hostnameVerifier;
+  final CertificatePinner certificatePinner;
 
   public Address(String uriHost, int uriPort, Dns dns, SocketFactory socketFactory,
-      @Nullable SSLSocketFactory sslSocketFactory, @Nullable HostnameVerifier hostnameVerifier,
-      @Nullable CertificatePinner certificatePinner, Authenticator proxyAuthenticator,
-      @Nullable Proxy proxy, List<Protocol> protocols, List<ConnectionSpec> connectionSpecs,
+      SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier,
+      CertificatePinner certificatePinner, Authenticator proxyAuthenticator,
+      Proxy proxy, List<Protocol> protocols, List<ConnectionSpec> connectionSpecs,
       ProxySelector proxySelector) {
     this.url = new HttpUrl.Builder()
         .scheme(sslSocketFactory != null ? "https" : "http")
@@ -131,26 +130,26 @@ public final class Address {
    * Returns this address's explicitly-specified HTTP proxy, or null to delegate to the {@linkplain
    * #proxySelector proxy selector}.
    */
-  public @Nullable Proxy proxy() {
+  public Proxy proxy() {
     return proxy;
   }
 
   /** Returns the SSL socket factory, or null if this is not an HTTPS address. */
-  public @Nullable SSLSocketFactory sslSocketFactory() {
+  public SSLSocketFactory sslSocketFactory() {
     return sslSocketFactory;
   }
 
   /** Returns the hostname verifier, or null if this is not an HTTPS address. */
-  public @Nullable HostnameVerifier hostnameVerifier() {
+  public HostnameVerifier hostnameVerifier() {
     return hostnameVerifier;
   }
 
   /** Returns this address's certificate pinner, or null if this is not an HTTPS address. */
-  public @Nullable CertificatePinner certificatePinner() {
+  public CertificatePinner certificatePinner() {
     return certificatePinner;
   }
 
-  @Override public boolean equals(@Nullable Object other) {
+  @Override public boolean equals(Object other) {
     return other instanceof Address
         && url.equals(((Address) other).url)
         && equalsNonHost((Address) other);

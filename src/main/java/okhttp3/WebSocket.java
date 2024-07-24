@@ -15,7 +15,6 @@
  */
 package okhttp3;
 
-import javax.annotation.Nullable;
 import okio.ByteString;
 
 /**
@@ -103,7 +102,7 @@ public interface WebSocket {
    * @param reason Reason for shutting down or {@code null}.
    * @throws IllegalArgumentException if code is invalid.
    */
-  boolean close(int code, @Nullable String reason);
+  boolean close(int code, String reason);
 
   /**
    * Immediately and violently release resources held by this web socket, discarding any enqueued

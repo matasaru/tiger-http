@@ -19,7 +19,6 @@ import java.nio.charset.Charset;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import javax.annotation.Nullable;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.util.Collections.singletonMap;
@@ -88,7 +87,7 @@ public final class Challenge {
     return ISO_8859_1;
   }
 
-  @Override public boolean equals(@Nullable Object other) {
+  @Override public boolean equals(Object other) {
     return other instanceof Challenge
         && ((Challenge) other).scheme.equals(scheme)
         && ((Challenge) other).authParams.equals(authParams);

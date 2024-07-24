@@ -23,7 +23,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
 import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
@@ -110,7 +109,7 @@ public final class WebSocketRecorder extends WebSocketListener {
     }
   }
 
-  @Override public void onFailure(WebSocket webSocket, Throwable t, @Nullable Response response)  {
+  @Override public void onFailure(WebSocket webSocket, Throwable t, Response response)  {
     logger.log(Level.INFO, "[WS " + name + "] onFailure", t);
 
     WebSocketListener delegate = this.delegate;

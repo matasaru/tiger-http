@@ -20,7 +20,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.List;
-import javax.annotation.Nullable;
 
 /**
  * Listener for metrics events. Extend this class to monitor the quantity, size, and duration of
@@ -120,7 +119,7 @@ public abstract class EventListener {
    *
    * <p>This method is invoked after {@link #secureConnectStart}.
    */
-  public void secureConnectEnd(Call call, @Nullable Handshake handshake) {
+  public void secureConnectEnd(Call call, Handshake handshake) {
   }
 
   /**
@@ -131,7 +130,7 @@ public abstract class EventListener {
    * {@link #connectStart(Call, InetSocketAddress, Proxy)}.
    */
   public void connectEnd(Call call, InetSocketAddress inetSocketAddress, Proxy proxy,
-      @Nullable Protocol protocol) {
+      Protocol protocol) {
   }
 
   /**
@@ -143,7 +142,7 @@ public abstract class EventListener {
    * Proxy)}.
    */
   public void connectFailed(Call call, InetSocketAddress inetSocketAddress, Proxy proxy,
-      @Nullable Protocol protocol, IOException ioe) {
+      Protocol protocol, IOException ioe) {
   }
 
   /**

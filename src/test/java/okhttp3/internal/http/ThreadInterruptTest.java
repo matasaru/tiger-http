@@ -20,7 +20,6 @@ import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nullable;
 import javax.net.ServerSocketFactory;
 import javax.net.SocketFactory;
 import okhttp3.Call;
@@ -88,7 +87,7 @@ public final class ThreadInterruptTest {
     Call call = client.newCall(new Request.Builder()
         .url(server.url("/"))
         .post(new RequestBody() {
-          @Override public @Nullable MediaType contentType() {
+          @Override public MediaType contentType() {
             return null;
           }
 

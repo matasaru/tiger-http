@@ -16,7 +16,6 @@
 package okhttp3.internal.http;
 
 import java.io.IOException;
-import javax.annotation.Nullable;
 import okhttp3.Headers;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -54,7 +53,7 @@ public interface ExchangeCodec {
    * @param expectContinue true to return null if this is an intermediate response with a "100"
    *     response code. Otherwise this method never returns null.
    */
-  @Nullable Response.Builder readResponseHeaders(boolean expectContinue) throws IOException;
+  Response.Builder readResponseHeaders(boolean expectContinue) throws IOException;
 
   long reportedContentLength(Response response) throws IOException;
 

@@ -18,7 +18,6 @@ package okhttp3.internal.http;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nullable;
 import okhttp3.Call;
 import okhttp3.Connection;
 import okhttp3.Interceptor;
@@ -39,7 +38,7 @@ import static okhttp3.internal.Util.checkDuration;
 public final class RealInterceptorChain implements Interceptor.Chain {
   private final List<Interceptor> interceptors;
   private final Transmitter transmitter;
-  private final @Nullable Exchange exchange;
+  private final Exchange exchange;
   private final int index;
   private final Request request;
   private final Call call;
@@ -49,7 +48,7 @@ public final class RealInterceptorChain implements Interceptor.Chain {
   private int calls;
 
   public RealInterceptorChain(List<Interceptor> interceptors, Transmitter transmitter,
-      @Nullable Exchange exchange, int index, Request request, Call call,
+      Exchange exchange, int index, Request request, Call call,
       int connectTimeout, int readTimeout, int writeTimeout) {
     this.interceptors = interceptors;
     this.transmitter = transmitter;
@@ -62,7 +61,7 @@ public final class RealInterceptorChain implements Interceptor.Chain {
     this.writeTimeout = writeTimeout;
   }
 
-  @Override public @Nullable Connection connection() {
+  @Override public Connection connection() {
     return exchange != null ? exchange.connection() : null;
   }
 
@@ -117,7 +116,7 @@ public final class RealInterceptorChain implements Interceptor.Chain {
     return proceed(request, transmitter, exchange);
   }
 
-  public Response proceed(Request request, Transmitter transmitter, @Nullable Exchange exchange)
+  public Response proceed(Request request, Transmitter transmitter, Exchange exchange)
       throws IOException {
     if (index >= interceptors.size()) throw new AssertionError();
 

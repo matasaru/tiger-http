@@ -30,7 +30,6 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nullable;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSession;
@@ -465,7 +464,7 @@ public final class RealConnection extends Http2Connection.Listener implements Co
    * Returns true if this connection can carry a stream allocation to {@code address}. If non-null
    * {@code route} is the resolved route for a connection.
    */
-  boolean isEligible(Address address, @Nullable List<Route> routes) {
+  boolean isEligible(Address address, List<Route> routes) {
     // If this connection is not accepting new exchanges, we're done.
     if (transmitters.size() >= allocationLimit || noNewExchanges) return false;
 
@@ -628,7 +627,7 @@ public final class RealConnection extends Http2Connection.Listener implements Co
    * Track a failure using this connection. This may prevent both the connection and its route from
    * being used for future exchanges.
    */
-  void trackFailure(@Nullable IOException e) {
+  void trackFailure(IOException e) {
     assert (!Thread.holdsLock(connectionPool));
     synchronized (connectionPool) {
       if (e instanceof StreamResetException) {

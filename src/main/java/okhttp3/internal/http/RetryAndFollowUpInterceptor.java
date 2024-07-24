@@ -22,7 +22,6 @@ import java.net.ProtocolException;
 import java.net.Proxy;
 import java.net.SocketTimeoutException;
 import java.security.cert.CertificateException;
-import javax.annotation.Nullable;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import okhttp3.HttpUrl;
@@ -211,7 +210,7 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
    * either add authentication headers, follow redirects or handle a client request timeout. If a
    * follow-up is either unnecessary or not applicable, this returns null.
    */
-  private Request followUpRequest(Response userResponse, @Nullable Route route) throws IOException {
+  private Request followUpRequest(Response userResponse, Route route) throws IOException {
     if (userResponse == null) throw new IllegalStateException();
     int responseCode = userResponse.code();
 

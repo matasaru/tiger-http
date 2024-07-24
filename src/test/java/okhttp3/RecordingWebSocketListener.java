@@ -15,7 +15,6 @@
  */
 package okhttp3;
 
-import javax.annotation.Nullable;
 import okio.ByteString;
 
 public final class RecordingWebSocketListener extends WebSocketListener {
@@ -39,7 +38,7 @@ public final class RecordingWebSocketListener extends WebSocketListener {
     // TODO
   }
 
-  @Override public void onFailure(WebSocket webSocket, Throwable t, @Nullable Response response) {
+  @Override public void onFailure(WebSocket webSocket, Throwable t, Response response) {
     // TODO
   }
 }

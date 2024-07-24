@@ -41,7 +41,6 @@ import java.util.TimeZone;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
-import javax.annotation.Nullable;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
@@ -481,7 +480,7 @@ public final class Util {
   }
 
   /** Decodes an IPv6 address like 1111:2222:3333:4444:5555:6666:7777:8888 or ::1. */
-  private static @Nullable InetAddress decodeIpv6(String input, int pos, int limit) {
+  private static InetAddress decodeIpv6(String input, int pos, int limit) {
     byte[] address = new byte[16];
     int b = 0;
     int compress = -1;
@@ -658,7 +657,7 @@ public final class Util {
    * Returns the system property, or defaultValue if the system property is null or
    * cannot be read (e.g. because of security policy restrictions).
    */
-  public static String getSystemProperty(String key, @Nullable String defaultValue) {
+  public static String getSystemProperty(String key, String defaultValue) {
     String value;
     try {
       value = System.getProperty(key);

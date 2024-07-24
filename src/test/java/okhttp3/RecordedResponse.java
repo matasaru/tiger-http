@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
-import javax.annotation.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,13 +27,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public final class RecordedResponse {
   public final Request request;
-  public final @Nullable Response response;
-  public final @Nullable WebSocket webSocket;
-  public final @Nullable String body;
-  public final @Nullable IOException failure;
+  public final Response response;
+  public final WebSocket webSocket;
+  public final String body;
+  public final IOException failure;
 
-  public RecordedResponse(Request request, @Nullable Response response,
-      @Nullable WebSocket webSocket, @Nullable String body, @Nullable IOException failure) {
+  public RecordedResponse(Request request, Response response,
+      WebSocket webSocket, String body, IOException failure) {
     this.request = request;
     this.response = response;
     this.webSocket = webSocket;

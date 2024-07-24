@@ -27,7 +27,6 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
 import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
@@ -165,14 +164,14 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
         responseBuilder.initExchange(exchange);
       }
 
-      @Override public @Nullable Exchange exchange(Response response) {
+      @Override public Exchange exchange(Response response) {
         return response.exchange;
       }
     };
   }
 
   final Dispatcher dispatcher;
-  final @Nullable Proxy proxy;
+  final Proxy proxy;
   final List<Protocol> protocols;
   final List<ConnectionSpec> connectionSpecs;
   final List<Interceptor> interceptors;
@@ -180,8 +179,8 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
   final EventListener.Factory eventListenerFactory;
   final ProxySelector proxySelector;
   final CookieJar cookieJar;
-  final @Nullable Cache cache;
-  final @Nullable InternalCache internalCache;
+  final Cache cache;
+  final InternalCache internalCache;
   final SocketFactory socketFactory;
   final SSLSocketFactory sslSocketFactory;
   final CertificateChainCleaner certificateChainCleaner;
@@ -294,7 +293,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
     return pingInterval;
   }
 
-  public @Nullable Proxy proxy() {
+  public Proxy proxy() {
     return proxy;
   }
 
@@ -306,11 +305,11 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
     return cookieJar;
   }
 
-  public @Nullable Cache cache() {
+  public Cache cache() {
     return cache;
   }
 
-  @Nullable InternalCache internalCache() {
+  InternalCache internalCache() {
     return cache != null ? cache.internalCache : internalCache;
   }
 
@@ -414,7 +413,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
 
   public static final class Builder {
     Dispatcher dispatcher;
-    @Nullable Proxy proxy;
+    Proxy proxy;
     List<Protocol> protocols;
     List<ConnectionSpec> connectionSpecs;
     final List<Interceptor> interceptors = new ArrayList<>();
@@ -422,11 +421,11 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
     EventListener.Factory eventListenerFactory;
     ProxySelector proxySelector;
     CookieJar cookieJar;
-    @Nullable Cache cache;
-    @Nullable InternalCache internalCache;
+    Cache cache;
+    InternalCache internalCache;
     SocketFactory socketFactory;
-    @Nullable SSLSocketFactory sslSocketFactory;
-    @Nullable CertificateChainCleaner certificateChainCleaner;
+    SSLSocketFactory sslSocketFactory;
+    CertificateChainCleaner certificateChainCleaner;
     HostnameVerifier hostnameVerifier;
     CertificatePinner certificatePinner;
     Authenticator proxyAuthenticator;
@@ -655,7 +654,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
      * precedence over {@link #proxySelector}, which is only honored when this proxy is null (which
      * it is by default). To disable proxy use completely, call {@code proxy(Proxy.NO_PROXY)}.
      */
-    public Builder proxy(@Nullable Proxy proxy) {
+    public Builder proxy(Proxy proxy) {
       this.proxy = proxy;
       return this;
     }
@@ -687,7 +686,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
     }
 
     /** Sets the response cache to be used to read and write cached responses. */
-    public Builder cache(@Nullable Cache cache) {
+    public Builder cache(Cache cache) {
       this.cache = cache;
       this.internalCache = null;
       return this;

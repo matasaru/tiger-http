@@ -18,7 +18,6 @@ package okhttp3;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import javax.annotation.Nullable;
 import javax.net.ssl.SSLSocket;
 import okhttp3.internal.Util;
 
@@ -123,8 +122,8 @@ public final class ConnectionSpec {
 
   final boolean tls;
   final boolean supportsTlsExtensions;
-  final @Nullable String[] cipherSuites;
-  final @Nullable String[] tlsVersions;
+  final String[] cipherSuites;
+  final String[] tlsVersions;
 
   ConnectionSpec(Builder builder) {
     this.tls = builder.tls;
@@ -141,7 +140,7 @@ public final class ConnectionSpec {
    * Returns the cipher suites to use for a connection. Returns null if all of the SSL socket's
    * enabled cipher suites should be used.
    */
-  public @Nullable List<CipherSuite> cipherSuites() {
+  public List<CipherSuite> cipherSuites() {
     return cipherSuites != null ? CipherSuite.forJavaNames(cipherSuites) : null;
   }
 
@@ -149,7 +148,7 @@ public final class ConnectionSpec {
    * Returns the TLS versions to use when negotiating a connection. Returns null if all of the SSL
    * socket's enabled TLS versions should be used.
    */
-  public @Nullable List<TlsVersion> tlsVersions() {
+  public List<TlsVersion> tlsVersions() {
     return tlsVersions != null ? TlsVersion.forJavaNames(tlsVersions) : null;
   }
 
@@ -226,7 +225,7 @@ public final class ConnectionSpec {
     return true;
   }
 
-  @Override public boolean equals(@Nullable Object other) {
+  @Override public boolean equals(Object other) {
     if (!(other instanceof ConnectionSpec)) return false;
     if (other == this) return true;
 
@@ -266,8 +265,8 @@ public final class ConnectionSpec {
 
   public static final class Builder {
     boolean tls;
-    @Nullable String[] cipherSuites;
-    @Nullable String[] tlsVersions;
+    String[] cipherSuites;
+    String[] tlsVersions;
     boolean supportsTlsExtensions;
 
     Builder(boolean tls) {

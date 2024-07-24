@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
-import javax.annotation.Nullable;
 import okhttp3.internal.Util;
 import okio.Buffer;
 import okio.BufferedSource;
@@ -102,9 +101,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 public abstract class ResponseBody implements Closeable {
   /** Multiple calls to {@link #charStream()} must return the same instance. */
-  private @Nullable Reader reader;
+  private Reader reader;
 
-  public abstract @Nullable MediaType contentType();
+  public abstract MediaType contentType();
 
   /**
    * Returns the number of bytes in that will returned by {@link #bytes}, or {@link #byteStream}, or
@@ -196,7 +195,7 @@ public abstract class ResponseBody implements Closeable {
    * Returns a new response body that transmits {@code content}. If {@code contentType} is non-null
    * and lacks a charset, this will use UTF-8.
    */
-  public static ResponseBody create(@Nullable MediaType contentType, String content) {
+  public static ResponseBody create(MediaType contentType, String content) {
     Charset charset = UTF_8;
     if (contentType != null) {
       charset = contentType.charset();
@@ -210,23 +209,23 @@ public abstract class ResponseBody implements Closeable {
   }
 
   /** Returns a new response body that transmits {@code content}. */
-  public static ResponseBody create(final @Nullable MediaType contentType, byte[] content) {
+  public static ResponseBody create(final MediaType contentType, byte[] content) {
     Buffer buffer = new Buffer().write(content);
     return create(contentType, content.length, buffer);
   }
 
   /** Returns a new response body that transmits {@code content}. */
-  public static ResponseBody create(@Nullable MediaType contentType, ByteString content) {
+  public static ResponseBody create(MediaType contentType, ByteString content) {
     Buffer buffer = new Buffer().write(content);
     return create(contentType, content.size(), buffer);
   }
 
   /** Returns a new response body that transmits {@code content}. */
-  public static ResponseBody create(final @Nullable MediaType contentType,
+  public static ResponseBody create(final MediaType contentType,
       final long contentLength, final BufferedSource content) {
     if (content == null) throw new NullPointerException("source == null");
     return new ResponseBody() {
-      @Override public @Nullable MediaType contentType() {
+      @Override public MediaType contentType() {
         return contentType;
       }
 
@@ -245,7 +244,7 @@ public abstract class ResponseBody implements Closeable {
     private final Charset charset;
 
     private boolean closed;
-    private @Nullable Reader delegate;
+    private Reader delegate;
 
     BomAwareReader(BufferedSource source, Charset charset) {
       this.source = source;

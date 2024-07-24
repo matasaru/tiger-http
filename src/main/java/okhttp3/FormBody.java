@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nullable;
 import okhttp3.internal.Util;
 import okio.Buffer;
 import okio.BufferedSink;
@@ -77,7 +76,7 @@ public final class FormBody extends RequestBody {
    * to awkward operations like measuring the encoded length of header strings, or the
    * length-in-digits of an encoded integer.
    */
-  private long writeOrCountBytes(@Nullable BufferedSink sink, boolean countBytes) {
+  private long writeOrCountBytes(BufferedSink sink, boolean countBytes) {
     long byteCount = 0L;
 
     Buffer buffer;
@@ -105,13 +104,13 @@ public final class FormBody extends RequestBody {
   public static final class Builder {
     private final List<String> names = new ArrayList<>();
     private final List<String> values = new ArrayList<>();
-    private final @Nullable Charset charset;
+    private final Charset charset;
 
     public Builder() {
       this(null);
     }
 
-    public Builder(@Nullable Charset charset) {
+    public Builder(Charset charset) {
       this.charset = charset;
     }
 

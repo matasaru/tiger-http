@@ -18,7 +18,6 @@ package okhttp3.internal;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nullable;
 import okhttp3.Authenticator;
 import okhttp3.Challenge;
 import okhttp3.Request;
@@ -28,10 +27,10 @@ import okhttp3.Route;
 public final class RecordingOkAuthenticator implements Authenticator {
   public final List<Response> responses = new ArrayList<>();
   public final List<Route> routes = new ArrayList<>();
-  public @Nullable String credential;
-  public @Nullable String scheme;
+  public String credential;
+  public String scheme;
 
-  public RecordingOkAuthenticator(@Nullable String credential, @Nullable String scheme) {
+  public RecordingOkAuthenticator(String credential, String scheme) {
     this.credential = credential;
     this.scheme = scheme;
   }

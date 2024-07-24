@@ -17,7 +17,6 @@ package okhttp3;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-import javax.annotation.Nullable;
 
 /**
  * The concrete route used by a connection to reach an abstract origin server. When creating a
@@ -80,7 +79,7 @@ public final class Route {
     return address.sslSocketFactory != null && proxy.type() == Proxy.Type.HTTP;
   }
 
-  @Override public boolean equals(@Nullable Object other) {
+  @Override public boolean equals(Object other) {
     return other instanceof Route
         && ((Route) other).address.equals(address)
         && ((Route) other).proxy.equals(proxy)

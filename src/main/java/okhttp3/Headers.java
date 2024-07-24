@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import javax.annotation.Nullable;
 import okhttp3.internal.Util;
 import okhttp3.internal.http.HttpDate;
 
@@ -60,7 +59,7 @@ public final class Headers {
   }
 
   /** Returns the last value corresponding to the specified field, or null. */
-  public @Nullable String get(String name) {
+  public String get(String name) {
     return get(namesAndValues, name);
   }
 
@@ -68,7 +67,7 @@ public final class Headers {
    * Returns the last value corresponding to the specified field parsed as an HTTP date, or null if
    * either the field is absent or cannot be parsed as a date.
    */
-  public @Nullable Date getDate(String name) {
+  public Date getDate(String name) {
     String value = get(name);
     return value != null ? HttpDate.parse(value) : null;
   }
@@ -77,7 +76,7 @@ public final class Headers {
    * Returns the last value corresponding to the specified field parsed as an HTTP date, or null if
    * either the field is absent or cannot be parsed as a date.
    */
-  public @Nullable Instant getInstant(String name) {
+  public Instant getInstant(String name) {
     Date value = getDate(name);
     return value != null ? value.toInstant() : null;
   }
@@ -169,7 +168,7 @@ public final class Headers {
    * Applications that require semantically equal headers should convert them into a canonical form
    * before comparing them for equality.
    */
-  @Override public boolean equals(@Nullable Object other) {
+  @Override public boolean equals(Object other) {
     return other instanceof Headers
         && Arrays.equals(((Headers) other).namesAndValues, namesAndValues);
   }
@@ -200,7 +199,7 @@ public final class Headers {
     return result;
   }
 
-  private static @Nullable String get(String[] namesAndValues, String name) {
+  private static String get(String[] namesAndValues, String name) {
     for (int i = namesAndValues.length - 2; i >= 0; i -= 2) {
       if (name.equalsIgnoreCase(namesAndValues[i])) {
         return namesAndValues[i + 1];
@@ -415,7 +414,7 @@ public final class Headers {
     }
 
     /** Equivalent to {@code build().get(name)}, but potentially faster. */
-    public @Nullable String get(String name) {
+    public String get(String name) {
       for (int i = namesAndValues.size() - 2; i >= 0; i -= 2) {
         if (name.equalsIgnoreCase(namesAndValues.get(i))) {
           return namesAndValues.get(i + 1);

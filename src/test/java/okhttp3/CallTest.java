@@ -49,7 +49,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
-import javax.annotation.Nullable;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLPeerUnverifiedException;
@@ -1929,7 +1928,7 @@ public final class CallTest {
         .post(new RequestBody() {
           int attempt = 0;
 
-          @Override public @Nullable MediaType contentType() {
+          @Override public MediaType contentType() {
             return null;
           }
 
@@ -1960,7 +1959,7 @@ public final class CallTest {
         .post(new RequestBody() {
           int attempt = 0;
 
-          @Override public @Nullable MediaType contentType() {
+          @Override public MediaType contentType() {
             return null;
           }
 
@@ -3582,7 +3581,7 @@ public final class CallTest {
     final AtomicInteger called = new AtomicInteger(0);
 
     RequestBody body = new RequestBody() {
-      @Nullable @Override public MediaType contentType() {
+      @Override public MediaType contentType() {
         return MediaType.get("application/octet-stream");
       }
 
@@ -3667,7 +3666,7 @@ public final class CallTest {
     Request request = new Request.Builder()
         .url(server.url("/"))
         .post(new RequestBody() {
-          @Override public @Nullable MediaType contentType() {
+          @Override public MediaType contentType() {
             return null;
           }
 

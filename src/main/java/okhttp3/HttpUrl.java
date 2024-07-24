@@ -26,7 +26,6 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nullable;
 import okhttp3.internal.Util;
 import okhttp3.internal.publicsuffix.PublicSuffixDatabase;
 import okio.Buffer;
@@ -328,10 +327,10 @@ public final class HttpUrl {
    * non-empty, but never null. Values are null if the name has no corresponding '=' separator, or
    * empty, or non-empty.
    */
-  private final @Nullable List<String> queryNamesAndValues;
+  private final List<String> queryNamesAndValues;
 
   /** Decoded fragment. */
-  private final @Nullable String fragment;
+  private final String fragment;
 
   /** Canonical URL. */
   private final String url;
@@ -610,7 +609,7 @@ public final class HttpUrl {
    *   <tr><td>{@code http://host/?a=apple&b}</td><td>{@code "a=apple&b"}</td></tr>
    * </table>
    */
-  public @Nullable String encodedQuery() {
+  public String encodedQuery() {
     if (queryNamesAndValues == null) return null; // No query.
     int queryStart = url.indexOf('?') + 1;
     int queryEnd = delimiterOffset(url, queryStart, url.length(), '#');
@@ -670,7 +669,7 @@ public final class HttpUrl {
    *   <tr><td>{@code http://host/?a=apple&b}</td><td>{@code "a=apple&b"}</td></tr>
    * </table>
    */
-  public @Nullable String query() {
+  public String query() {
     if (queryNamesAndValues == null) return null; // No query.
     StringBuilder result = new StringBuilder();
     namesAndValuesToQueryString(result, queryNamesAndValues);
@@ -708,7 +707,7 @@ public final class HttpUrl {
    *   <tr><td>{@code http://host/?a=apple&b}</td><td>{@code "apple"}</td></tr>
    * </table>
    */
-  public @Nullable String queryParameter(String name) {
+  public String queryParameter(String name) {
     if (queryNamesAndValues == null) return null;
     for (int i = 0, size = queryNamesAndValues.size(); i < size; i += 2) {
       if (name.equals(queryNamesAndValues.get(i))) {
@@ -825,7 +824,7 @@ public final class HttpUrl {
    *   <tr><td>{@code http://host/#abc|def}</td><td>{@code "abc|def"}</td></tr>
    * </table>
    */
-  public @Nullable String encodedFragment() {
+  public String encodedFragment() {
     if (fragment == null) return null;
     int fragmentStart = url.indexOf('#') + 1;
     return url.substring(fragmentStart);
@@ -843,7 +842,7 @@ public final class HttpUrl {
    *   <tr><td>{@code http://host/#abc|def}</td><td>{@code "abc|def"}</td></tr>
    * </table>
    */
-  public @Nullable String fragment() {
+  public String fragment() {
     return fragment;
   }
 
@@ -864,7 +863,7 @@ public final class HttpUrl {
    * Returns the URL that would be retrieved by following {@code link} from this URL, or null if
    * the resulting URL is not well-formed.
    */
-  public @Nullable HttpUrl resolve(String link) {
+  public HttpUrl resolve(String link) {
     Builder builder = newBuilder(link);
     return builder != null ? builder.build() : null;
   }
@@ -888,7 +887,7 @@ public final class HttpUrl {
    * Returns a builder for the URL that would be retrieved by following {@code link} from this URL,
    * or null if the resulting URL is not well-formed.
    */
-  public @Nullable Builder newBuilder(String link) {
+  public Builder newBuilder(String link) {
     try {
       return new Builder().parse(this, link);
     } catch (IllegalArgumentException ignored) {
@@ -900,7 +899,7 @@ public final class HttpUrl {
    * Returns a new {@code HttpUrl} representing {@code url} if it is a well-formed HTTP or HTTPS
    * URL, or null if it isn't.
    */
-  public static @Nullable HttpUrl parse(String url) {
+  public static HttpUrl parse(String url) {
     try {
       return get(url);
     } catch (IllegalArgumentException ignored) {
@@ -921,15 +920,15 @@ public final class HttpUrl {
    * Returns an {@link HttpUrl} for {@code url} if its protocol is {@code http} or {@code https}, or
    * null if it has any other protocol.
    */
-  public static @Nullable HttpUrl get(URL url) {
+  public static HttpUrl get(URL url) {
     return parse(url.toString());
   }
 
-  public static @Nullable HttpUrl get(URI uri) {
+  public static HttpUrl get(URI uri) {
     return parse(uri.toString());
   }
 
-  @Override public boolean equals(@Nullable Object other) {
+  @Override public boolean equals(Object other) {
     return other instanceof HttpUrl && ((HttpUrl) other).url.equals(url);
   }
 
@@ -960,20 +959,20 @@ public final class HttpUrl {
    *   <tr><td>{@code http://127.0.0.1}</td><td>null</td></tr>
    * </table>
    */
-  public @Nullable String topPrivateDomain() {
+  public String topPrivateDomain() {
     if (verifyAsIpAddress(host)) return null;
     return PublicSuffixDatabase.get().getEffectiveTldPlusOne(host);
   }
 
   public static final class Builder {
-    @Nullable String scheme;
+    String scheme;
     String encodedUsername = "";
     String encodedPassword = "";
-    @Nullable String host;
+    String host;
     int port = -1;
     final List<String> encodedPathSegments = new ArrayList<>();
-    @Nullable List<String> encodedQueryNamesAndValues;
-    @Nullable String encodedFragment;
+    List<String> encodedQueryNamesAndValues;
+    String encodedFragment;
 
     public Builder() {
       encodedPathSegments.add(""); // The default path is '/' which needs a trailing space.
@@ -1127,7 +1126,7 @@ public final class HttpUrl {
       return this;
     }
 
-    public Builder query(@Nullable String query) {
+    public Builder query(String query) {
       this.encodedQueryNamesAndValues = query != null
           ? queryStringToNamesAndValues(canonicalize(
           query, QUERY_ENCODE_SET, false, false, true, true))
@@ -1135,7 +1134,7 @@ public final class HttpUrl {
       return this;
     }
 
-    public Builder encodedQuery(@Nullable String encodedQuery) {
+    public Builder encodedQuery(String encodedQuery) {
       this.encodedQueryNamesAndValues = encodedQuery != null
           ? queryStringToNamesAndValues(
           canonicalize(encodedQuery, QUERY_ENCODE_SET, true, false, true, true))
@@ -1144,7 +1143,7 @@ public final class HttpUrl {
     }
 
     /** Encodes the query parameter using UTF-8 and adds it to this URL's query string. */
-    public Builder addQueryParameter(String name, @Nullable String value) {
+    public Builder addQueryParameter(String name, String value) {
       if (name == null) throw new NullPointerException("name == null");
       if (encodedQueryNamesAndValues == null) encodedQueryNamesAndValues = new ArrayList<>();
       encodedQueryNamesAndValues.add(
@@ -1156,7 +1155,7 @@ public final class HttpUrl {
     }
 
     /** Adds the pre-encoded query parameter to this URL's query string. */
-    public Builder addEncodedQueryParameter(String encodedName, @Nullable String encodedValue) {
+    public Builder addEncodedQueryParameter(String encodedName, String encodedValue) {
       if (encodedName == null) throw new NullPointerException("encodedName == null");
       if (encodedQueryNamesAndValues == null) encodedQueryNamesAndValues = new ArrayList<>();
       encodedQueryNamesAndValues.add(
@@ -1167,13 +1166,13 @@ public final class HttpUrl {
       return this;
     }
 
-    public Builder setQueryParameter(String name, @Nullable String value) {
+    public Builder setQueryParameter(String name, String value) {
       removeAllQueryParameters(name);
       addQueryParameter(name, value);
       return this;
     }
 
-    public Builder setEncodedQueryParameter(String encodedName, @Nullable String encodedValue) {
+    public Builder setEncodedQueryParameter(String encodedName, String encodedValue) {
       removeAllEncodedQueryParameters(encodedName);
       addEncodedQueryParameter(encodedName, encodedValue);
       return this;
@@ -1209,14 +1208,14 @@ public final class HttpUrl {
       }
     }
 
-    public Builder fragment(@Nullable String fragment) {
+    public Builder fragment(String fragment) {
       this.encodedFragment = fragment != null
           ? canonicalize(fragment, FRAGMENT_ENCODE_SET, false, false, false, false)
           : null;
       return this;
     }
 
-    public Builder encodedFragment(@Nullable String encodedFragment) {
+    public Builder encodedFragment(String encodedFragment) {
       this.encodedFragment = encodedFragment != null
           ? canonicalize(encodedFragment, FRAGMENT_ENCODE_SET, true, false, false, false)
           : null;
@@ -1309,7 +1308,7 @@ public final class HttpUrl {
 
     static final String INVALID_HOST = "Invalid URL host";
 
-    Builder parse(@Nullable HttpUrl base, String input) {
+    Builder parse(HttpUrl base, String input) {
       int pos = skipLeadingAsciiWhitespace(input, 0, input.length());
       int limit = skipTrailingAsciiWhitespace(input, pos, input.length());
 
@@ -1582,7 +1581,7 @@ public final class HttpUrl {
       return limit; // No colon.
     }
 
-    private static @Nullable String canonicalizeHost(String input, int pos, int limit) {
+    private static String canonicalizeHost(String input, int pos, int limit) {
       // Start by percent decoding the host. The WHATWG spec suggests doing this only after we've
       // checked for IPv6 square braces. But Chrome does it first, and that's more lenient.
       String percentDecoded = percentDecode(input, pos, limit, false);
@@ -1678,7 +1677,7 @@ public final class HttpUrl {
    */
   static String canonicalize(String input, int pos, int limit, String encodeSet,
       boolean alreadyEncoded, boolean strict, boolean plusIsSpace, boolean asciiOnly,
-      @Nullable Charset charset) {
+      Charset charset) {
     int codePoint;
     for (int i = pos; i < limit; i += Character.charCount(codePoint)) {
       codePoint = input.codePointAt(i);
@@ -1703,7 +1702,7 @@ public final class HttpUrl {
 
   static void canonicalize(Buffer out, String input, int pos, int limit, String encodeSet,
       boolean alreadyEncoded, boolean strict, boolean plusIsSpace, boolean asciiOnly,
-      @Nullable Charset charset) {
+      Charset charset) {
     Buffer encodedCharBuffer = null; // Lazily allocated.
     int codePoint;
     for (int i = pos; i < limit; i += Character.charCount(codePoint)) {
@@ -1744,7 +1743,7 @@ public final class HttpUrl {
   }
 
   static String canonicalize(String input, String encodeSet, boolean alreadyEncoded, boolean strict,
-      boolean plusIsSpace, boolean asciiOnly, @Nullable Charset charset) {
+      boolean plusIsSpace, boolean asciiOnly, Charset charset) {
     return canonicalize(input, 0, input.length(), encodeSet, alreadyEncoded, strict, plusIsSpace,
         asciiOnly, charset);
   }

@@ -26,7 +26,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nullable;
 import okhttp3.RecordingEventListener.CallEnd;
 import okhttp3.RecordingEventListener.CallFailed;
 import okhttp3.RecordingEventListener.ConnectEnd;
@@ -262,8 +261,8 @@ public final class EventListenerTest {
   }
 
   private void assertBytesReadWritten(RecordingEventListener listener,
-      @Nullable Matcher<Long> requestHeaderLength, @Nullable Matcher<Long> requestBodyBytes,
-      @Nullable Matcher<Long> responseHeaderLength, @Nullable Matcher<Long> responseBodyBytes) {
+      Matcher<Long> requestHeaderLength, Matcher<Long> requestBodyBytes,
+      Matcher<Long> responseHeaderLength, Matcher<Long> responseBodyBytes) {
 
     if (requestHeaderLength != null) {
       RequestHeadersEnd responseHeadersEnd = listener.removeUpToEvent(RequestHeadersEnd.class);

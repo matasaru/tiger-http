@@ -47,7 +47,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.GZIPInputStream;
-import javax.annotation.Nullable;
 import javax.net.ServerSocketFactory;
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLContext;
@@ -111,7 +110,7 @@ public final class URLConnectionTest {
 
   private HandshakeCertificates handshakeCertificates = localhost();
   private OkHttpClient client = clientTestRule.client;
-  private @Nullable Cache cache;
+  private Cache cache;
 
   @Before public void setUp() {
     server.setProtocolNegotiationEnabled(false);
@@ -429,7 +428,7 @@ public final class URLConnectionTest {
     server.enqueue(new MockResponse());
 
     RequestBody requestBody = new RequestBody() {
-      @Override public @Nullable MediaType contentType() {
+      @Override public MediaType contentType() {
         return null;
       }
 
@@ -2554,7 +2553,7 @@ public final class URLConnectionTest {
     Request request = new Request.Builder()
         .url(server.url("/"))
         .post(new RequestBody() {
-          @Override public @Nullable MediaType contentType() {
+          @Override public MediaType contentType() {
             return null;
           }
 
@@ -2998,7 +2997,7 @@ public final class URLConnectionTest {
         .setBody("A"));
 
     RequestBody requestBody = new RequestBody() {
-      @Override public @Nullable MediaType contentType() {
+      @Override public MediaType contentType() {
         return null;
       }
 
@@ -3025,7 +3024,7 @@ public final class URLConnectionTest {
         .setBody("A"));
 
     RequestBody requestBody = new RequestBody() {
-      @Override public @Nullable MediaType contentType() {
+      @Override public MediaType contentType() {
         return null;
       }
 
@@ -3378,7 +3377,7 @@ public final class URLConnectionTest {
     Response response = getResponse(new Request.Builder()
         .url(server.url("/"))
         .post(new RequestBody() {
-          @Override public @Nullable MediaType contentType() {
+          @Override public MediaType contentType() {
             return null;
           }
 
@@ -3658,7 +3657,7 @@ public final class URLConnectionTest {
             return -1L;
           }
 
-          @Override public @Nullable MediaType contentType() {
+          @Override public MediaType contentType() {
             return null;
           }
 
@@ -3679,7 +3678,7 @@ public final class URLConnectionTest {
             return Utf8.size(body);
           }
 
-          @Override public @Nullable MediaType contentType() {
+          @Override public MediaType contentType() {
             return null;
           }
 

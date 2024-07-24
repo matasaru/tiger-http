@@ -21,7 +21,6 @@ import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.net.Socket;
 import java.util.logging.Level;
-import javax.annotation.Nullable;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
 import okhttp3.Address;
@@ -62,14 +61,14 @@ public final class Transmitter {
     }
   };
 
-  private @Nullable Object callStackTrace;
+  private Object callStackTrace;
 
   private Request request;
   private ExchangeFinder exchangeFinder;
 
   // Guarded by connectionPool.
   public RealConnection connection;
-  private @Nullable Exchange exchange;
+  private Exchange exchange;
   private boolean exchangeRequestDone;
   private boolean exchangeResponseDone;
   private boolean canceled;
@@ -102,7 +101,7 @@ public final class Transmitter {
     timeout.exit();
   }
 
-  private @Nullable IOException timeoutExit(@Nullable IOException cause) {
+  private IOException timeoutExit(IOException cause) {
     if (timeoutEarlyExit) return cause;
     if (!timeout.exit()) return cause;
 
@@ -192,7 +191,7 @@ public final class Transmitter {
    * Remove the transmitter from the connection's list of allocations. Returns a socket that the
    * caller should close.
    */
-  @Nullable Socket releaseConnectionNoEvents() {
+  Socket releaseConnectionNoEvents() {
     assert (Thread.holdsLock(connectionPool));
 
     int index = -1;
@@ -235,8 +234,8 @@ public final class Transmitter {
    * <p>If the exchange was canceled or timed out, this will wrap {@code e} in an exception that
    * provides that additional context. Otherwise {@code e} is returned as-is.
    */
-  @Nullable IOException exchangeMessageDone(
-      Exchange exchange, boolean requestDone, boolean responseDone, @Nullable IOException e) {
+  IOException exchangeMessageDone(
+      Exchange exchange, boolean requestDone, boolean responseDone, IOException e) {
     boolean exchangeDone = false;
     synchronized (connectionPool) {
       if (exchange != this.exchange) {
@@ -263,7 +262,7 @@ public final class Transmitter {
     return e;
   }
 
-  public @Nullable IOException noMoreExchanges(@Nullable IOException e) {
+  public IOException noMoreExchanges(IOException e) {
     synchronized (connectionPool) {
       noMoreExchanges = true;
     }
@@ -279,7 +278,7 @@ public final class Transmitter {
    *
    * @param force true to release the connection even if more exchanges are expected for the call.
    */
-  private @Nullable IOException maybeReleaseConnection(@Nullable IOException e, boolean force) {
+  private IOException maybeReleaseConnection(IOException e, boolean force) {
     Socket socket;
     Connection releasedConnection;
     boolean callEnd;

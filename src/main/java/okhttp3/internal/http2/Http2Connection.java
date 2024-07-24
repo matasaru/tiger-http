@@ -35,7 +35,6 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
-import javax.annotation.Nullable;
 import okhttp3.Headers;
 import okhttp3.OkHttpClient;
 import okhttp3.internal.NamedRunnable;
@@ -468,7 +467,7 @@ public final class Http2Connection implements Closeable {
     close(ErrorCode.NO_ERROR, ErrorCode.CANCEL, null);
   }
 
-  void close(ErrorCode connectionCode, ErrorCode streamCode, @Nullable IOException cause) {
+  void close(ErrorCode connectionCode, ErrorCode streamCode, IOException cause) {
     assert (!Thread.holdsLock(this));
     try {
       shutdown(connectionCode);
@@ -509,7 +508,7 @@ public final class Http2Connection implements Closeable {
     pushExecutor.shutdown();
   }
 
-  private void failConnection(@Nullable IOException e) {
+  private void failConnection(IOException e) {
     close(ErrorCode.PROTOCOL_ERROR, ErrorCode.PROTOCOL_ERROR, e);
   }
 

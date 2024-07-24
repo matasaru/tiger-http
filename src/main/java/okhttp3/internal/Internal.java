@@ -15,7 +15,6 @@
  */
 package okhttp3.internal;
 
-import javax.annotation.Nullable;
 import javax.net.ssl.SSLSocket;
 import okhttp3.Address;
 import okhttp3.Call;
@@ -59,5 +58,5 @@ public abstract class Internal {
   public abstract void initExchange(
       Response.Builder responseBuilder, Exchange exchange);
 
-  public abstract @Nullable Exchange exchange(Response response);
+  public abstract Exchange exchange(Response response);
 }

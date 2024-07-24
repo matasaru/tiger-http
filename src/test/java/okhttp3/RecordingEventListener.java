@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import javax.annotation.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -100,12 +99,12 @@ public final class RecordingEventListener extends EventListener {
   }
 
   @Override public void connectEnd(Call call, InetSocketAddress inetSocketAddress,
-      @Nullable Proxy proxy, Protocol protocol) {
+      Proxy proxy, Protocol protocol) {
     logEvent(new ConnectEnd(call, inetSocketAddress, proxy, protocol));
   }
 
   @Override public void connectFailed(Call call, InetSocketAddress inetSocketAddress, Proxy proxy,
-      @Nullable Protocol protocol, IOException ioe) {
+      Protocol protocol, IOException ioe) {
     logEvent(new ConnectFailed(call, inetSocketAddress, proxy, protocol, ioe));
   }
 
@@ -200,7 +199,7 @@ public final class RecordingEventListener extends EventListener {
       return result;
     }
 
-    public @Nullable CallEvent closes() {
+    public CallEvent closes() {
       return null;
     }
   }
@@ -224,7 +223,7 @@ public final class RecordingEventListener extends EventListener {
       this.inetAddressList = inetAddressList;
     }
 
-    @Override public @Nullable CallEvent closes() {
+    @Override public CallEvent closes() {
       return new DnsStart(call, domainName);
     }
   }
@@ -272,7 +271,7 @@ public final class RecordingEventListener extends EventListener {
       this.ioe = ioe;
     }
 
-    @Override public @Nullable CallEvent closes() {
+    @Override public CallEvent closes() {
       return new ConnectStart(call, inetSocketAddress, proxy);
     }
   }
@@ -291,7 +290,7 @@ public final class RecordingEventListener extends EventListener {
       this.handshake = handshake;
     }
 
-    @Override public @Nullable CallEvent closes() {
+    @Override public CallEvent closes() {
       return new SecureConnectStart(call);
     }
   }
@@ -313,7 +312,7 @@ public final class RecordingEventListener extends EventListener {
       this.connection = connection;
     }
 
-    @Override public @Nullable CallEvent closes() {
+    @Override public CallEvent closes() {
       return new ConnectionAcquired(call, connection);
     }
   }
@@ -329,7 +328,7 @@ public final class RecordingEventListener extends EventListener {
       super(call);
     }
 
-    @Override public @Nullable CallEvent closes() {
+    @Override public CallEvent closes() {
       return new CallStart(call);
     }
   }
@@ -357,7 +356,7 @@ public final class RecordingEventListener extends EventListener {
       this.headerLength = headerLength;
     }
 
-    @Override public @Nullable CallEvent closes() {
+    @Override public CallEvent closes() {
       return new RequestHeadersStart(call);
     }
   }
@@ -376,7 +375,7 @@ public final class RecordingEventListener extends EventListener {
       this.bytesWritten = bytesWritten;
     }
 
-    @Override public @Nullable CallEvent closes() {
+    @Override public CallEvent closes() {
       return new RequestBodyStart(call);
     }
   }
@@ -404,7 +403,7 @@ public final class RecordingEventListener extends EventListener {
       this.headerLength = headerLength;
     }
 
-    @Override public @Nullable CallEvent closes() {
+    @Override public CallEvent closes() {
       return new RequestHeadersStart(call);
     }
   }
@@ -423,7 +422,7 @@ public final class RecordingEventListener extends EventListener {
       this.bytesRead = bytesRead;
     }
 
-    @Override public @Nullable CallEvent closes() {
+    @Override public CallEvent closes() {
       return new ResponseBodyStart(call);
     }
   }

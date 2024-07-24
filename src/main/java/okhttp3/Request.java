@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nullable;
 import okhttp3.internal.Util;
 import okhttp3.internal.http.HttpMethod;
 
@@ -32,10 +31,10 @@ public final class Request {
   final HttpUrl url;
   final String method;
   final Headers headers;
-  final @Nullable RequestBody body;
+  final RequestBody body;
   final Map<Class<?>, Object> tags;
 
-  private volatile @Nullable CacheControl cacheControl; // Lazily initialized.
+  private volatile CacheControl cacheControl; // Lazily initialized.
 
   Request(Builder builder) {
     this.url = builder.url;
@@ -57,7 +56,7 @@ public final class Request {
     return headers;
   }
 
-  public @Nullable String header(String name) {
+  public String header(String name) {
     return headers.get(name);
   }
 
@@ -65,7 +64,7 @@ public final class Request {
     return headers.values(name);
   }
 
-  public @Nullable RequestBody body() {
+  public RequestBody body() {
     return body;
   }
 
@@ -77,7 +76,7 @@ public final class Request {
    * returned either this request, or the request upon which this request was derived with {@link
    * #newBuilder()}.
    */
-  public @Nullable Object tag() {
+  public Object tag() {
     return tag(Object.class);
   }
 
@@ -85,7 +84,7 @@ public final class Request {
    * Returns the tag attached with {@code type} as a key, or null if no tag is attached with that
    * key.
    */
-  public @Nullable <T> T tag(Class<? extends T> type) {
+  public <T> T tag(Class<? extends T> type) {
     return type.cast(tags.get(type));
   }
 
@@ -117,10 +116,10 @@ public final class Request {
   }
 
   public static class Builder {
-    @Nullable HttpUrl url;
+    HttpUrl url;
     String method;
     Headers.Builder headers;
-    @Nullable RequestBody body;
+    RequestBody body;
 
     /** A mutable map of tags, or an immutable empty map if we don't have any. */
     Map<Class<?>, Object> tags = Collections.emptyMap();
@@ -232,7 +231,7 @@ public final class Request {
       return method("POST", body);
     }
 
-    public Builder delete(@Nullable RequestBody body) {
+    public Builder delete(RequestBody body) {
       return method("DELETE", body);
     }
 
@@ -248,7 +247,7 @@ public final class Request {
       return method("PATCH", body);
     }
 
-    public Builder method(String method, @Nullable RequestBody body) {
+    public Builder method(String method, RequestBody body) {
       if (method == null) throw new NullPointerException("method == null");
       if (method.length() == 0) throw new IllegalArgumentException("method.length() == 0");
       if (body != null && !HttpMethod.permitsRequestBody(method)) {
@@ -263,7 +262,7 @@ public final class Request {
     }
 
     /** Attaches {@code tag} to the request using {@code Object.class} as a key. */
-    public Builder tag(@Nullable Object tag) {
+    public Builder tag(Object tag) {
       return tag(Object.class, tag);
     }
 
@@ -275,7 +274,7 @@ public final class Request {
      * <p>Use this API to attach timing, debugging, or other application data to a request so that
      * you may read it in interceptors, event listeners, or callbacks.
      */
-    public <T> Builder tag(Class<? super T> type, @Nullable T tag) {
+    public <T> Builder tag(Class<? super T> type, T tag) {
       if (type == null) throw new NullPointerException("type == null");
 
       if (tag == null) {

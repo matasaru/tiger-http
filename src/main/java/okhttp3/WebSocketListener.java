@@ -15,7 +15,6 @@
  */
 package okhttp3;
 
-import javax.annotation.Nullable;
 import okio.ByteString;
 
 public abstract class WebSocketListener {
@@ -53,6 +52,6 @@ public abstract class WebSocketListener {
    * network. Both outgoing and incoming messages may have been lost. No further calls to this
    * listener will be made.
    */
-  public void onFailure(WebSocket webSocket, Throwable t, @Nullable Response response) {
+  public void onFailure(WebSocket webSocket, Throwable t, Response response) {
   }
 }
