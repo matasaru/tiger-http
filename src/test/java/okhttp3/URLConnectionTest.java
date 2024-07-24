@@ -110,7 +110,6 @@ public final class URLConnectionTest {
 
   private HandshakeCertificates handshakeCertificates = localhost();
   private OkHttpClient client = clientTestRule.client;
-  private Cache cache;
 
   @Before public void setUp() {
     server.setProtocolNegotiationEnabled(false);
@@ -124,9 +123,6 @@ public final class URLConnectionTest {
     System.clearProperty("http.proxyPort");
     System.clearProperty("https.proxyHost");
     System.clearProperty("https.proxyPort");
-    if (cache != null) {
-      cache.delete();
-    }
   }
 
   @Test public void requestHeaders() throws Exception {
@@ -506,7 +502,6 @@ public final class URLConnectionTest {
     ConnectionPool connectionPool = new ConnectionPool();
 
     client = new OkHttpClient.Builder()
-        .cache(cache)
         .connectionPool(connectionPool)
         .cookieJar(cookieJar)
         .sslSocketFactory(clientSocketFactory, handshakeCertificates.trustManager())
@@ -517,7 +512,6 @@ public final class URLConnectionTest {
 
     if (rebuildClient) {
       client = new OkHttpClient.Builder()
-          .cache(cache)
           .connectionPool(connectionPool)
           .cookieJar(cookieJar)
           .sslSocketFactory(clientSocketFactory, handshakeCertificates.trustManager())
@@ -902,8 +896,6 @@ public final class URLConnectionTest {
 
   /** Tolerate bad https proxy response when using HttpResponseCache. Android bug 6754912. */
   @Test public void connectViaHttpProxyToHttpsUsingBadProxyAndHttpResponseCache() throws Exception {
-    initResponseCache();
-
     server.useHttps(handshakeCertificates.sslSocketFactory(), true);
     // The inclusion of a body in the response to a CONNECT is key to reproducing b/6754912.
     MockResponse badProxyResponse = new MockResponse()
@@ -932,13 +924,6 @@ public final class URLConnectionTest {
     Assertions.assertThat(connect.getRequestLine()).isEqualTo(
         "CONNECT android.com:443 HTTP/1.1");
     Assertions.assertThat(connect.getHeader("Host")).isEqualTo("android.com:443");
-  }
-
-  private void initResponseCache() {
-    cache = new Cache(tempDir.getRoot(), Integer.MAX_VALUE);
-    client = client.newBuilder()
-        .cache(cache)
-        .build();
   }
 
   /** Test which headers are sent unencrypted to the HTTP proxy. */

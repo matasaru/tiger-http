@@ -25,7 +25,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
 import okhttp3.internal.NamedRunnable;
-import okhttp3.internal.cache.CacheInterceptor;
 import okhttp3.internal.connection.ConnectInterceptor;
 import okhttp3.internal.connection.Transmitter;
 import okhttp3.internal.http.BridgeInterceptor;
@@ -213,7 +212,6 @@ final class RealCall implements Call {
     interceptors.addAll(client.interceptors());
     interceptors.add(new RetryAndFollowUpInterceptor(client));
     interceptors.add(new BridgeInterceptor(client.cookieJar()));
-    interceptors.add(new CacheInterceptor(client.internalCache()));
     interceptors.add(new ConnectInterceptor(client));
     if (!forWebSocket) {
       interceptors.addAll(client.networkInterceptors());

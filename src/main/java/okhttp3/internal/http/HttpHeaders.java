@@ -22,22 +22,18 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
+
 import okhttp3.Challenge;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
-import okhttp3.Request;
 import okhttp3.Response;
 import okio.Buffer;
 import okio.ByteString;
 
 import static java.net.HttpURLConnection.HTTP_NOT_MODIFIED;
 import static java.net.HttpURLConnection.HTTP_NO_CONTENT;
-import static okhttp3.internal.Util.EMPTY_HEADERS;
 import static okhttp3.internal.http.StatusLine.HTTP_CONTINUE;
 
 /** Headers and utilities for internal use by OkHttp. */
@@ -63,86 +59,6 @@ public final class HttpHeaders {
     } catch (NumberFormatException e) {
       return -1;
     }
-  }
-
-  /**
-   * Returns true if none of the Vary headers have changed between {@code cachedRequest} and {@code
-   * newRequest}.
-   */
-  public static boolean varyMatches(
-      Response cachedResponse, Headers cachedRequest, Request newRequest) {
-    for (String field : varyFields(cachedResponse)) {
-      if (!Objects.equals(cachedRequest.values(field), newRequest.headers(field))) return false;
-    }
-    return true;
-  }
-
-  /**
-   * Returns true if a Vary header contains an asterisk. Such responses cannot be cached.
-   */
-  public static boolean hasVaryAll(Response response) {
-    return hasVaryAll(response.headers());
-  }
-
-  /**
-   * Returns true if a Vary header contains an asterisk. Such responses cannot be cached.
-   */
-  public static boolean hasVaryAll(Headers responseHeaders) {
-    return varyFields(responseHeaders).contains("*");
-  }
-
-  private static Set<String> varyFields(Response response) {
-    return varyFields(response.headers());
-  }
-
-  /**
-   * Returns the names of the request headers that need to be checked for equality when caching.
-   */
-  public static Set<String> varyFields(Headers responseHeaders) {
-    Set<String> result = Collections.emptySet();
-    for (int i = 0, size = responseHeaders.size(); i < size; i++) {
-      if (!"Vary".equalsIgnoreCase(responseHeaders.name(i))) continue;
-
-      String value = responseHeaders.value(i);
-      if (result.isEmpty()) {
-        result = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-      }
-      for (String varyField : value.split(",")) {
-        result.add(varyField.trim());
-      }
-    }
-    return result;
-  }
-
-  /**
-   * Returns the subset of the headers in {@code response}'s request that impact the content of
-   * response's body.
-   */
-  public static Headers varyHeaders(Response response) {
-    // Use the request headers sent over the network, since that's what the
-    // response varies on. Otherwise OkHttp-supplied headers like
-    // "Accept-Encoding: gzip" may be lost.
-    Headers requestHeaders = response.networkResponse().request().headers();
-    Headers responseHeaders = response.headers();
-    return varyHeaders(requestHeaders, responseHeaders);
-  }
-
-  /**
-   * Returns the subset of the headers in {@code requestHeaders} that impact the content of
-   * response's body.
-   */
-  public static Headers varyHeaders(Headers requestHeaders, Headers responseHeaders) {
-    Set<String> varyFields = varyFields(responseHeaders);
-    if (varyFields.isEmpty()) return EMPTY_HEADERS;
-
-    Headers.Builder result = new Headers.Builder();
-    for (int i = 0, size = requestHeaders.size(); i < size; i++) {
-      String fieldName = requestHeaders.name(i);
-      if (varyFields.contains(fieldName)) {
-        result.add(fieldName, requestHeaders.value(i));
-      }
-    }
-    return result.build();
   }
 
   /**
@@ -341,51 +257,5 @@ public final class HttpHeaders {
     }
 
     return false;
-  }
-
-  /**
-   * Returns the next index in {@code input} at or after {@code pos} that contains a character from
-   * {@code characters}. Returns the input length if none of the requested characters can be found.
-   */
-  public static int skipUntil(String input, int pos, String characters) {
-    for (; pos < input.length(); pos++) {
-      if (characters.indexOf(input.charAt(pos)) != -1) {
-        break;
-      }
-    }
-    return pos;
-  }
-
-  /**
-   * Returns the next non-whitespace character in {@code input} that is white space. Result is
-   * undefined if input contains newline characters.
-   */
-  public static int skipWhitespace(String input, int pos) {
-    for (; pos < input.length(); pos++) {
-      char c = input.charAt(pos);
-      if (c != ' ' && c != '\t') {
-        break;
-      }
-    }
-    return pos;
-  }
-
-  /**
-   * Returns {@code value} as a positive integer, or 0 if it is negative, or {@code defaultValue} if
-   * it cannot be parsed.
-   */
-  public static int parseSeconds(String value, int defaultValue) {
-    try {
-      long seconds = Long.parseLong(value);
-      if (seconds > Integer.MAX_VALUE) {
-        return Integer.MAX_VALUE;
-      } else if (seconds < 0) {
-        return 0;
-      } else {
-        return (int) seconds;
-      }
-    } catch (NumberFormatException e) {
-      return defaultValue;
-    }
   }
 }

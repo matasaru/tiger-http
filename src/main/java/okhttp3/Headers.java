@@ -288,8 +288,7 @@ public final class Headers {
     final List<String> namesAndValues = new ArrayList<>(20);
 
     /**
-     * Add a header line without any validation. Only appropriate for headers from the remote peer
-     * or cache.
+     * Add a header line without any validation. Only appropriate for headers from the remote peer.
      */
     Builder addLenient(String line) {
       int index = line.indexOf(":", 1);
@@ -381,8 +380,7 @@ public final class Headers {
     }
 
     /**
-     * Add a field with the specified value without any validation. Only appropriate for headers
-     * from the remote peer or cache.
+     * Add a field with the specified value without any validation. Only appropriate for headers from the remote peer.
      */
     Builder addLenient(String name, String value) {
       namesAndValues.add(name);

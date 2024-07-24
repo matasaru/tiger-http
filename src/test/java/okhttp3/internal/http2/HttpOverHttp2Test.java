@@ -31,7 +31,7 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import okhttp3.Cache;
+
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Connection;
@@ -107,7 +107,6 @@ public final class HttpOverHttp2Test {
   @Rule public final Timeout timeout = new Timeout(5, SECONDS);
 
   private OkHttpClient client;
-  private Cache cache;
   private TestLogHandler http2Handler = new TestLogHandler();
   private Level previousLevel;
   private String scheme;
@@ -140,8 +139,6 @@ public final class HttpOverHttp2Test {
     } else {
       server.useHttps(handshakeCertificates.sslSocketFactory(), false);
     }
-
-    cache = new Cache(tempDir.getRoot(), Integer.MAX_VALUE);
 
     http2Logger.addHandler(http2Handler);
     previousLevel = http2Logger.getLevel();
@@ -620,101 +617,6 @@ public final class HttpOverHttp2Test {
     // Confirm that the connection was reused.
     Assertions.assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
     Assertions.assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(1);
-  }
-
-  @Test public void responsesAreCached() throws IOException {
-    client = client.newBuilder()
-        .cache(cache)
-        .build();
-
-    server.enqueue(new MockResponse()
-        .addHeader("cache-control: max-age=60")
-        .setBody("A"));
-
-    Call call1 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
-        .build());
-    Response response1 = call1.execute();
-
-    Assertions.assertThat(response1.body().string()).isEqualTo("A");
-    Assertions.assertThat(cache.requestCount()).isEqualTo(1);
-    Assertions.assertThat(cache.networkCount()).isEqualTo(1);
-    Assertions.assertThat(cache.hitCount()).isEqualTo(0);
-
-    Call call2 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
-        .build());
-    Response response2 = call2.execute();
-    Assertions.assertThat(response2.body().string()).isEqualTo("A");
-
-    Call call3 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
-        .build());
-    Response response3 = call3.execute();
-    Assertions.assertThat(response3.body().string()).isEqualTo("A");
-
-    Assertions.assertThat(cache.requestCount()).isEqualTo(3);
-    Assertions.assertThat(cache.networkCount()).isEqualTo(1);
-    Assertions.assertThat(cache.hitCount()).isEqualTo(2);
-  }
-
-  @Test public void conditionalCache() throws IOException {
-    client = client.newBuilder()
-        .cache(cache)
-        .build();
-
-    server.enqueue(new MockResponse()
-        .addHeader("ETag: v1")
-        .setBody("A"));
-    server.enqueue(new MockResponse()
-        .setResponseCode(HttpURLConnection.HTTP_NOT_MODIFIED));
-
-    Call call1 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
-        .build());
-    Response response1 = call1.execute();
-    Assertions.assertThat(response1.body().string()).isEqualTo("A");
-
-    Assertions.assertThat(cache.requestCount()).isEqualTo(1);
-    Assertions.assertThat(cache.networkCount()).isEqualTo(1);
-    Assertions.assertThat(cache.hitCount()).isEqualTo(0);
-
-    Call call2 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
-        .build());
-    Response response2 = call2.execute();
-    Assertions.assertThat(response2.body().string()).isEqualTo("A");
-
-    Assertions.assertThat(cache.requestCount()).isEqualTo(2);
-    Assertions.assertThat(cache.networkCount()).isEqualTo(2);
-    Assertions.assertThat(cache.hitCount()).isEqualTo(1);
-  }
-
-  @Test public void responseCachedWithoutConsumingFullBody() throws IOException {
-    client = client.newBuilder()
-        .cache(cache)
-        .build();
-
-    server.enqueue(new MockResponse()
-        .addHeader("cache-control: max-age=60")
-        .setBody("ABCD"));
-    server.enqueue(new MockResponse()
-        .addHeader("cache-control: max-age=60")
-        .setBody("EFGH"));
-
-    Call call1 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
-        .build());
-    Response response1 = call1.execute();
-    Assertions.assertThat(response1.body().source().readUtf8(2)).isEqualTo("AB");
-    response1.body().close();
-
-    Call call2 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
-        .build());
-    Response response2 = call2.execute();
-    Assertions.assertThat(response2.body().source().readUtf8()).isEqualTo("ABCD");
-    response2.body().close();
   }
 
   @Test public void sendRequestCookies() throws Exception {

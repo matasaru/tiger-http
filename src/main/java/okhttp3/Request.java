@@ -34,8 +34,6 @@ public final class Request {
   final RequestBody body;
   final Map<Class<?>, Object> tags;
 
-  private volatile CacheControl cacheControl; // Lazily initialized.
-
   Request(Builder builder) {
     this.url = builder.url;
     this.method = builder.method;
@@ -90,15 +88,6 @@ public final class Request {
 
   public Builder newBuilder() {
     return new Builder(this);
-  }
-
-  /**
-   * Returns the cache control directives for this response. This is never null, even if this
-   * response contains no {@code Cache-Control} header.
-   */
-  public CacheControl cacheControl() {
-    CacheControl result = cacheControl;
-    return result != null ? result : (cacheControl = CacheControl.parse(headers));
   }
 
   public boolean isHttps() {
@@ -206,17 +195,6 @@ public final class Request {
     public Builder headers(Headers headers) {
       this.headers = headers.newBuilder();
       return this;
-    }
-
-    /**
-     * Sets this request's {@code Cache-Control} header, replacing any cache control headers already
-     * present. If {@code cacheControl} doesn't define any directives, this clears this request's
-     * cache-control headers.
-     */
-    public Builder cacheControl(CacheControl cacheControl) {
-      String value = cacheControl.toString();
-      if (value.isEmpty()) return removeHeader("Cache-Control");
-      return header("Cache-Control", value);
     }
 
     public Builder get() {

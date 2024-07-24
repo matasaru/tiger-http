@@ -395,8 +395,7 @@ public final class Http1ExchangeCodec implements ExchangeCodec {
     }
 
     /**
-     * Closes the cache entry and makes the socket available for reuse. This should be invoked when
-     * the end of the body has been reached.
+     * Makes the socket available for reuse. This should be invoked when the end of the body has been reached.
      */
     final void responseBodyComplete() {
       if (state == STATE_CLOSED) return;

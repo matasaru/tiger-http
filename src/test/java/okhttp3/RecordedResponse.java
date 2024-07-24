@@ -123,22 +123,6 @@ public final class RecordedResponse {
     return this;
   }
 
-  /** Asserts that the current response didn't use the cache. */
-  public RecordedResponse assertNoCacheResponse() {
-    assertThat(response.cacheResponse()).isNull();
-    return this;
-  }
-
-  /**
-   * Asserts that the current response used the cache and returns the cache response.
-   */
-  public RecordedResponse cacheResponse() {
-    Response cacheResponse = response.cacheResponse();
-    assertThat(cacheResponse).isNotNull();
-    assertThat(cacheResponse.body()).isNull();
-    return new RecordedResponse(cacheResponse.request(), cacheResponse, null, null, null);
-  }
-
   public RecordedResponse assertFailure(Class<?>... allowedExceptionTypes) {
     boolean found = false;
     for (Class expectedClass : allowedExceptionTypes) {

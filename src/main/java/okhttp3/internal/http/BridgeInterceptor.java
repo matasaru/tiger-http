@@ -95,7 +95,8 @@ public final class BridgeInterceptor implements Interceptor {
     HttpHeaders.receiveHeaders(cookieJar, userRequest.url(), networkResponse.headers());
 
     Response.Builder responseBuilder = networkResponse.newBuilder()
-        .request(userRequest);
+        .request(userRequest)
+        .networkResponse(stripBody(networkResponse));
 
     if (transparentGzip
         && "gzip".equalsIgnoreCase(networkResponse.header("Content-Encoding"))
@@ -124,5 +125,11 @@ public final class BridgeInterceptor implements Interceptor {
       cookieHeader.append(cookie.name()).append('=').append(cookie.value());
     }
     return cookieHeader.toString();
+  }
+
+  private static Response stripBody(Response response) {
+    return response != null && response.body() != null
+        ? response.newBuilder().body(null).build()
+        : response;
   }
 }

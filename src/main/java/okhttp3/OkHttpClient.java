@@ -36,7 +36,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import okhttp3.internal.Internal;
 import okhttp3.internal.Util;
-import okhttp3.internal.cache.InternalCache;
 import okhttp3.internal.connection.Exchange;
 import okhttp3.internal.connection.RealConnectionPool;
 import okhttp3.internal.proxy.NullProxySelector;
@@ -72,7 +71,6 @@ import static okhttp3.internal.Util.checkDuration;
  *   // The singleton HTTP client.
  *   public final OkHttpClient client = new OkHttpClient.Builder()
  *       .addInterceptor(new HttpLoggingInterceptor())
- *       .cache(new Cache(cacheDir, cacheSize))
  *       .build();
  * }</pre>
  *
@@ -106,13 +104,6 @@ import static okhttp3.internal.Util.checkDuration;
  * connection pool's daemon thread may not exit immediately. <pre>   {@code
  *
  *     client.connectionPool().evictAll();
- * }</pre>
- *
- * <p>If your client has a cache, call {@link Cache#close close()}. Note that it is an error to
- * create calls against a cache that is closed, and doing so will cause the call to crash.
- * <pre>   {@code
- *
- *     client.cache().close();
  * }</pre>
  *
  * <p>OkHttp also uses daemon threads for HTTP/2 connections. These will exit automatically if they
@@ -179,8 +170,6 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
   final EventListener.Factory eventListenerFactory;
   final ProxySelector proxySelector;
   final CookieJar cookieJar;
-  final Cache cache;
-  final InternalCache internalCache;
   final SocketFactory socketFactory;
   final SSLSocketFactory sslSocketFactory;
   final CertificateChainCleaner certificateChainCleaner;
@@ -213,8 +202,6 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
     this.eventListenerFactory = builder.eventListenerFactory;
     this.proxySelector = builder.proxySelector;
     this.cookieJar = builder.cookieJar;
-    this.cache = builder.cache;
-    this.internalCache = builder.internalCache;
     this.socketFactory = builder.socketFactory;
 
     boolean isTLS = false;
@@ -305,14 +292,6 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
     return cookieJar;
   }
 
-  public Cache cache() {
-    return cache;
-  }
-
-  InternalCache internalCache() {
-    return cache != null ? cache.internalCache : internalCache;
-  }
-
   public Dns dns() {
     return dns;
   }
@@ -371,8 +350,8 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
 
   /**
    * Returns an immutable list of interceptors that observe the full span of each call: from before
-   * the connection is established (if any) until after the response source is selected (either the
-   * origin server, cache, or both).
+   * the connection is established (if any) until after the response source is selected (the origin
+   * server).//TODO debug and clarify the last part with the source selection and shit
    */
   public List<Interceptor> interceptors() {
     return interceptors;
@@ -421,8 +400,6 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
     EventListener.Factory eventListenerFactory;
     ProxySelector proxySelector;
     CookieJar cookieJar;
-    Cache cache;
-    InternalCache internalCache;
     SocketFactory socketFactory;
     SSLSocketFactory sslSocketFactory;
     CertificateChainCleaner certificateChainCleaner;
@@ -478,8 +455,6 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
       this.eventListenerFactory = okHttpClient.eventListenerFactory;
       this.proxySelector = okHttpClient.proxySelector;
       this.cookieJar = okHttpClient.cookieJar;
-      this.internalCache = okHttpClient.internalCache;
-      this.cache = okHttpClient.cache;
       this.socketFactory = okHttpClient.socketFactory;
       this.sslSocketFactory = okHttpClient.sslSocketFactory;
       this.certificateChainCleaner = okHttpClient.certificateChainCleaner;
@@ -682,13 +657,6 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
     public Builder cookieJar(CookieJar cookieJar) {
       if (cookieJar == null) throw new NullPointerException("cookieJar == null");
       this.cookieJar = cookieJar;
-      return this;
-    }
-
-    /** Sets the response cache to be used to read and write cached responses. */
-    public Builder cache(Cache cache) {
-      this.cache = cache;
-      this.internalCache = null;
       return this;
     }
 
@@ -934,7 +902,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
     /**
      * Returns a modifiable list of interceptors that observe the full span of each call: from
      * before the connection is established (if any) until after the response source is selected
-     * (either the origin server, cache, or both).
+     * (the origin server). // TODO same as above
      */
     public List<Interceptor> interceptors() {
       return interceptors;

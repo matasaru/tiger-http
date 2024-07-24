@@ -141,23 +141,6 @@ public final class RequestTest {
         HttpUrl.get("http://localhost/api/foo"));
   }
 
-  @Test public void cacheControl() {
-    Request request = new Request.Builder()
-        .cacheControl(new CacheControl.Builder().noCache().build())
-        .url("https://square.com")
-        .build();
-    assertThat(request.headers("Cache-Control")).containsExactly("no-cache");
-  }
-
-  @Test public void emptyCacheControlClearsAllCacheControlHeaders() {
-    Request request = new Request.Builder()
-        .header("Cache-Control", "foo")
-        .cacheControl(new CacheControl.Builder().build())
-        .url("https://square.com")
-        .build();
-    assertThat(request.headers("Cache-Control")).isEmpty();
-  }
-
   @Test public void headerAcceptsPermittedCharacters() {
     Request.Builder builder = new Request.Builder();
     builder.header("AZab09~", "AZab09 ~");

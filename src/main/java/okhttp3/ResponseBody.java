@@ -35,9 +35,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  *
  * <h3>The response body must be closed.</h3>
  *
- * Each response body is backed by a limited resource like a socket (live network responses) or
- * an open file (for cached responses). Failing to close the response body will leak resources and
- * may ultimately cause the application to slow down or crash.
+ * Each response body is backed by a socket. Failing to close the response body will leak resources
+ * and may ultimately cause the application to slow down or crash.
  *
  * <p>Both this class and {@link Response} implement {@link Closeable}. Closing a response simply
  * closes its response body. If you invoke {@link Call#execute()} or implement {@link

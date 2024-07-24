@@ -87,8 +87,7 @@ public final class Handshake {
   }
 
   /**
-   * Returns the TLS version used for this connection. This value wasn't tracked prior to OkHttp
-   * 3.0. For responses cached by preceding versions this returns {@link TlsVersion#SSL_3_0}.
+   * Returns the TLS version used for this connection.
    */
   public TlsVersion tlsVersion() {
     return tlsVersion;

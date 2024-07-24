@@ -49,13 +49,10 @@ public final class Response implements Closeable {
   final Headers headers;
   final ResponseBody body;
   final Response networkResponse;
-  final Response cacheResponse;
   final Response priorResponse;
   final long sentRequestAtMillis;
   final long receivedResponseAtMillis;
   final Exchange exchange;
-
-  private volatile CacheControl cacheControl; // Lazily initialized.
 
   Response(Builder builder) {
     this.request = builder.request;
@@ -66,7 +63,6 @@ public final class Response implements Closeable {
     this.headers = builder.headers.build();
     this.body = builder.body;
     this.networkResponse = builder.networkResponse;
-    this.cacheResponse = builder.cacheResponse;
     this.priorResponse = builder.priorResponse;
     this.sentRequestAtMillis = builder.sentRequestAtMillis;
     this.receivedResponseAtMillis = builder.receivedResponseAtMillis;
@@ -171,8 +167,7 @@ public final class Response implements Closeable {
    * from {@link Call#execute()}. Response bodies must be {@linkplain ResponseBody closed} and may
    * be consumed only once.
    *
-   * <p>This always returns null on responses returned from {@link #cacheResponse}, {@link
-   * #networkResponse}, and {@link #priorResponse()}.
+   * <p>This always returns null on responses returned from {@link #networkResponse} and {@link #priorResponse()}.
    */
   public ResponseBody body() {
     return body;
@@ -198,21 +193,11 @@ public final class Response implements Closeable {
   }
 
   /**
-   * Returns the raw response received from the network. Will be null if this response didn't use
-   * the network, such as when the response is fully cached. The body of the returned response
+   * Returns the raw response received from the network. The body of the returned response
    * should not be read.
    */
   public Response networkResponse() {
     return networkResponse;
-  }
-
-  /**
-   * Returns the raw response received from the cache. Will be null if this response didn't use the
-   * cache. For conditional get requests the cache response and network response may both be
-   * non-null. The body of the returned response should not be read.
-   */
-  public Response cacheResponse() {
-    return cacheResponse;
   }
 
   /**
@@ -249,18 +234,8 @@ public final class Response implements Closeable {
   }
 
   /**
-   * Returns the cache control directives for this response. This is never null, even if this
-   * response contains no {@code Cache-Control} header.
-   */
-  public CacheControl cacheControl() {
-    CacheControl result = cacheControl;
-    return result != null ? result : (cacheControl = CacheControl.parse(headers));
-  }
-
-  /**
    * Returns a {@linkplain System#currentTimeMillis() timestamp} taken immediately before OkHttp
-   * transmitted the initiating request over the network. If this response is being served from the
-   * cache then this is the timestamp of the original request.
+   * transmitted the initiating request over the network.
    */
   public long sentRequestAtMillis() {
     return sentRequestAtMillis;
@@ -268,8 +243,7 @@ public final class Response implements Closeable {
 
   /**
    * Returns a {@linkplain System#currentTimeMillis() timestamp} taken immediately after OkHttp
-   * received this response's headers from the network. If this response is being served from the
-   * cache then this is the timestamp of the original response.
+   * received this response's headers from the network.
    */
   public long receivedResponseAtMillis() {
     return receivedResponseAtMillis;
@@ -279,8 +253,7 @@ public final class Response implements Closeable {
    * Closes the response body. Equivalent to {@code body().close()}.
    *
    * <p>It is an error to close a response that is not eligible for a body. This includes the
-   * responses returned from {@link #cacheResponse}, {@link #networkResponse}, and {@link
-   * #priorResponse()}.
+   * responses returned from {@link #networkResponse}, and {@link #priorResponse()}.
    */
   @Override public void close() {
     if (body == null) {
@@ -310,7 +283,6 @@ public final class Response implements Closeable {
     Headers.Builder headers;
     ResponseBody body;
     Response networkResponse;
-    Response cacheResponse;
     Response priorResponse;
     long sentRequestAtMillis;
     long receivedResponseAtMillis;
@@ -329,7 +301,6 @@ public final class Response implements Closeable {
       this.headers = response.headers.newBuilder();
       this.body = response.body;
       this.networkResponse = response.networkResponse;
-      this.cacheResponse = response.cacheResponse;
       this.priorResponse = response.priorResponse;
       this.sentRequestAtMillis = response.sentRequestAtMillis;
       this.receivedResponseAtMillis = response.receivedResponseAtMillis;
@@ -402,19 +373,11 @@ public final class Response implements Closeable {
       return this;
     }
 
-    public Builder cacheResponse(Response cacheResponse) {
-      if (cacheResponse != null) checkSupportResponse("cacheResponse", cacheResponse);
-      this.cacheResponse = cacheResponse;
-      return this;
-    }
-
     private void checkSupportResponse(String name, Response response) {
       if (response.body != null) {
         throw new IllegalArgumentException(name + ".body != null");
       } else if (response.networkResponse != null) {
         throw new IllegalArgumentException(name + ".networkResponse != null");
-      } else if (response.cacheResponse != null) {
-        throw new IllegalArgumentException(name + ".cacheResponse != null");
       } else if (response.priorResponse != null) {
         throw new IllegalArgumentException(name + ".priorResponse != null");
       }
