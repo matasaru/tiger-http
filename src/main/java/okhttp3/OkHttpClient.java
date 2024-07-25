@@ -41,7 +41,6 @@ import okhttp3.internal.connection.RealConnectionPool;
 import okhttp3.internal.proxy.NullProxySelector;
 import okhttp3.internal.tls.CertificateChainCleaner;
 import okhttp3.internal.tls.OkHostnameVerifier;
-import okhttp3.internal.ws.RealWebSocket;
 import okio.Sink;
 import okio.Source;
 
@@ -109,7 +108,7 @@ import static okhttp3.internal.Util.checkDuration;
  * <p>OkHttp also uses daemon threads for HTTP/2 connections. These will exit automatically if they
  * remain idle.
  */
-public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory {
+public class OkHttpClient implements Cloneable, Call.Factory {
   // TODO review the usage of this logger
   public static final Logger logger = Logger.getLogger(OkHttpClient.class.getName());
 
@@ -144,10 +143,6 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
       @Override
       public void apply(ConnectionSpec tlsConfiguration, SSLSocket sslSocket, boolean isFallback) {
         tlsConfiguration.apply(sslSocket, isFallback);
-      }
-
-      @Override public Call newWebSocketCall(OkHttpClient client, Request originalRequest) {
-        return RealCall.newRealCall(client, originalRequest, true);
       }
 
       @Override public void initExchange(
@@ -374,16 +369,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
    * Prepares the {@code request} to be executed at some point in the future.
    */
   @Override public Call newCall(Request request) {
-    return RealCall.newRealCall(this, request, false /* for web socket */);
-  }
-
-  /**
-   * Uses {@code request} to connect a new web socket.
-   */
-  @Override public WebSocket newWebSocket(Request request, WebSocketListener listener) {
-    RealWebSocket webSocket = new RealWebSocket(request, listener, new Random(), pingInterval);
-    webSocket.connect(this);
-    return webSocket;
+    return RealCall.newRealCall(this, request);
   }
 
   public Builder newBuilder() {
@@ -589,15 +575,13 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
     }
 
     /**
-     * Sets the interval between HTTP/2 and web socket pings initiated by this client. Use this to
-     * automatically send ping frames until either the connection fails or it is closed. This keeps
-     * the connection alive and may detect connectivity failures.
+     * Sets the interval between HTTP/2 pings initiated by this client. Use this to automatically
+     * send ping frames until either the connection fails or it is closed. This keeps the connection
+     * alive and may detect connectivity failures.
      *
      * <p>If the server does not respond to each ping with a pong within {@code interval}, this
-     * client will assume that connectivity has been lost. When this happens on a web socket the
-     * connection is canceled and its listener is {@linkplain WebSocketListener#onFailure notified
-     * of the failure}. When it happens on an HTTP/2 connection the connection is closed and any
-     * calls it is carrying {@linkplain java.io.IOException will fail with an IOException}.
+     * client will assume that connectivity has been lost. When this happens, the connection is closed
+     * and any calls it is carrying {@linkplain java.io.IOException will fail with an IOException}.
      *
      * <p>The default value of 0 disables client-initiated pings.
      */
@@ -607,15 +591,13 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
     }
 
     /**
-     * Sets the interval between HTTP/2 and web socket pings initiated by this client. Use this to
-     * automatically send ping frames until either the connection fails or it is closed. This keeps
-     * the connection alive and may detect connectivity failures.
+     * Sets the interval between HTTP/2 pings initiated by this client. Use this to automatically
+     * send ping frames until either the connection fails or it is closed. This keeps the connection
+     * alive and may detect connectivity failures.
      *
      * <p>If the server does not respond to each ping with a pong within {@code interval}, this
-     * client will assume that connectivity has been lost. When this happens on a web socket the
-     * connection is canceled and its listener is {@linkplain WebSocketListener#onFailure notified
-     * of the failure}. When it happens on an HTTP/2 connection the connection is closed and any
-     * calls it is carrying {@linkplain java.io.IOException will fail with an IOException}.
+     * client will assume that connectivity has been lost. When this happens, the connection is closed
+     * and any calls it is carrying {@linkplain java.io.IOException will fail with an IOException}.
      *
      * <p>The default value of 0 disables client-initiated pings.
      */

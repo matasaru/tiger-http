@@ -46,20 +46,18 @@ final class RealCall implements Call {
 
   /** The application's original request unadulterated by redirects or auth headers. */
   final Request originalRequest;
-  final boolean forWebSocket;
 
   // Guarded by this.
   private boolean executed;
 
-  private RealCall(OkHttpClient client, Request originalRequest, boolean forWebSocket) {
+  private RealCall(OkHttpClient client, Request originalRequest) {
     this.client = client;
     this.originalRequest = originalRequest;
-    this.forWebSocket = forWebSocket;
   }
 
-  static RealCall newRealCall(OkHttpClient client, Request originalRequest, boolean forWebSocket) {
+  static RealCall newRealCall(OkHttpClient client, Request originalRequest) {
     // Safely publish the Call instance to the EventListener.
-    RealCall call = new RealCall(client, originalRequest, forWebSocket);
+    RealCall call = new RealCall(client, originalRequest);
     call.transmitter = new Transmitter(client, call);
     return call;
   }
@@ -110,7 +108,7 @@ final class RealCall implements Call {
 
   @SuppressWarnings("CloneDoesntCallSuperClone") // We are a final type & this saves clearing state.
   @Override public RealCall clone() {
-    return RealCall.newRealCall(client, originalRequest, forWebSocket);
+    return RealCall.newRealCall(client, originalRequest);
   }
 
   final class AsyncCall extends NamedRunnable {
@@ -198,8 +196,7 @@ final class RealCall implements Call {
    */
   String toLoggableString() {
     return (isCanceled() ? "canceled " : "")
-        + (forWebSocket ? "web socket" : "call")
-        + " to " + redactedUrl();
+        + "call to " + redactedUrl();
   }
 
   String redactedUrl() {
@@ -213,10 +210,8 @@ final class RealCall implements Call {
     interceptors.add(new RetryAndFollowUpInterceptor(client));
     interceptors.add(new BridgeInterceptor(client.cookieJar()));
     interceptors.add(new ConnectInterceptor(client));
-    if (!forWebSocket) {
-      interceptors.addAll(client.networkInterceptors());
-    }
-    interceptors.add(new CallServerInterceptor(forWebSocket));
+    interceptors.addAll(client.networkInterceptors());
+    interceptors.add(new CallServerInterceptor());
 
     Interceptor.Chain chain = new RealInterceptorChain(interceptors, transmitter, null, 0,
         originalRequest, this, client.connectTimeoutMillis(),

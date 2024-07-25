@@ -92,8 +92,8 @@ public final class Transmitter {
   }
 
   /**
-   * Stops applying the timeout before the call is entirely complete. This is used for WebSockets
-   * and duplex calls where the timeout only applies to the initial setup.
+   * Stops applying the timeout before the call is entirely complete. This is used for
+   * duplex calls where the timeout only applies to the initial setup.
    */
   public void timeoutEarlyExit() {
     if (timeoutEarlyExit) throw new IllegalStateException();

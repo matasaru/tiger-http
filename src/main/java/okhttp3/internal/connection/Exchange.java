@@ -17,7 +17,6 @@ package okhttp3.internal.connection;
 
 import java.io.IOException;
 import java.net.ProtocolException;
-import java.net.SocketException;
 import okhttp3.Call;
 import okhttp3.EventListener;
 import okhttp3.Headers;
@@ -27,7 +26,6 @@ import okhttp3.ResponseBody;
 import okhttp3.internal.Internal;
 import okhttp3.internal.http.ExchangeCodec;
 import okhttp3.internal.http.RealResponseBody;
-import okhttp3.internal.ws.RealWebSocket;
 import okio.Buffer;
 import okio.ForwardingSink;
 import okio.ForwardingSource;
@@ -148,15 +146,6 @@ public final class Exchange {
 
   public void timeoutEarlyExit() {
     transmitter.timeoutEarlyExit();
-  }
-
-  public RealWebSocket.Streams newWebSocketStreams() throws SocketException {
-    transmitter.timeoutEarlyExit();
-    return codec.connection().newWebSocketStreams(this);
-  }
-
-  public void webSocketUpgradeFailed() {
-    bodyComplete(-1L, true, true, null);
   }
 
   public void noNewExchangesOnConnection() {

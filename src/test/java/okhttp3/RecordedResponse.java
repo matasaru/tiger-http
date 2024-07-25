@@ -28,15 +28,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 public final class RecordedResponse {
   public final Request request;
   public final Response response;
-  public final WebSocket webSocket;
   public final String body;
   public final IOException failure;
 
   public RecordedResponse(Request request, Response response,
-      WebSocket webSocket, String body, IOException failure) {
+      String body, IOException failure) {
     this.request = request;
     this.response = response;
-    this.webSocket = webSocket;
     this.body = body;
     this.failure = failure;
   }
@@ -104,7 +102,7 @@ public final class RecordedResponse {
     Response priorResponse = response.priorResponse();
     assertThat(priorResponse).isNotNull();
     assertThat(priorResponse.body()).isNull();
-    return new RecordedResponse(priorResponse.request(), priorResponse, null, null, null);
+    return new RecordedResponse(priorResponse.request(), priorResponse, null, null);
   }
 
   /**
@@ -114,7 +112,7 @@ public final class RecordedResponse {
     Response networkResponse = response.networkResponse();
     assertThat(networkResponse).isNotNull();
     assertThat(networkResponse.body()).isNull();
-    return new RecordedResponse(networkResponse.request(), networkResponse, null, null, null);
+    return new RecordedResponse(networkResponse.request(), networkResponse, null, null);
   }
 
   /** Asserts that the current response didn't use the network. */

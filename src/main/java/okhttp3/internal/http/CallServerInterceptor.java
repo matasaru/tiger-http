@@ -20,18 +20,12 @@ import java.net.ProtocolException;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
-import okhttp3.internal.Util;
 import okhttp3.internal.connection.Exchange;
 import okio.BufferedSink;
 import okio.Okio;
 
 /** This is the last interceptor in the chain. It makes a network call to the server. */
 public final class CallServerInterceptor implements Interceptor {
-  private final boolean forWebSocket;
-
-  public CallServerInterceptor(boolean forWebSocket) {
-    this.forWebSocket = forWebSocket;
-  }
 
   @Override public Response intercept(Chain chain) throws IOException {
     RealInterceptorChain realChain = (RealInterceptorChain) chain;
@@ -117,18 +111,11 @@ public final class CallServerInterceptor implements Interceptor {
 
     exchange.responseHeadersEnd(response);
 
-    if (forWebSocket && code == 101) {
-      // Connection is upgrading, but we need to ensure interceptors see a non-null response body.
-      response = response.newBuilder()
-          .body(Util.EMPTY_RESPONSE)
-          .build();
-    } else {
-      response = response.newBuilder()
-          .body(exchange.openResponseBody(response))
-          .build();
-    }
+    response = response.newBuilder()
+        .body(exchange.openResponseBody(response))
+        .build();
 
-    if ("close".equalsIgnoreCase(response.request().header("Connection"))
+      if ("close".equalsIgnoreCase(response.request().header("Connection"))
         || "close".equalsIgnoreCase(response.header("Connection"))) {
       exchange.noNewExchangesOnConnection();
     }

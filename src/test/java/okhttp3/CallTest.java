@@ -3497,9 +3497,9 @@ public final class CallTest {
     try {
       Response response = call.execute();
       String bodyString = response.body().string();
-      return new RecordedResponse(request, response, null, bodyString, null);
+      return new RecordedResponse(request, response, bodyString, null);
     } catch (IOException e) {
-      return new RecordedResponse(request, null, null, null, e);
+      return new RecordedResponse(request, null, null, e);
     }
   }
 

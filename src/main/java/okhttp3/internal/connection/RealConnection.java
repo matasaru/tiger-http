@@ -61,7 +61,6 @@ import okhttp3.internal.http2.Http2ExchangeCodec;
 import okhttp3.internal.http2.Http2Stream;
 import okhttp3.internal.http2.StreamResetException;
 import okhttp3.internal.tls.OkHostnameVerifier;
-import okhttp3.internal.ws.RealWebSocket;
 import okio.BufferedSink;
 import okio.BufferedSource;
 import okio.Okio;
@@ -542,16 +541,6 @@ public final class RealConnection extends Http2Connection.Listener implements Co
       sink.timeout().timeout(chain.writeTimeoutMillis(), MILLISECONDS);
       return new Http1ExchangeCodec(client, this, source, sink);
     }
-  }
-
-  RealWebSocket.Streams newWebSocketStreams(Exchange exchange) throws SocketException {
-    socket.setSoTimeout(0);
-    noNewExchanges();
-    return new RealWebSocket.Streams(true, source, sink) {
-      @Override public void close() throws IOException {
-        exchange.bodyComplete(-1L, true, true, null);
-      }
-    };
   }
 
   @Override public Route route() {

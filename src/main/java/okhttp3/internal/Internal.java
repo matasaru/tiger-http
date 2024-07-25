@@ -53,8 +53,6 @@ public abstract class Internal {
   public abstract void apply(ConnectionSpec tlsConfiguration, SSLSocket sslSocket,
       boolean isFallback);
 
-  public abstract Call newWebSocketCall(OkHttpClient client, Request request);
-
   public abstract void initExchange(
       Response.Builder responseBuilder, Exchange exchange);
 
