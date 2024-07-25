@@ -25,7 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import okhttp3.RealCall.AsyncCall;
+import okhttp3.Call.AsyncCall;
 import okhttp3.internal.Util;
 
 /**
@@ -50,7 +50,7 @@ public final class Dispatcher {
   private final Deque<AsyncCall> runningAsyncCalls = new ArrayDeque<>();
 
   /** Running synchronous calls. Includes canceled calls that haven't finished yet. */
-  private final Deque<RealCall> runningSyncCalls = new ArrayDeque<>();
+  private final Deque<Call> runningSyncCalls = new ArrayDeque<>();
 
   public Dispatcher(ExecutorService executorService) {
     this.executorService = executorService;
@@ -162,7 +162,7 @@ public final class Dispatcher {
       call.get().cancel();
     }
 
-    for (RealCall call : runningSyncCalls) {
+    for (Call call : runningSyncCalls) {
       call.cancel();
     }
   }
@@ -203,7 +203,7 @@ public final class Dispatcher {
   }
 
   /** Used by {@code Call#execute} to signal it is in-flight. */
-  synchronized void executed(RealCall call) {
+  synchronized void executed(Call call) {
     runningSyncCalls.add(call);
   }
 
@@ -214,7 +214,7 @@ public final class Dispatcher {
   }
 
   /** Used by {@code Call#execute} to signal completion. */
-  void finished(RealCall call) {
+  void finished(Call call) {
     finished(runningSyncCalls, call);
   }
 

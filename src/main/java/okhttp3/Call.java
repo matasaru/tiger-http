@@ -16,15 +16,60 @@
 package okhttp3;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+
+import okhttp3.internal.NamedRunnable;
+import okhttp3.internal.connection.ConnectInterceptor;
+import okhttp3.internal.connection.Transmitter;
+import okhttp3.internal.http.BridgeInterceptor;
+import okhttp3.internal.http.CallServerInterceptor;
+import okhttp3.internal.http.RealInterceptorChain;
+import okhttp3.internal.http.RetryAndFollowUpInterceptor;
 import okio.Timeout;
+
+import static okhttp3.internal.Util.closeQuietly;
 
 /**
  * A call is a request that has been prepared for execution. A call can be canceled. As this object
  * represents a single request/response pair (stream), it cannot be executed twice.
  */
-public interface Call extends Cloneable {
+public class Call implements Cloneable {
+  final OkHttpClient client;
+
+  /**
+   * There is a cycle between the {@link Call} and {@link Transmitter} that makes this awkward.
+   * This is set after immediately after creating the call instance.
+   */
+  private Transmitter transmitter;
+
+  /** The application's original request unadulterated by redirects or auth headers. */
+  final Request originalRequest;
+
+  // Guarded by this.
+  private boolean executed;
+
+  private Call(OkHttpClient client, Request originalRequest) {
+    this.client = client;
+    this.originalRequest = originalRequest;
+  }
+
+  static Call newCall(OkHttpClient client, Request originalRequest) {
+    // Safely publish the Call instance to the EventListener.
+    Call call = new Call(client, originalRequest);
+    call.transmitter = new Transmitter(client, call);
+    return call;
+  }
+
   /** Returns the original request that initiated this call. */
-  Request request();
+  public Request request() {
+    return originalRequest;
+  }
 
   /**
    * Invokes the request immediately, and blocks until the response can be processed or is in
@@ -55,7 +100,20 @@ public interface Call extends Cloneable {
    * remote server accepted the request before the failure.
    * @throws IllegalStateException when the call has already been executed.
    */
-  Response execute() throws IOException;
+  public Response execute() throws IOException {
+    synchronized (this) {
+      if (executed) throw new IllegalStateException("Already Executed");
+      executed = true;
+    }
+    transmitter.timeoutEnter();
+    transmitter.callStart();
+    try {
+      client.dispatcher().executed(this);
+      return getResponseWithInterceptorChain();
+    } finally {
+      client.dispatcher().finished(this);
+    }
+  }
 
   /**
    * Schedules the request to be executed at some point in the future.
@@ -68,18 +126,31 @@ public interface Call extends Cloneable {
    *
    * @throws IllegalStateException when the call has already been executed.
    */
-  void enqueue(Callback responseCallback);
+  public void enqueue(Callback responseCallback) {
+    synchronized (this) {
+      if (executed) throw new IllegalStateException("Already Executed");
+      executed = true;
+    }
+    transmitter.callStart();
+    client.dispatcher().enqueue(new AsyncCall(responseCallback));
+  }
 
   /** Cancels the request, if possible. Requests that are already complete cannot be canceled. */
-  void cancel();
+  public void cancel() {
+    transmitter.cancel();
+  }
 
   /**
    * Returns true if this call has been either {@linkplain #execute() executed} or {@linkplain
    * #enqueue(Callback) enqueued}. It is an error to execute a call more than once.
    */
-  boolean isExecuted();
+  public synchronized boolean isExecuted() {
+    return executed;
+  }
 
-  boolean isCanceled();
+  public boolean isCanceled() {
+    return transmitter.isCanceled();
+  }
 
   /**
    * Returns a timeout that spans the entire call: resolving DNS, connecting, writing the request
@@ -88,15 +159,144 @@ public interface Call extends Cloneable {
    *
    * <p>Configure the client's default timeout with {@link OkHttpClient.Builder#callTimeout}.
    */
-  Timeout timeout();
+  public Timeout timeout() {
+    return transmitter.timeout();
+  }
 
   /**
    * Create a new, identical call to this one which can be enqueued or executed even if this call
    * has already been.
    */
-  Call clone();
+  @SuppressWarnings("CloneDoesntCallSuperClone") // We are a final type & this saves clearing state.
+  @Override public Call clone() {
+    return Call.newCall(client, originalRequest);
+  }
 
-  interface Factory {
+  public interface Factory {
     Call newCall(Request request);
+  }
+
+  final class AsyncCall extends NamedRunnable {
+    private final Callback responseCallback;
+    private volatile AtomicInteger callsPerHost = new AtomicInteger(0);
+
+    AsyncCall(Callback responseCallback) {
+      super("OkHttp %s", redactedUrl());
+      this.responseCallback = responseCallback;
+    }
+
+    AtomicInteger callsPerHost() {
+      return callsPerHost;
+    }
+
+    void reuseCallsPerHostFrom(AsyncCall other) {
+      this.callsPerHost = other.callsPerHost;
+    }
+
+    String host() {
+      return originalRequest.url().host();
+    }
+
+    Request request() {
+      return originalRequest;
+    }
+
+    Call get() {
+      return Call.this;
+    }
+
+    /**
+     * Attempt to enqueue this async call on {@code executorService}. This will attempt to clean up
+     * if the executor has been shut down by reporting the call as failed.
+     */
+    void executeOn(ExecutorService executorService) {
+      assert (!Thread.holdsLock(client.dispatcher()));
+      boolean success = false;
+      try {
+        executorService.execute(this);
+        success = true;
+      } catch (RejectedExecutionException e) {
+        InterruptedIOException ioException = new InterruptedIOException("executor rejected");
+        ioException.initCause(e);
+        transmitter.noMoreExchanges(ioException);
+        responseCallback.onFailure(Call.this, ioException);
+      } finally {
+        if (!success) {
+          client.dispatcher().finished(this); // This call is no longer running!
+        }
+      }
+    }
+
+    @Override protected void execute() {
+      boolean signalledCallback = false;
+      transmitter.timeoutEnter();
+      try {
+        Response response = getResponseWithInterceptorChain();
+        signalledCallback = true;
+        responseCallback.onResponse(Call.this, response);
+      } catch (IOException e) {
+        if (signalledCallback) {
+          // Do not signal the callback twice!
+          OkHttpClient.logger.log(Level.INFO, "Callback failure for " + toLoggableString(), e);
+        } else {
+          responseCallback.onFailure(Call.this, e);
+        }
+      } catch (Throwable t) {
+        cancel();
+        if (!signalledCallback) {
+          IOException canceledException = new IOException("canceled due to " + t);
+          canceledException.addSuppressed(t);
+          responseCallback.onFailure(Call.this, canceledException);
+        }
+        throw t;
+      } finally {
+        client.dispatcher().finished(this);
+      }
+    }
+  }
+
+  /**
+   * Returns a string that describes this call. Doesn't include a full URL as that might contain
+   * sensitive information.
+   */
+  String toLoggableString() {
+    return (isCanceled() ? "canceled " : "")
+            + "call to " + redactedUrl();
+  }
+
+  String redactedUrl() {
+    return originalRequest.url().redact();
+  }
+
+  Response getResponseWithInterceptorChain() throws IOException {
+    // Build a full stack of interceptors.
+    List<Interceptor> interceptors = new ArrayList<>();
+    interceptors.addAll(client.interceptors());
+    interceptors.add(new RetryAndFollowUpInterceptor(client));
+    interceptors.add(new BridgeInterceptor(client.cookieJar()));
+    interceptors.add(new ConnectInterceptor(client));
+    interceptors.addAll(client.networkInterceptors());
+    interceptors.add(new CallServerInterceptor());
+
+    Interceptor.Chain chain = new RealInterceptorChain(interceptors, transmitter, null, 0,
+            originalRequest, this, client.connectTimeoutMillis(),
+            client.readTimeoutMillis(), client.writeTimeoutMillis());
+
+    boolean calledNoMoreExchanges = false;
+    try {
+      Response response = chain.proceed(originalRequest);
+      if (transmitter.isCanceled()) {
+        closeQuietly(response);
+        throw new IOException("Canceled");
+      }
+      return response;
+    } catch (IOException e) {
+      calledNoMoreExchanges = true;
+      throw transmitter.noMoreExchanges(e);
+    } finally {
+      if (!calledNoMoreExchanges) {
+        transmitter.noMoreExchanges(null);
+      }
+    }
   }
 }

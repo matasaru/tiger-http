@@ -3193,7 +3193,7 @@ public final class CallTest {
       String message = logHandler.take();
       assertThat(message.contains("A connection to " + server.url("/") + " was leaked."
             + " Did you forget to close a response body?")).isTrue();
-      assertThat(message.contains("okhttp3.RealCall.execute(")).isTrue();
+      assertThat(message.contains("okhttp3.Call.execute(")).isTrue();
       assertThat(message.contains("okhttp3.CallTest.leakedResponseBodyLogsStackTrace(")).isTrue();
     } finally {
       logger.setLevel(original);
@@ -3236,7 +3236,7 @@ public final class CallTest {
       String message = logHandler.take();
       assertThat(message.contains("A connection to " + server.url("/") + " was leaked."
             + " Did you forget to close a response body?")).isTrue();
-      assertThat(message.contains("okhttp3.RealCall.enqueue(")).isTrue();
+      assertThat(message.contains("okhttp3.Call.enqueue(")).isTrue();
       assertThat(message.contains("okhttp3.CallTest.asyncLeakedResponseBodyLogsStackTrace(")).isTrue();
     } finally {
       logger.setLevel(original);
