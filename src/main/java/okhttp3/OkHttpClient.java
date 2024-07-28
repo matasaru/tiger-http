@@ -868,9 +868,6 @@ public class OkHttpClient {
         throw new IllegalArgumentException("protocols must not contain null");
       }
 
-      // Remove protocols that we no longer support.
-      protocols.remove(Protocol.SPDY_3);
-
       // Assign as an unmodifiable list. This is effectively immutable.
       this.protocols = Collections.unmodifiableList(protocols);
       return this;

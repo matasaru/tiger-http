@@ -41,16 +41,6 @@ public enum Protocol {
   HTTP_1_1("http/1.1"),
 
   /**
-   * Chromium's binary-framed protocol that includes header compression, multiplexing multiple
-   * requests on the same socket, and server-push. HTTP/1.1 semantics are layered on SPDY/3.
-   *
-   * <p>Current versions of OkHttp do not support this protocol.
-   *
-   * @deprecated OkHttp has dropped support for SPDY. Prefer {@link #HTTP_2}.
-   */
-  SPDY_3("spdy/3.1"),
-
-  /**
    * The IETF's binary-framed protocol that includes header compression, multiplexing multiple
    * requests on the same socket, and server-push. HTTP/1.1 semantics are layered on HTTP/2.
    *
@@ -97,7 +87,6 @@ public enum Protocol {
     if (protocol.equals(HTTP_1_1.protocol)) return HTTP_1_1;
     if (protocol.equals(H2_PRIOR_KNOWLEDGE.protocol)) return H2_PRIOR_KNOWLEDGE;
     if (protocol.equals(HTTP_2.protocol)) return HTTP_2;
-    if (protocol.equals(SPDY_3.protocol)) return SPDY_3;
     if (protocol.equals(QUIC.protocol)) return QUIC;
     throw new IOException("Unexpected protocol: " + protocol);
   }
