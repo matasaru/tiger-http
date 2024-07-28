@@ -17,17 +17,17 @@
 package okhttp3.internal.connection;
 
 import java.io.IOException;
+import okhttp3.HttpClient;
 import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.internal.http.RealInterceptorChain;
 
 /** Opens a connection to the target server and proceeds to the next interceptor. */
 public final class ConnectInterceptor implements Interceptor {
-  public final OkHttpClient client;
+  public final HttpClient client;
 
-  public ConnectInterceptor(OkHttpClient client) {
+  public ConnectInterceptor(HttpClient client) {
     this.client = client;
   }
 

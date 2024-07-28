@@ -28,7 +28,7 @@ import javax.net.ssl.X509KeyManager;
 import javax.net.ssl.X509TrustManager;
 import javax.security.auth.x500.X500Principal;
 import okhttp3.Call;
-import okhttp3.OkHttpClient;
+import okhttp3.HttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.mockwebserver.MockResponse;
@@ -101,7 +101,7 @@ public final class ClientAuthTest {
   }
 
   @Test public void clientAuthForWants() throws Exception {
-    OkHttpClient client = buildClient(clientCert, clientIntermediateCa.certificate());
+    HttpClient client = buildClient(clientCert, clientIntermediateCa.certificate());
 
     SSLSocketFactory socketFactory = buildServerSslSocketFactory();
 
@@ -119,7 +119,7 @@ public final class ClientAuthTest {
   }
 
   @Test public void clientAuthForNeeds() throws Exception {
-    OkHttpClient client = buildClient(clientCert, clientIntermediateCa.certificate());
+    HttpClient client = buildClient(clientCert, clientIntermediateCa.certificate());
 
     SSLSocketFactory socketFactory = buildServerSslSocketFactory();
 
@@ -137,7 +137,7 @@ public final class ClientAuthTest {
   }
 
   @Test public void clientAuthSkippedForNone() throws Exception {
-    OkHttpClient client = buildClient(clientCert, clientIntermediateCa.certificate());
+    HttpClient client = buildClient(clientCert, clientIntermediateCa.certificate());
 
     SSLSocketFactory socketFactory = buildServerSslSocketFactory();
 
@@ -154,7 +154,7 @@ public final class ClientAuthTest {
   }
 
   @Test public void missingClientAuthSkippedForWantsOnly() throws Exception {
-    OkHttpClient client = buildClient(null, clientIntermediateCa.certificate());
+    HttpClient client = buildClient(null, clientIntermediateCa.certificate());
 
     SSLSocketFactory socketFactory = buildServerSslSocketFactory();
 
@@ -178,7 +178,7 @@ public final class ClientAuthTest {
         .addSubjectAlternativeName("different-host.com")
         .build();
 
-    OkHttpClient client = buildClient(clientCert, clientIntermediateCa.certificate());
+    HttpClient client = buildClient(clientCert, clientIntermediateCa.certificate());
 
     SSLSocketFactory socketFactory = buildServerSslSocketFactory();
 
@@ -194,7 +194,7 @@ public final class ClientAuthTest {
     }
   }
 
-  private OkHttpClient buildClient(
+  private HttpClient buildClient(
       HeldCertificate heldCertificate, X509Certificate... intermediates) {
     HandshakeCertificates.Builder builder = new HandshakeCertificates.Builder()
         .addTrustedCertificate(serverRootCa.certificate());

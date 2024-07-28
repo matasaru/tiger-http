@@ -26,7 +26,7 @@ import okhttp3.Address;
 import okhttp3.Call;
 import okhttp3.ConnectionPool;
 import okhttp3.Dns;
-import okhttp3.OkHttpClient;
+import okhttp3.HttpClient;
 import okhttp3.Request;
 import okhttp3.Route;
 import okhttp3.internal.Internal;
@@ -87,7 +87,7 @@ public final class ConnectionPoolTest {
 
     RealConnection c1 = newConnection(pool, routeA1, 50L);
     synchronized (pool) {
-      OkHttpClient client = new OkHttpClient.Builder()
+      HttpClient client = new HttpClient.Builder()
           .connectionPool(poolApi)
           .build();
       Call call = client.newCall(newRequest(addressA));
@@ -187,7 +187,7 @@ public final class ConnectionPoolTest {
   /** Use a helper method so there's no hidden reference remaining on the stack. */
   private void allocateAndLeakAllocation(ConnectionPool pool, RealConnection connection) {
     synchronized (Internal.instance.realConnectionPool(pool)) {
-      OkHttpClient client = new OkHttpClient.Builder()
+      HttpClient client = new HttpClient.Builder()
           .connectionPool(pool)
           .build();
       Call call = client.newCall(newRequest(connection.route().address()));

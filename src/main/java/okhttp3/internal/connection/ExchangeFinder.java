@@ -21,8 +21,8 @@ import java.util.List;
 import okhttp3.Address;
 import okhttp3.Call;
 import okhttp3.EventListener;
+import okhttp3.HttpClient;
 import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
 import okhttp3.Route;
 import okhttp3.internal.Util;
 import okhttp3.internal.http.ExchangeCodec;
@@ -77,7 +77,7 @@ final class ExchangeFinder {
   }
 
   public ExchangeCodec find(
-      OkHttpClient client, Interceptor.Chain chain, boolean doExtensiveHealthChecks) {
+    HttpClient client, Interceptor.Chain chain, boolean doExtensiveHealthChecks) {
     int connectTimeout = chain.connectTimeoutMillis();
     int readTimeout = chain.readTimeoutMillis();
     int writeTimeout = chain.writeTimeoutMillis();

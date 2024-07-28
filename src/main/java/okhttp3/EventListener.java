@@ -295,7 +295,7 @@ public abstract class EventListener {
      * {@link EventListener} instance will be used during the lifecycle of the {@code call}.
      *
      * <p>This method is invoked after the {@code call} is created. See
-     * {@link OkHttpClient#newCall(Request)}.
+     * {@link HttpClient#newCall(Request)}.
      *
      * <p><strong>It is an error for implementations to issue any mutating operations on the
      * {@code call} instance from this method.</strong>

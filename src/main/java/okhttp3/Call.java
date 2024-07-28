@@ -40,7 +40,7 @@ import static okhttp3.internal.Util.closeQuietly;
  * represents a single request/response pair (stream), it cannot be executed twice.
  */
 public class Call implements Cloneable {
-  final OkHttpClient client;
+  final HttpClient client;
 
   /**
    * There is a cycle between the {@link Call} and {@link Transmitter} that makes this awkward.
@@ -54,12 +54,12 @@ public class Call implements Cloneable {
   // Guarded by this.
   private boolean executed;
 
-  private Call(OkHttpClient client, Request originalRequest) {
+  private Call(HttpClient client, Request originalRequest) {
     this.client = client;
     this.originalRequest = originalRequest;
   }
 
-  static Call newCall(OkHttpClient client, Request originalRequest) {
+  static Call newCall(HttpClient client, Request originalRequest) {
     // Safely publish the Call instance to the EventListener.
     Call call = new Call(client, originalRequest);
     call.transmitter = new Transmitter(client, call);
@@ -118,7 +118,7 @@ public class Call implements Cloneable {
   /**
    * Schedules the request to be executed at some point in the future.
    *
-   * <p>The {@link OkHttpClient#dispatcher dispatcher} defines when the request will run: usually
+   * <p>The {@link HttpClient#dispatcher dispatcher} defines when the request will run: usually
    * immediately unless there are several other requests currently being executed.
    *
    * <p>This client will later call back {@code responseCallback} with either an HTTP response or a
@@ -157,7 +157,7 @@ public class Call implements Cloneable {
    * body, server processing, and reading the response body. If the call requires redirects or
    * retries all must complete within one timeout period.
    *
-   * <p>Configure the client's default timeout with {@link OkHttpClient.Builder#callTimeout}.
+   * <p>Configure the client's default timeout with {@link HttpClient.Builder#callTimeout}.
    */
   public Timeout timeout() {
     return transmitter.timeout();
@@ -233,7 +233,7 @@ public class Call implements Cloneable {
       } catch (IOException e) {
         if (signalledCallback) {
           // Do not signal the callback twice!
-          OkHttpClient.logger.log(Level.INFO, "Callback failure for " + toLoggableString(), e);
+          HttpClient.logger.log(Level.INFO, "Callback failure for " + toLoggableString(), e);
         } else {
           responseCallback.onFailure(Call.this, e);
         }

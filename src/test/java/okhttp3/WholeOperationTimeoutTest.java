@@ -35,9 +35,9 @@ public final class WholeOperationTimeoutTest {
   private static final String BIG_ENOUGH_BODY = TestUtil.repeat('a', 64 * 1024);
 
   @Rule public final MockWebServer server = new MockWebServer();
-  @Rule public final OkHttpClientTestRule clientTestRule = new OkHttpClientTestRule();
+  @Rule public final HttpClientTestRule clientTestRule = new HttpClientTestRule();
 
-  private OkHttpClient client = clientTestRule.client;
+  private HttpClient client = clientTestRule.client;
 
   @Test public void defaultConfigIsNoTimeout() throws Exception {
     Request request = new Request.Builder()
@@ -52,7 +52,7 @@ public final class WholeOperationTimeoutTest {
         .url(server.url("/"))
         .build();
 
-    OkHttpClient timeoutClient = client.newBuilder()
+    HttpClient timeoutClient = client.newBuilder()
         .callTimeout(456, TimeUnit.MILLISECONDS)
         .build();
 

@@ -106,10 +106,10 @@ public final class URLConnectionTest {
   @Rule public final MockWebServer server = new MockWebServer();
   @Rule public final MockWebServer server2 = new MockWebServer();
   @Rule public final TemporaryFolder tempDir = new TemporaryFolder();
-  @Rule public final OkHttpClientTestRule clientTestRule = new OkHttpClientTestRule();
+  @Rule public final HttpClientTestRule clientTestRule = new HttpClientTestRule();
 
   private HandshakeCertificates handshakeCertificates = localhost();
-  private OkHttpClient client = clientTestRule.client;
+  private HttpClient client = clientTestRule.client;
 
   @Before public void setUp() {
     server.setProtocolNegotiationEnabled(false);
@@ -501,7 +501,7 @@ public final class URLConnectionTest {
     CookieJar cookieJar = new JavaNetCookieJar(new CookieManager());
     ConnectionPool connectionPool = new ConnectionPool();
 
-    client = new OkHttpClient.Builder()
+    client = new HttpClient.Builder()
         .connectionPool(connectionPool)
         .cookieJar(cookieJar)
         .sslSocketFactory(clientSocketFactory, handshakeCertificates.trustManager())
@@ -511,7 +511,7 @@ public final class URLConnectionTest {
     assertContent("this response comes via HTTPS", response1);
 
     if (rebuildClient) {
-      client = new OkHttpClient.Builder()
+      client = new HttpClient.Builder()
           .connectionPool(connectionPool)
           .cookieJar(cookieJar)
           .sslSocketFactory(clientSocketFactory, handshakeCertificates.trustManager())
@@ -3338,7 +3338,7 @@ public final class URLConnectionTest {
 
   @Test public void setProtocolsWithoutHttp11() {
     try {
-      new OkHttpClient.Builder()
+      new HttpClient.Builder()
           .protocols(Arrays.asList(Protocol.HTTP_2));
       fail();
     } catch (IllegalArgumentException expected) {
@@ -3347,7 +3347,7 @@ public final class URLConnectionTest {
 
   @Test public void setProtocolsWithNull() {
     try {
-      new OkHttpClient.Builder()
+      new HttpClient.Builder()
           .protocols(Arrays.asList(Protocol.HTTP_1_1, null));
       fail();
     } catch (IllegalArgumentException expected) {
@@ -3696,7 +3696,7 @@ public final class URLConnectionTest {
 
   enum ProxyConfig {
     NO_PROXY() {
-      @Override public OkHttpClient connect(MockWebServer server, OkHttpClient client) {
+      @Override public HttpClient connect(MockWebServer server, HttpClient client) {
         return client.newBuilder()
             .proxy(Proxy.NO_PROXY)
             .build();
@@ -3704,7 +3704,7 @@ public final class URLConnectionTest {
     },
 
     CREATE_ARG() {
-      @Override public OkHttpClient connect(MockWebServer server, OkHttpClient client) {
+      @Override public HttpClient connect(MockWebServer server, HttpClient client) {
         return client.newBuilder()
             .proxy(server.toProxyAddress())
             .build();
@@ -3712,7 +3712,7 @@ public final class URLConnectionTest {
     },
 
     PROXY_SYSTEM_PROPERTY() {
-      @Override public OkHttpClient connect(MockWebServer server, OkHttpClient client) {
+      @Override public HttpClient connect(MockWebServer server, HttpClient client) {
         System.setProperty("proxyHost", server.getHostName());
         System.setProperty("proxyPort", Integer.toString(server.getPort()));
         return client;
@@ -3720,7 +3720,7 @@ public final class URLConnectionTest {
     },
 
     HTTP_PROXY_SYSTEM_PROPERTY() {
-      @Override public OkHttpClient connect(MockWebServer server, OkHttpClient client) {
+      @Override public HttpClient connect(MockWebServer server, HttpClient client) {
         System.setProperty("http.proxyHost", server.getHostName());
         System.setProperty("http.proxyPort", Integer.toString(server.getPort()));
         return client;
@@ -3728,18 +3728,18 @@ public final class URLConnectionTest {
     },
 
     HTTPS_PROXY_SYSTEM_PROPERTY() {
-      @Override public OkHttpClient connect(MockWebServer server, OkHttpClient client) {
+      @Override public HttpClient connect(MockWebServer server, HttpClient client) {
         System.setProperty("https.proxyHost", server.getHostName());
         System.setProperty("https.proxyPort", Integer.toString(server.getPort()));
         return client;
       }
     };
 
-    public abstract OkHttpClient connect(MockWebServer server, OkHttpClient client)
+    public abstract HttpClient connect(MockWebServer server, HttpClient client)
         throws IOException;
 
     public Call connect(
-        MockWebServer server, OkHttpClient client, HttpUrl url) throws IOException {
+        MockWebServer server, HttpClient client, HttpUrl url) throws IOException {
       Request request = new Request.Builder()
           .url(url)
           .build();

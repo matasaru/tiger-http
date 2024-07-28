@@ -30,7 +30,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import okhttp3.Address;
-import okhttp3.OkHttpClient;
+import okhttp3.HttpClient;
 import okhttp3.Route;
 import okhttp3.internal.Util;
 import okhttp3.internal.connection.Transmitter.TransmitterReference;
@@ -236,7 +236,7 @@ public final class RealConnectionPool {
         message += " To see where this was allocated, set the OkHttpClient logger level to FINE: "
                 + "Logger.getLogger(OkHttpClient.class.getName()).setLevel(Level.FINE);";
       }
-      OkHttpClient.logger.log(Level.WARNING, message, (Throwable) transmitterRef.callStackTrace);
+      HttpClient.logger.log(Level.WARNING, message, (Throwable) transmitterRef.callStackTrace);
 
       references.remove(i);
       connection.noNewExchanges = true;

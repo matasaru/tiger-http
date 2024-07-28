@@ -44,11 +44,11 @@ import static org.junit.Assert.fail;
 public final class DuplexTest {
   @Rule public final TestRule timeout = new Timeout(30_000, TimeUnit.MILLISECONDS);
   @Rule public final MockWebServer server = new MockWebServer();
-  @Rule public OkHttpClientTestRule clientTestRule = new OkHttpClientTestRule();
+  @Rule public HttpClientTestRule clientTestRule = new HttpClientTestRule();
 
   private final RecordingEventListener listener = new RecordingEventListener();
   private HandshakeCertificates handshakeCertificates = localhost();
-  private OkHttpClient client = clientTestRule.client
+  private HttpClient client = clientTestRule.client
       .newBuilder()
       .eventListener(listener)
       .build();

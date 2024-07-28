@@ -107,9 +107,9 @@ import static okhttp3.internal.Util.checkDuration;
  * <p>OkHttp also uses daemon threads for HTTP/2 connections. These will exit automatically if they
  * remain idle.
  */
-public class OkHttpClient {
+public class HttpClient {
   // TODO review the usage of this logger
-  public static final Logger logger = Logger.getLogger(OkHttpClient.class.getName());
+  public static final Logger logger = Logger.getLogger(HttpClient.class.getName());
 
   static final List<Protocol> DEFAULT_PROTOCOLS = Util.immutableList(
       Protocol.HTTP_2, Protocol.HTTP_1_1);
@@ -182,11 +182,11 @@ public class OkHttpClient {
   final int writeTimeout;
   final int pingInterval;
 
-  public OkHttpClient() {
+  public HttpClient() {
     this(new Builder());
   }
 
-  OkHttpClient(Builder builder) {
+  HttpClient(Builder builder) {
     this.dispatcher = builder.dispatcher;
     this.proxy = builder.proxy;
     this.protocols = builder.protocols;
@@ -430,33 +430,33 @@ public class OkHttpClient {
       pingInterval = 0;
     }
 
-    Builder(OkHttpClient okHttpClient) {
-      this.dispatcher = okHttpClient.dispatcher;
-      this.proxy = okHttpClient.proxy;
-      this.protocols = okHttpClient.protocols;
-      this.connectionSpecs = okHttpClient.connectionSpecs;
-      this.interceptors.addAll(okHttpClient.interceptors);
-      this.networkInterceptors.addAll(okHttpClient.networkInterceptors);
-      this.eventListenerFactory = okHttpClient.eventListenerFactory;
-      this.proxySelector = okHttpClient.proxySelector;
-      this.cookieJar = okHttpClient.cookieJar;
-      this.socketFactory = okHttpClient.socketFactory;
-      this.sslSocketFactory = okHttpClient.sslSocketFactory;
-      this.certificateChainCleaner = okHttpClient.certificateChainCleaner;
-      this.hostnameVerifier = okHttpClient.hostnameVerifier;
-      this.certificatePinner = okHttpClient.certificatePinner;
-      this.proxyAuthenticator = okHttpClient.proxyAuthenticator;
-      this.authenticator = okHttpClient.authenticator;
-      this.connectionPool = okHttpClient.connectionPool;
-      this.dns = okHttpClient.dns;
-      this.followSslRedirects = okHttpClient.followSslRedirects;
-      this.followRedirects = okHttpClient.followRedirects;
-      this.retryOnConnectionFailure = okHttpClient.retryOnConnectionFailure;
-      this.callTimeout = okHttpClient.callTimeout;
-      this.connectTimeout = okHttpClient.connectTimeout;
-      this.readTimeout = okHttpClient.readTimeout;
-      this.writeTimeout = okHttpClient.writeTimeout;
-      this.pingInterval = okHttpClient.pingInterval;
+    Builder(HttpClient httpClient) {
+      this.dispatcher = httpClient.dispatcher;
+      this.proxy = httpClient.proxy;
+      this.protocols = httpClient.protocols;
+      this.connectionSpecs = httpClient.connectionSpecs;
+      this.interceptors.addAll(httpClient.interceptors);
+      this.networkInterceptors.addAll(httpClient.networkInterceptors);
+      this.eventListenerFactory = httpClient.eventListenerFactory;
+      this.proxySelector = httpClient.proxySelector;
+      this.cookieJar = httpClient.cookieJar;
+      this.socketFactory = httpClient.socketFactory;
+      this.sslSocketFactory = httpClient.sslSocketFactory;
+      this.certificateChainCleaner = httpClient.certificateChainCleaner;
+      this.hostnameVerifier = httpClient.hostnameVerifier;
+      this.certificatePinner = httpClient.certificatePinner;
+      this.proxyAuthenticator = httpClient.proxyAuthenticator;
+      this.authenticator = httpClient.authenticator;
+      this.connectionPool = httpClient.connectionPool;
+      this.dns = httpClient.dns;
+      this.followSslRedirects = httpClient.followSslRedirects;
+      this.followRedirects = httpClient.followRedirects;
+      this.retryOnConnectionFailure = httpClient.retryOnConnectionFailure;
+      this.callTimeout = httpClient.callTimeout;
+      this.connectTimeout = httpClient.connectTimeout;
+      this.readTimeout = httpClient.readTimeout;
+      this.writeTimeout = httpClient.writeTimeout;
+      this.pingInterval = httpClient.pingInterval;
     }
 
     /**
@@ -933,8 +933,8 @@ public class OkHttpClient {
       return this;
     }
 
-    public OkHttpClient build() {
-      return new OkHttpClient(this);
+    public HttpClient build() {
+      return new HttpClient(this);
     }
   }
 }

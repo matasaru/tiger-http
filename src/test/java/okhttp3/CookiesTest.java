@@ -41,9 +41,9 @@ import static org.junit.Assert.fail;
 
 /** Derived from Android's CookiesTest. */
 public class CookiesTest {
-  @Rule public final OkHttpClientTestRule clientTestRule = new OkHttpClientTestRule();
+  @Rule public final HttpClientTestRule clientTestRule = new HttpClientTestRule();
 
-  private OkHttpClient client = clientTestRule.client;
+  private HttpClient client = clientTestRule.client;
 
   @Test
   public void testNetscapeResponse() throws Exception {

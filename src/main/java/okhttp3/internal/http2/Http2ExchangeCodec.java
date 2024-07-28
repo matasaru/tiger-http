@@ -23,7 +23,7 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
+import okhttp3.HttpClient;
 import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -90,7 +90,7 @@ public final class Http2ExchangeCodec implements ExchangeCodec {
   private final Protocol protocol;
   private volatile boolean canceled;
 
-  public Http2ExchangeCodec(OkHttpClient client, RealConnection realConnection,
+  public Http2ExchangeCodec(HttpClient client, RealConnection realConnection,
       Interceptor.Chain chain, Http2Connection connection) {
     this.realConnection = realConnection;
     this.chain = chain;

@@ -24,9 +24,9 @@ import java.net.SocketTimeoutException;
 import java.security.cert.CertificateException;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLPeerUnverifiedException;
+import okhttp3.HttpClient;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -61,9 +61,9 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
    */
   private static final int MAX_FOLLOW_UPS = 20;
 
-  private final OkHttpClient client;
+  private final HttpClient client;
 
-  public RetryAndFollowUpInterceptor(OkHttpClient client) {
+  public RetryAndFollowUpInterceptor(HttpClient client) {
     this.client = client;
   }
 

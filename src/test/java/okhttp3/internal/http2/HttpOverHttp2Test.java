@@ -39,10 +39,10 @@ import okhttp3.Cookie;
 import okhttp3.Credentials;
 import okhttp3.EventListener;
 import okhttp3.Headers;
+import okhttp3.HttpClient;
+import okhttp3.HttpClientTestRule;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.OkHttpClientTestRule;
 import okhttp3.Protocol;
 import okhttp3.RecordingCookieJar;
 import okhttp3.RecordingHostnameVerifier;
@@ -103,10 +103,10 @@ public final class HttpOverHttp2Test {
 
   @Rule public final TemporaryFolder tempDir = new TemporaryFolder();
   @Rule public final MockWebServer server = new MockWebServer();
-  @Rule public final OkHttpClientTestRule clientTestRule = new OkHttpClientTestRule();
+  @Rule public final HttpClientTestRule clientTestRule = new HttpClientTestRule();
   @Rule public final Timeout timeout = new Timeout(5, SECONDS);
 
-  private OkHttpClient client;
+  private HttpClient client;
   private TestLogHandler http2Handler = new TestLogHandler();
   private Level previousLevel;
   private String scheme;
@@ -118,13 +118,13 @@ public final class HttpOverHttp2Test {
     this.protocol = protocol;
   }
 
-  private OkHttpClient buildH2PriorKnowledgeClient() {
+  private HttpClient buildH2PriorKnowledgeClient() {
     return clientTestRule.client.newBuilder()
         .protocols(Arrays.asList(Protocol.H2_PRIOR_KNOWLEDGE))
         .build();
   }
 
-  private OkHttpClient buildHttp2Client() {
+  private HttpClient buildHttp2Client() {
     return clientTestRule.client.newBuilder()
         .protocols(Arrays.asList(Protocol.HTTP_2, Protocol.HTTP_1_1))
         .sslSocketFactory(
@@ -589,7 +589,7 @@ public final class HttpOverHttp2Test {
         .setBody("A")
         .setBodyDelay(1, SECONDS));
 
-    OkHttpClient client1 = client.newBuilder()
+    HttpClient client1 = client.newBuilder()
         .readTimeout(2000, MILLISECONDS)
         .build();
     Call call1 = client1
@@ -597,7 +597,7 @@ public final class HttpOverHttp2Test {
         .url(server.url("/"))
         .build());
 
-    OkHttpClient client2 = client.newBuilder()
+    HttpClient client2 = client.newBuilder()
         .readTimeout(200, MILLISECONDS)
         .build();
     Call call2 = client2
@@ -881,7 +881,7 @@ public final class HttpOverHttp2Test {
       return response.request();
     };
 
-    OkHttpClient blockingAuthClient = client.newBuilder()
+    HttpClient blockingAuthClient = client.newBuilder()
         .authenticator(authenticator)
         .build();
 
@@ -1290,7 +1290,7 @@ public final class HttpOverHttp2Test {
     server.enqueue(new MockResponse()
         .setBody("DEF"));
 
-    OkHttpClient client2 = client.newBuilder()
+    HttpClient client2 = client.newBuilder()
         .addNetworkInterceptor(new Interceptor() {
           boolean executedCall;
 

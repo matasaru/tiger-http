@@ -20,20 +20,20 @@ import okhttp3.Address;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
 import okhttp3.Headers;
-import okhttp3.OkHttpClient;
+import okhttp3.HttpClient;
 import okhttp3.Response;
 import okhttp3.internal.connection.Exchange;
 import okhttp3.internal.connection.RealConnectionPool;
 
 /**
  * Escalate internal APIs in {@code okhttp3} so they can be used from OkHttp's implementation
- * packages. The only implementation of this interface is in {@link OkHttpClient}.
+ * packages. The only implementation of this interface is in {@link HttpClient}.
  */
 public abstract class Internal {
 
   public static void initializeInstanceForTests() {
     // Needed in tests to ensure that the instance is actually pointing to something.
-    new OkHttpClient();
+    new HttpClient();
   }
 
   public static Internal instance;

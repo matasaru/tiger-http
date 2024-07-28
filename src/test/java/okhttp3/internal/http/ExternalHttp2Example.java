@@ -17,7 +17,7 @@
 package okhttp3.internal.http;
 
 import okhttp3.Call;
-import okhttp3.OkHttpClient;
+import okhttp3.HttpClient;
 import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -25,7 +25,7 @@ import okhttp3.internal.Util;
 
 public final class ExternalHttp2Example {
   public static void main(String[] args) throws Exception {
-    OkHttpClient client = new OkHttpClient.Builder()
+    HttpClient client = new HttpClient.Builder()
         .protocols(Util.immutableList(Protocol.HTTP_2, Protocol.HTTP_1_1))
         .build();
 

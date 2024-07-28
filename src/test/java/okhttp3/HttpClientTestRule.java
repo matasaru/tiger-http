@@ -21,8 +21,8 @@ import org.junit.runners.model.Statement;
 
 import static okhttp3.TestUtil.defaultClient;
 
-public class OkHttpClientTestRule implements TestRule {
-  public OkHttpClient client = defaultClient();
+public class HttpClientTestRule implements TestRule {
+  public HttpClient client = defaultClient();
 
   @Override
   public Statement apply(Statement base, Description description) {

@@ -100,16 +100,16 @@ public final class CallTest {
   @Rule public final MockWebServer server = new MockWebServer();
   @Rule public final MockWebServer server2 = new MockWebServer();
   @Rule public final InMemoryFileSystem fileSystem = new InMemoryFileSystem();
-  @Rule public final OkHttpClientTestRule clientTestRule = new OkHttpClientTestRule();
+  @Rule public final HttpClientTestRule clientTestRule = new HttpClientTestRule();
 
   private final RecordingEventListener listener = new RecordingEventListener();
   private HandshakeCertificates handshakeCertificates = localhost();
-  private OkHttpClient client = clientTestRule.client.newBuilder()
+  private HttpClient client = clientTestRule.client.newBuilder()
       .eventListener(listener)
       .build();
   private RecordingCallback callback = new RecordingCallback();
   private TestLogHandler logHandler = new TestLogHandler();
-  private Logger logger = Logger.getLogger(OkHttpClient.class.getName());
+  private Logger logger = Logger.getLogger(HttpClient.class.getName());
 
   @Before public void setUp() throws Exception {
     logger.addHandler(logHandler);
@@ -988,7 +988,7 @@ public final class CallTest {
 
   /** https://github.com/square/okhttp/issues/1801 */
   @Test public void asyncCallEngineInitialized() throws Exception {
-    OkHttpClient c = clientTestRule.client.newBuilder()
+    HttpClient c = clientTestRule.client.newBuilder()
         .addInterceptor(chain -> { throw new IOException(); })
         .build();
     Request request = new Request.Builder().url(server.url("/")).build();
@@ -3468,7 +3468,7 @@ public final class CallTest {
         throw new IOException("write body fail!");
       }
     };
-    OkHttpClient nonRetryingClient = client.newBuilder()
+    HttpClient nonRetryingClient = client.newBuilder()
         .retryOnConnectionFailure(false)
         .build();
     Call call = nonRetryingClient.newCall(new Request.Builder()

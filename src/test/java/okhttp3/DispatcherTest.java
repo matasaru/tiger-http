@@ -23,13 +23,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 public final class DispatcherTest {
-  @Rule public final OkHttpClientTestRule clientTestRule = new OkHttpClientTestRule();
+  @Rule public final HttpClientTestRule clientTestRule = new HttpClientTestRule();
 
   RecordingExecutor executor = new RecordingExecutor();
   RecordingCallback callback = new RecordingCallback();
   Dispatcher dispatcher = new Dispatcher(executor);
   RecordingEventListener listener = new RecordingEventListener();
-  OkHttpClient client = clientTestRule.client.newBuilder()
+  HttpClient client = clientTestRule.client.newBuilder()
       .dispatcher(dispatcher)
       .eventListener(listener)
       .build();

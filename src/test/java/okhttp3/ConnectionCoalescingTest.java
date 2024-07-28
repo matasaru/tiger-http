@@ -40,9 +40,9 @@ import static org.junit.Assert.fail;
 
 public final class ConnectionCoalescingTest {
   @Rule public final MockWebServer server = new MockWebServer();
-  @Rule public final OkHttpClientTestRule clientTestRule = new OkHttpClientTestRule();
+  @Rule public final HttpClientTestRule clientTestRule = new HttpClientTestRule();
 
-  private OkHttpClient client;
+  private HttpClient client;
 
   private HeldCertificate rootCa;
   private HeldCertificate certificate;
@@ -78,7 +78,7 @@ public final class ConnectionCoalescingTest {
         .addTrustedCertificate(rootCa.certificate())
         .build();
 
-    client = new OkHttpClient.Builder().dns(dns)
+    client = new HttpClient.Builder().dns(dns)
         .sslSocketFactory(
             handshakeCertificates.sslSocketFactory(), handshakeCertificates.trustManager())
         .build();
@@ -167,7 +167,7 @@ public final class ConnectionCoalescingTest {
 
     // Get a reference to the connection so we can violently destroy it.
     AtomicReference<Connection> connection = new AtomicReference<>();
-    OkHttpClient client1 = client.newBuilder()
+    HttpClient client1 = client.newBuilder()
         .addNetworkInterceptor(chain -> {
           connection.set(chain.connection());
           return chain.proceed(chain.request());
@@ -194,7 +194,7 @@ public final class ConnectionCoalescingTest {
       }
     });
 
-    OkHttpClient client2 = client.newBuilder()
+    HttpClient client2 = client.newBuilder()
         .eventListener(request2Listener)
         .build();
     Call call2 = client2.newCall(request);
@@ -397,7 +397,7 @@ public final class ConnectionCoalescingTest {
   /** Run against public external sites, doesn't run by default. */
   @Ignore
   @Test public void coalescesConnectionsToRealSites() throws IOException {
-    client = new OkHttpClient();
+    client = new HttpClient();
 
     assert200Http2Response(execute("https://graph.facebook.com/robots.txt"), "graph.facebook.com");
     assert200Http2Response(execute("https://www.facebook.com/robots.txt"), "m.facebook.com");

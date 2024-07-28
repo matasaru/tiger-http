@@ -32,7 +32,7 @@ import static okhttp3.TestUtil.defaultClient;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
-public final class OkHttpClientTest {
+public final class HttpClientTest {
   private static final ProxySelector DEFAULT_PROXY_SELECTOR = ProxySelector.getDefault();
   private static final CookieHandler DEFAULT_COOKIE_HANDLER = CookieManager.getDefault();
   private static final ResponseCache DEFAULT_RESPONSE_CACHE = ResponseCache.getDefault();
@@ -50,7 +50,7 @@ public final class OkHttpClientTest {
   }
 
   @Test public void durationDefaults() {
-    OkHttpClient client = defaultClient();
+    HttpClient client = defaultClient();
     assertThat(client.callTimeoutMillis()).isEqualTo(0);
     assertThat(client.connectTimeoutMillis()).isEqualTo(10_000);
     assertThat(client.readTimeoutMillis()).isEqualTo(10_000);
@@ -59,7 +59,7 @@ public final class OkHttpClientTest {
   }
 
   @Test public void timeoutValidRange() {
-    OkHttpClient.Builder builder = new OkHttpClient.Builder();
+    HttpClient.Builder builder = new HttpClient.Builder();
     try {
       builder.callTimeout(1, TimeUnit.NANOSECONDS);
     } catch (IllegalArgumentException ignored) {
@@ -96,7 +96,7 @@ public final class OkHttpClientTest {
 
   @Test public void clonedInterceptorsListsAreIndependent() throws Exception {
     Interceptor interceptor = chain -> chain.proceed(chain.request());
-    OkHttpClient original = defaultClient();
+    HttpClient original = defaultClient();
     original.newBuilder()
         .addInterceptor(interceptor)
         .addNetworkInterceptor(interceptor)
@@ -110,23 +110,23 @@ public final class OkHttpClientTest {
    * clients.
    */
   @Test public void cloneSharesStatefulInstances() throws Exception {
-    OkHttpClient client = defaultClient();
+    HttpClient client = defaultClient();
 
     // Values should be non-null.
-    OkHttpClient a = client.newBuilder().build();
+    HttpClient a = client.newBuilder().build();
     assertThat(a.dispatcher()).isNotNull();
     assertThat(a.connectionPool()).isNotNull();
     assertThat(a.sslSocketFactory()).isNotNull();
 
     // Multiple clients share the instances.
-    OkHttpClient b = client.newBuilder().build();
+    HttpClient b = client.newBuilder().build();
     assertThat(b.dispatcher()).isSameAs(a.dispatcher());
     assertThat(b.connectionPool()).isSameAs(a.connectionPool());
     assertThat(b.sslSocketFactory()).isSameAs(a.sslSocketFactory());
   }
 
   @Test public void setProtocolsRejectsHttp10() throws Exception {
-    OkHttpClient.Builder builder = new OkHttpClient.Builder();
+    HttpClient.Builder builder = new HttpClient.Builder();
     try {
       builder.protocols(Arrays.asList(Protocol.HTTP_1_0, Protocol.HTTP_1_1));
       fail();
@@ -135,13 +135,13 @@ public final class OkHttpClientTest {
   }
 
   @Test public void certificatePinnerEquality() {
-    OkHttpClient clientA = TestUtil.defaultClient();
-    OkHttpClient clientB = TestUtil.defaultClient();
+    HttpClient clientA = TestUtil.defaultClient();
+    HttpClient clientB = TestUtil.defaultClient();
     assertThat(clientB.certificatePinner()).isEqualTo(clientA.certificatePinner());
   }
 
   @Test public void nullInterceptor() {
-    OkHttpClient.Builder builder = new OkHttpClient.Builder();
+    HttpClient.Builder builder = new HttpClient.Builder();
     try {
       builder.addInterceptor(null);
       fail();
@@ -151,7 +151,7 @@ public final class OkHttpClientTest {
   }
 
   @Test public void nullNetworkInterceptor() {
-    OkHttpClient.Builder builder = new OkHttpClient.Builder();
+    HttpClient.Builder builder = new HttpClient.Builder();
     try {
       builder.addNetworkInterceptor(null);
       fail();
@@ -161,7 +161,7 @@ public final class OkHttpClientTest {
   }
 
   @Test public void nullInterceptorInList() {
-    OkHttpClient.Builder builder = new OkHttpClient.Builder();
+    HttpClient.Builder builder = new HttpClient.Builder();
     builder.interceptors().add(null);
     try {
       builder.build();
@@ -172,7 +172,7 @@ public final class OkHttpClientTest {
   }
 
   @Test public void nullNetworkInterceptorInList() {
-    OkHttpClient.Builder builder = new OkHttpClient.Builder();
+    HttpClient.Builder builder = new HttpClient.Builder();
     builder.networkInterceptors().add(null);
     try {
       builder.build();
@@ -184,7 +184,7 @@ public final class OkHttpClientTest {
 
   @Test public void testH2PriorKnowledgeOkHttpClientConstructionFallback() {
     try {
-      new OkHttpClient.Builder()
+      new HttpClient.Builder()
           .protocols(Arrays.asList(Protocol.H2_PRIOR_KNOWLEDGE, Protocol.HTTP_1_1));
       fail();
     } catch (IllegalArgumentException expected) {
@@ -196,7 +196,7 @@ public final class OkHttpClientTest {
 
   @Test public void testH2PriorKnowledgeOkHttpClientConstructionDuplicates() {
     try {
-      new OkHttpClient.Builder()
+      new HttpClient.Builder()
           .protocols(Arrays.asList(Protocol.H2_PRIOR_KNOWLEDGE, Protocol.H2_PRIOR_KNOWLEDGE));
       fail();
     } catch (IllegalArgumentException expected) {
@@ -207,11 +207,11 @@ public final class OkHttpClientTest {
   }
 
   @Test public void testH2PriorKnowledgeOkHttpClientConstructionSuccess() {
-    OkHttpClient okHttpClient = new OkHttpClient.Builder()
+    HttpClient httpClient = new HttpClient.Builder()
         .protocols(Arrays.asList(Protocol.H2_PRIOR_KNOWLEDGE))
         .build();
-    assertThat(okHttpClient.protocols().size()).isEqualTo(1);
-    assertThat(okHttpClient.protocols().get(0)).isEqualTo(Protocol.H2_PRIOR_KNOWLEDGE);
+    assertThat(httpClient.protocols().size()).isEqualTo(1);
+    assertThat(httpClient.protocols().get(0)).isEqualTo(Protocol.H2_PRIOR_KNOWLEDGE);
   }
 
   @Test public void nullDefaultProxySelector() throws Exception {
@@ -219,7 +219,7 @@ public final class OkHttpClientTest {
 
     ProxySelector.setDefault(null);
 
-    OkHttpClient client = defaultClient().newBuilder()
+    HttpClient client = defaultClient().newBuilder()
         .build();
 
     Request request = new Request.Builder().url(server.url("/")).build();
@@ -228,7 +228,7 @@ public final class OkHttpClientTest {
   }
 
   @Test public void sslSocketFactorySetAsSocketFactory() throws Exception {
-    OkHttpClient.Builder builder = new OkHttpClient.Builder();
+    HttpClient.Builder builder = new HttpClient.Builder();
     try {
       builder.socketFactory(SSLSocketFactory.getDefault());
       fail();

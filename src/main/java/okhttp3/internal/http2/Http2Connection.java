@@ -36,7 +36,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import okhttp3.Headers;
-import okhttp3.OkHttpClient;
+import okhttp3.HttpClient;
 import okhttp3.internal.NamedRunnable;
 import okhttp3.internal.Util;
 import okio.Buffer;
@@ -729,7 +729,7 @@ public final class Http2Connection implements Closeable {
               try {
                 listener.onStream(newStream);
               } catch (IOException e) {
-                OkHttpClient.logger.log(Level.INFO, "Http2Connection.Listener failure for " + connectionName, e);
+                HttpClient.logger.log(Level.INFO, "Http2Connection.Listener failure for " + connectionName, e);
                 try {
                   newStream.close(ErrorCode.PROTOCOL_ERROR, e);
                 } catch (IOException ignored) {

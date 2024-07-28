@@ -20,8 +20,8 @@ import java.io.IOException;
 import java.net.ProtocolException;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Headers;
+import okhttp3.HttpClient;
 import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.internal.Internal;
@@ -74,7 +74,7 @@ public final class Http1ExchangeCodec implements ExchangeCodec {
   private static final int HEADER_LIMIT = 256 * 1024;
 
   /** The client that configures this stream. May be null for HTTPS proxy tunnels. */
-  private final OkHttpClient client;
+  private final HttpClient client;
 
   /** The connection that carries this stream. */
   private final RealConnection realConnection;
@@ -90,7 +90,7 @@ public final class Http1ExchangeCodec implements ExchangeCodec {
    */
   private Headers trailers;
 
-  public Http1ExchangeCodec(OkHttpClient client, RealConnection realConnection,
+  public Http1ExchangeCodec(HttpClient client, RealConnection realConnection,
       BufferedSource source, BufferedSink sink) {
     this.client = client;
     this.realConnection = realConnection;

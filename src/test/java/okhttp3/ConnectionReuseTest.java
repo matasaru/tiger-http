@@ -37,10 +37,10 @@ import static org.junit.Assert.fail;
 public final class ConnectionReuseTest {
   @Rule public final TestRule timeout = new Timeout(30_000);
   @Rule public final MockWebServer server = new MockWebServer();
-  @Rule public final OkHttpClientTestRule clientTestRule = new OkHttpClientTestRule();
+  @Rule public final HttpClientTestRule clientTestRule = new HttpClientTestRule();
 
   private HandshakeCertificates handshakeCertificates = localhost();
-  private OkHttpClient client = clientTestRule.client;
+  private HttpClient client = clientTestRule.client;
 
   @Test public void connectionsAreReused() throws Exception {
     server.enqueue(new MockResponse().setBody("a"));
@@ -254,7 +254,7 @@ public final class ConnectionReuseTest {
 
     // This client shares a connection pool but has a different SSL socket factory.
     HandshakeCertificates handshakeCertificates2 = new HandshakeCertificates.Builder().build();
-    OkHttpClient anotherClient = client.newBuilder()
+    HttpClient anotherClient = client.newBuilder()
         .sslSocketFactory(
             handshakeCertificates2.sslSocketFactory(), handshakeCertificates2.trustManager())
         .build();
@@ -280,7 +280,7 @@ public final class ConnectionReuseTest {
     response1.body().close();
 
     // This client shares a connection pool but has a different SSL socket factory.
-    OkHttpClient anotherClient = client.newBuilder()
+    HttpClient anotherClient = client.newBuilder()
         .hostnameVerifier(new RecordingHostnameVerifier())
         .build();
 

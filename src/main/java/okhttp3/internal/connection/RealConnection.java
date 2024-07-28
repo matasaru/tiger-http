@@ -42,9 +42,9 @@ import okhttp3.Connection;
 import okhttp3.ConnectionSpec;
 import okhttp3.EventListener;
 import okhttp3.Handshake;
+import okhttp3.HttpClient;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -532,7 +532,7 @@ public final class RealConnection extends Http2Connection.Listener implements Co
     return true; // Success. The URL is supported.
   }
 
-  ExchangeCodec newCodec(OkHttpClient client, Interceptor.Chain chain) throws SocketException {
+  ExchangeCodec newCodec(HttpClient client, Interceptor.Chain chain) throws SocketException {
     if (http2Connection != null) {
       return new Http2ExchangeCodec(client, this, chain, http2Connection);
     } else {

@@ -28,9 +28,9 @@ import okhttp3.Call;
 import okhttp3.CertificatePinner;
 import okhttp3.Connection;
 import okhttp3.EventListener;
+import okhttp3.HttpClient;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.internal.Internal;
 import okhttp3.internal.http.ExchangeCodec;
@@ -51,7 +51,7 @@ import static okhttp3.internal.Util.sameConnection;
  * then canceling may break the entire connection.
  */
 public final class Transmitter {
-  private final OkHttpClient client;
+  private final HttpClient client;
   private final RealConnectionPool connectionPool;
   private final Call call;
   private final EventListener eventListener;
@@ -75,7 +75,7 @@ public final class Transmitter {
   private boolean timeoutEarlyExit;
   private boolean noMoreExchanges;
 
-  public Transmitter(OkHttpClient client, Call call) {
+  public Transmitter(HttpClient client, Call call) {
     this.client = client;
     this.connectionPool = Internal.instance.realConnectionPool(client.connectionPool());
     this.call = call;
@@ -112,7 +112,7 @@ public final class Transmitter {
   }
 
   public void callStart() {
-    if (OkHttpClient.logger.isLoggable(Level.FINE)) {
+    if (HttpClient.logger.isLoggable(Level.FINE)) {
       // These are expensive to allocate
       this.callStackTrace = new Throwable("response.body().close()");
     }

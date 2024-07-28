@@ -53,8 +53,8 @@ public final class TestUtil {
    * <p>This client is also configured to be slightly more deterministic, returning a single IP
    * address for all hosts, regardless of the actual number of IP addresses reported by DNS.
    */
-  public static OkHttpClient defaultClient() {
-    return new OkHttpClient.Builder()
+  public static HttpClient defaultClient() {
+    return new HttpClient.Builder()
         .connectionPool(connectionPool)
         .dispatcher(dispatcher)
         .dns(SINGLE_INET_ADDRESS_DNS) // Prevent unexpected fallback addresses.
@@ -86,7 +86,7 @@ public final class TestUtil {
     System.runFinalization();
   }
 
-  public static void ensureAllConnectionsReleased(OkHttpClient client) {
+  public static void ensureAllConnectionsReleased(HttpClient client) {
     client.connectionPool().evictAll();
     assertThat(client.connectionPool().idleConnectionCount()).isEqualTo(0);
   }

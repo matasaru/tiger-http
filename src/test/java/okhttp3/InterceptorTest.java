@@ -47,9 +47,9 @@ import static org.junit.Assert.fail;
 
 public final class InterceptorTest {
   @Rule public MockWebServer server = new MockWebServer();
-  @Rule public final OkHttpClientTestRule clientTestRule = new OkHttpClientTestRule();
+  @Rule public final HttpClientTestRule clientTestRule = new HttpClientTestRule();
 
-  private OkHttpClient client = clientTestRule.client;
+  private HttpClient client = clientTestRule.client;
   private RecordingCallback callback = new RecordingCallback();
 
   @Test public void applicationInterceptorsCanShortCircuitResponses() throws Exception {
@@ -877,7 +877,7 @@ public final class InterceptorTest {
   }
 
   private void addInterceptor(boolean network, Interceptor interceptor) {
-    OkHttpClient.Builder builder = client.newBuilder();
+    HttpClient.Builder builder = client.newBuilder();
     if (network) {
       builder.addNetworkInterceptor(interceptor);
     } else {
