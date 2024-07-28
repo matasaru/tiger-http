@@ -29,12 +29,6 @@
     </dependency>
     <dependency>
       <groupId>${okhttp3.groupId}</groupId>
-      <artifactId>okhttp-urlconnection</artifactId>
-      <version>${okhttp3.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>${okhttp3.groupId}</groupId>
       <artifactId>mockwebserver</artifactId>
       <version>${okhttp3.version}</version>
       <scope>test</scope>
