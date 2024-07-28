@@ -172,10 +172,6 @@ public class Call implements Cloneable {
     return Call.newCall(client, originalRequest);
   }
 
-  public interface Factory {
-    Call newCall(Request request);
-  }
-
   final class AsyncCall extends NamedRunnable {
     private final Callback responseCallback;
     private volatile AtomicInteger callsPerHost = new AtomicInteger(0);

@@ -3696,7 +3696,7 @@ public final class URLConnectionTest {
 
   enum ProxyConfig {
     NO_PROXY() {
-      @Override public Call.Factory connect(MockWebServer server, OkHttpClient client) {
+      @Override public OkHttpClient connect(MockWebServer server, OkHttpClient client) {
         return client.newBuilder()
             .proxy(Proxy.NO_PROXY)
             .build();
@@ -3704,7 +3704,7 @@ public final class URLConnectionTest {
     },
 
     CREATE_ARG() {
-      @Override public Call.Factory connect(MockWebServer server, OkHttpClient client) {
+      @Override public OkHttpClient connect(MockWebServer server, OkHttpClient client) {
         return client.newBuilder()
             .proxy(server.toProxyAddress())
             .build();
@@ -3712,7 +3712,7 @@ public final class URLConnectionTest {
     },
 
     PROXY_SYSTEM_PROPERTY() {
-      @Override public Call.Factory connect(MockWebServer server, OkHttpClient client) {
+      @Override public OkHttpClient connect(MockWebServer server, OkHttpClient client) {
         System.setProperty("proxyHost", server.getHostName());
         System.setProperty("proxyPort", Integer.toString(server.getPort()));
         return client;
@@ -3720,7 +3720,7 @@ public final class URLConnectionTest {
     },
 
     HTTP_PROXY_SYSTEM_PROPERTY() {
-      @Override public Call.Factory connect(MockWebServer server, OkHttpClient client) {
+      @Override public OkHttpClient connect(MockWebServer server, OkHttpClient client) {
         System.setProperty("http.proxyHost", server.getHostName());
         System.setProperty("http.proxyPort", Integer.toString(server.getPort()));
         return client;
@@ -3728,14 +3728,14 @@ public final class URLConnectionTest {
     },
 
     HTTPS_PROXY_SYSTEM_PROPERTY() {
-      @Override public Call.Factory connect(MockWebServer server, OkHttpClient client) {
+      @Override public OkHttpClient connect(MockWebServer server, OkHttpClient client) {
         System.setProperty("https.proxyHost", server.getHostName());
         System.setProperty("https.proxyPort", Integer.toString(server.getPort()));
         return client;
       }
     };
 
-    public abstract Call.Factory connect(MockWebServer server, OkHttpClient client)
+    public abstract OkHttpClient connect(MockWebServer server, OkHttpClient client)
         throws IOException;
 
     public Call connect(

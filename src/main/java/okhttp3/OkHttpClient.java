@@ -108,7 +108,7 @@ import static okhttp3.internal.Util.checkDuration;
  * <p>OkHttp also uses daemon threads for HTTP/2 connections. These will exit automatically if they
  * remain idle.
  */
-public class OkHttpClient implements Call.Factory {
+public class OkHttpClient {
   // TODO review the usage of this logger
   public static final Logger logger = Logger.getLogger(OkHttpClient.class.getName());
 
@@ -368,7 +368,7 @@ public class OkHttpClient implements Call.Factory {
   /**
    * Prepares the {@code request} to be executed at some point in the future.
    */
-  @Override public Call newCall(Request request) {
+  public Call newCall(Request request) {
     return Call.newCall(this, request);
   }
 
