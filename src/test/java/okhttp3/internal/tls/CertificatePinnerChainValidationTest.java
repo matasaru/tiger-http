@@ -46,7 +46,6 @@ import static okhttp3.tls.internal.TlsUtil.newKeyManager;
 import static okhttp3.tls.internal.TlsUtil.newTrustManager;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeFalse;
 
 public final class CertificatePinnerChainValidationTest {
   @Rule public final MockWebServer server = new MockWebServer();
