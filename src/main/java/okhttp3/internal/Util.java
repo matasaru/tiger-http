@@ -45,9 +45,9 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import okhttp3.Headers;
-import okhttp3.HttpUrl;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
+import okhttp3.Url;
 import okhttp3.internal.http2.Header;
 import okio.Buffer;
 import okio.BufferedSource;
@@ -277,11 +277,11 @@ public final class Util {
     return false;
   }
 
-  public static String hostHeader(HttpUrl url, boolean includeDefaultPort) {
+  public static String hostHeader(Url url, boolean includeDefaultPort) {
     String host = url.host().contains(":")
         ? "[" + url.host() + "]"
         : url.host();
-    return includeDefaultPort || url.port() != HttpUrl.defaultPort(url.scheme())
+    return includeDefaultPort || url.port() != Url.defaultPort(url.scheme())
         ? host + ":" + url.port()
         : host;
   }
@@ -667,7 +667,7 @@ public final class Util {
   }
 
   /** Returns true if an HTTP request for {@code a} and {@code b} can reuse a connection. */
-  public static boolean sameConnection(HttpUrl a, HttpUrl b) {
+  public static boolean sameConnection(Url a, Url b) {
     return a.host().equals(b.host())
         && a.port() == b.port()
         && a.scheme().equals(b.scheme());

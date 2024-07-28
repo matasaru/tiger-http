@@ -25,12 +25,12 @@ import java.security.cert.CertificateException;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import okhttp3.HttpClient;
-import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.Route;
+import okhttp3.Url;
 import okhttp3.internal.Internal;
 import okhttp3.internal.connection.Exchange;
 import okhttp3.internal.connection.RouteException;
@@ -245,7 +245,7 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
 
         String location = userResponse.header("Location");
         if (location == null) return null;
-        HttpUrl url = userResponse.request().url().resolve(location);
+        Url url = userResponse.request().url().resolve(location);
 
         // Don't follow redirects to unsupported protocols.
         if (url == null) return null;

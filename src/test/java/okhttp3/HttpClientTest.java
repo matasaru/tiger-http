@@ -222,7 +222,7 @@ public final class HttpClientTest {
     HttpClient client = defaultClient().newBuilder()
         .build();
 
-    Request request = new Request.Builder().url(server.url("/")).build();
+    Request request = new Request.Builder().url(server.url("/").toString()).build();
     Response response = client.newCall(request).execute();
     assertThat(response.body().string()).isEqualTo("abc");
   }

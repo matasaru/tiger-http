@@ -109,7 +109,7 @@ public final class ClientAuthTest {
     server.requestClientAuth();
     server.enqueue(new MockResponse().setBody("abc"));
 
-    Call call = client.newCall(new Request.Builder().url(server.url("/")).build());
+    Call call = client.newCall(new Request.Builder().url(server.url("/").toString()).build());
     Response response = call.execute();
     assertThat(response.handshake().peerPrincipal()).isEqualTo(
         new X500Principal("CN=Local Host"));
@@ -127,7 +127,7 @@ public final class ClientAuthTest {
     server.requireClientAuth();
     server.enqueue(new MockResponse().setBody("abc"));
 
-    Call call = client.newCall(new Request.Builder().url(server.url("/")).build());
+    Call call = client.newCall(new Request.Builder().url(server.url("/").toString()).build());
     Response response = call.execute();
     assertThat(response.handshake().peerPrincipal()).isEqualTo(
         new X500Principal("CN=Local Host"));
@@ -145,7 +145,7 @@ public final class ClientAuthTest {
     server.noClientAuth();
     server.enqueue(new MockResponse().setBody("abc"));
 
-    Call call = client.newCall(new Request.Builder().url(server.url("/")).build());
+    Call call = client.newCall(new Request.Builder().url(server.url("/").toString()).build());
     Response response = call.execute();
     assertThat(response.handshake().peerPrincipal()).isEqualTo(
         new X500Principal("CN=Local Host"));
@@ -162,7 +162,7 @@ public final class ClientAuthTest {
     server.requestClientAuth();
     server.enqueue(new MockResponse().setBody("abc"));
 
-    Call call = client.newCall(new Request.Builder().url(server.url("/")).build());
+    Call call = client.newCall(new Request.Builder().url(server.url("/").toString()).build());
     Response response = call.execute();
     assertThat(response.handshake().peerPrincipal()).isEqualTo(
         new X500Principal("CN=Local Host"));
@@ -185,7 +185,7 @@ public final class ClientAuthTest {
     server.useHttps(socketFactory, false);
     server.requireClientAuth();
 
-    Call call = client.newCall(new Request.Builder().url(server.url("/")).build());
+    Call call = client.newCall(new Request.Builder().url(server.url("/").toString()).build());
 
     try {
       call.execute();

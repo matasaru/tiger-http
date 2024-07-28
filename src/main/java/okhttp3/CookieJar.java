@@ -34,10 +34,10 @@ import java.util.List;
 public interface CookieJar {
   /** A cookie jar that never accepts any cookies. */
   CookieJar NO_COOKIES = new CookieJar() {
-    @Override public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
+    @Override public void saveFromResponse(Url url, List<Cookie> cookies) {
     }
 
-    @Override public List<Cookie> loadForRequest(HttpUrl url) {
+    @Override public List<Cookie> loadForRequest(Url url) {
       return Collections.emptyList();
     }
   };
@@ -49,7 +49,7 @@ public interface CookieJar {
    * includes a trailer. For this obscure HTTP feature, {@code cookies} contains only the trailer's
    * cookies.
    */
-  void saveFromResponse(HttpUrl url, List<Cookie> cookies);
+  void saveFromResponse(Url url, List<Cookie> cookies);
 
   /**
    * Load cookies from the jar for an HTTP request to {@code url}. This method returns a possibly
@@ -58,5 +58,5 @@ public interface CookieJar {
    * <p>Simple implementations will return the accepted cookies that have not yet expired and that
    * {@linkplain Cookie#matches match} {@code url}.
    */
-  List<Cookie> loadForRequest(HttpUrl url);
+  List<Cookie> loadForRequest(Url url);
 }

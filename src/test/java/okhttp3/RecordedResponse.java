@@ -39,7 +39,7 @@ public final class RecordedResponse {
     this.failure = failure;
   }
 
-  public RecordedResponse assertRequestUrl(HttpUrl url) {
+  public RecordedResponse assertRequestUrl(Url url) {
     assertThat(request.url()).isEqualTo(url);
     return this;
   }

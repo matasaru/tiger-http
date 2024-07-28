@@ -39,7 +39,7 @@ public final class JavaNetCookieJar implements CookieJar {
     this.cookieHandler = cookieHandler;
   }
 
-  @Override public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
+  @Override public void saveFromResponse(Url url, List<Cookie> cookies) {
     List<String> cookieStrings = new ArrayList<>();
     for (Cookie cookie : cookies) {
       cookieStrings.add(cookie.toString(true));
@@ -52,7 +52,7 @@ public final class JavaNetCookieJar implements CookieJar {
     }
   }
 
-  @Override public List<Cookie> loadForRequest(HttpUrl url) {
+  @Override public List<Cookie> loadForRequest(Url url) {
     // The RI passes all headers. We don't have 'em, so we don't pass 'em!
     Map<String, List<String>> headers = Collections.emptyMap();
     Map<String, List<String>> cookieHeaders;
@@ -84,7 +84,7 @@ public final class JavaNetCookieJar implements CookieJar {
    * Convert a request header to OkHttp's cookies via {@link HttpCookie}. That extra step handles
    * multiple cookies in a single request header, which {@link Cookie#parse} doesn't support.
    */
-  private List<Cookie> decodeHeaderAsJavaNetCookies(HttpUrl url, String header) {
+  private List<Cookie> decodeHeaderAsJavaNetCookies(Url url, String header) {
     List<Cookie> result = new ArrayList<>();
     for (int pos = 0, limit = header.length(), pairEnd; pos < limit; pos = pairEnd + 1) {
       pairEnd = delimiterOffset(header, pos, limit, ";,");

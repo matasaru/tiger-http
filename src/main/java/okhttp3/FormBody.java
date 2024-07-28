@@ -23,8 +23,8 @@ import okhttp3.internal.Util;
 import okio.Buffer;
 import okio.BufferedSink;
 
-import static okhttp3.HttpUrl.FORM_ENCODE_SET;
-import static okhttp3.HttpUrl.percentDecode;
+import static okhttp3.Url.FORM_ENCODE_SET;
+import static okhttp3.Url.percentDecode;
 
 public final class FormBody extends RequestBody {
   private static final MediaType CONTENT_TYPE = MediaType.get("application/x-www-form-urlencoded");
@@ -118,8 +118,8 @@ public final class FormBody extends RequestBody {
       if (name == null) throw new NullPointerException("name == null");
       if (value == null) throw new NullPointerException("value == null");
 
-      names.add(HttpUrl.canonicalize(name, FORM_ENCODE_SET, false, false, true, true, charset));
-      values.add(HttpUrl.canonicalize(value, FORM_ENCODE_SET, false, false, true, true, charset));
+      names.add(Url.canonicalize(name, FORM_ENCODE_SET, false, false, true, true, charset));
+      values.add(Url.canonicalize(value, FORM_ENCODE_SET, false, false, true, true, charset));
       return this;
     }
 
@@ -127,8 +127,8 @@ public final class FormBody extends RequestBody {
       if (name == null) throw new NullPointerException("name == null");
       if (value == null) throw new NullPointerException("value == null");
 
-      names.add(HttpUrl.canonicalize(name, FORM_ENCODE_SET, true, false, true, true, charset));
-      values.add(HttpUrl.canonicalize(value, FORM_ENCODE_SET, true, false, true, true, charset));
+      names.add(Url.canonicalize(name, FORM_ENCODE_SET, true, false, true, true, charset));
+      values.add(Url.canonicalize(value, FORM_ENCODE_SET, true, false, true, true, charset));
       return this;
     }
 

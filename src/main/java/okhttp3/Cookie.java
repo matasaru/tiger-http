@@ -168,7 +168,7 @@ public final class Cookie {
    * Returns true if this cookie should be included on a request to {@code url}. In addition to this
    * check callers should also confirm that this cookie has not expired.
    */
-  public boolean matches(HttpUrl url) {
+  public boolean matches(Url url) {
     boolean domainMatch = hostOnly
         ? url.host().equals(domain)
         : domainMatch(url.host(), domain);
@@ -195,7 +195,7 @@ public final class Cookie {
     return false;
   }
 
-  private static boolean pathMatch(HttpUrl url, String path) {
+  private static boolean pathMatch(Url url, String path) {
     String urlPath = url.encodedPath();
 
     if (urlPath.equals(path)) {
@@ -214,11 +214,11 @@ public final class Cookie {
    * Attempt to parse a {@code Set-Cookie} HTTP header value {@code setCookie} as a cookie. Returns
    * null if {@code setCookie} is not a well-formed cookie.
    */
-  public static Cookie parse(HttpUrl url, String setCookie) {
+  public static Cookie parse(Url url, String setCookie) {
     return parse(System.currentTimeMillis(), url, setCookie);
   }
 
-  static Cookie parse(long currentTimeMillis, HttpUrl url, String setCookie) {
+  static Cookie parse(long currentTimeMillis, Url url, String setCookie) {
     int pos = 0;
     int limit = setCookie.length();
     int cookiePairEnd = delimiterOffset(setCookie, pos, limit, ';');
@@ -436,7 +436,7 @@ public final class Cookie {
   }
 
   /** Returns all of the cookies from a set of HTTP response headers. */
-  public static List<Cookie> parseAll(HttpUrl url, Headers headers) {
+  public static List<Cookie> parseAll(Url url, Headers headers) {
     List<String> cookieStrings = headers.values("Set-Cookie");
     List<Cookie> cookies = null;
 

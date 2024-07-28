@@ -44,7 +44,7 @@ public class RecordingCallback implements Callback {
    * Returns the recorded response triggered by {@code request}. Throws if the response isn't
    * enqueued before the timeout.
    */
-  public synchronized RecordedResponse await(HttpUrl url) throws Exception {
+  public synchronized RecordedResponse await(Url url) throws Exception {
     long timeoutMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime()) + TIMEOUT_MILLIS;
     while (true) {
       for (Iterator<RecordedResponse> i = responses.iterator(); i.hasNext(); ) {

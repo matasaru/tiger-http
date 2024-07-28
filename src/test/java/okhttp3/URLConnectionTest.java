@@ -129,7 +129,7 @@ public final class URLConnectionTest {
     server.enqueue(new MockResponse());
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .addHeader("D", "e")
         .addHeader("D", "f")
         .build();
@@ -177,7 +177,7 @@ public final class URLConnectionTest {
 
   @Test public void getRequestPropertyReturnsLastValue() {
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .addHeader("A", "value1")
         .addHeader("A", "value2")
         .build();
@@ -293,7 +293,7 @@ public final class URLConnectionTest {
     server2.shutdown();
 
     Request request = new Request.Builder()
-        .url(server.url("/def"))
+        .url(server.url("/def").toString())
         .post(transferKind.newRequestBody("body"))
         .build();
     Response response = getResponse(request);
@@ -353,7 +353,7 @@ public final class URLConnectionTest {
         .build();
     try {
       getResponse(new Request.Builder()
-          .url(HttpUrl.get("http://1234.1.1.1/index.html"))
+          .url(Url.get("http://1234.1.1.1/index.html"))
           .build());
       fail();
     } catch (UnknownHostException expected) {
@@ -448,7 +448,7 @@ public final class URLConnectionTest {
     };
 
     Response response = getResponse(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(requestBody)
         .build());
     Assertions.assertThat(response.code()).isEqualTo(200);
@@ -686,7 +686,7 @@ public final class URLConnectionTest {
         .setBody("this response comes via a proxy");
     server.enqueue(mockResponse);
 
-    HttpUrl url = HttpUrl.parse("http://android.com/foo");
+    Url url = Url.parse("http://android.com/foo");
     Response response = proxyConfig.connect(server, client, url).execute();
     assertContent("this response comes via a proxy", response);
 
@@ -828,7 +828,7 @@ public final class URLConnectionTest {
     server.enqueue(new MockResponse()
         .setBody("this response comes via HTTPS"));
 
-    HttpUrl url = server.url("/foo");
+    Url url = Url.get(server.url("/foo").toString());
     client = client.newBuilder()
         .sslSocketFactory(
             handshakeCertificates.sslSocketFactory(), handshakeCertificates.trustManager())
@@ -872,7 +872,7 @@ public final class URLConnectionTest {
     server.enqueue(new MockResponse()
         .setBody("this response comes via a secure proxy"));
 
-    HttpUrl url = HttpUrl.parse("https://android.com/foo");
+    Url url = Url.parse("https://android.com/foo");
     client = client.newBuilder()
         .sslSocketFactory(
             handshakeCertificates.sslSocketFactory(), handshakeCertificates.trustManager())
@@ -916,7 +916,7 @@ public final class URLConnectionTest {
         .build();
 
     Response response = getResponse(new Request.Builder()
-        .url(HttpUrl.get("https://android.com/foo"))
+        .url(Url.get("https://android.com/foo"))
         .build());
     assertContent("response", response);
 
@@ -945,7 +945,7 @@ public final class URLConnectionTest {
         .build();
 
     Response response = getResponse(new Request.Builder()
-        .url(HttpUrl.get("https://android.com/foo"))
+        .url(Url.get("https://android.com/foo"))
         .header("Private", "Secret")
         .header("Proxy-Authorization", "bar")
         .header("User-Agent", "baz")
@@ -986,7 +986,7 @@ public final class URLConnectionTest {
         .build();
 
     Response response = getResponse(new Request.Builder()
-        .url(HttpUrl.parse("https://android.com/foo"))
+        .url(Url.parse("https://android.com/foo"))
         .build());
     assertContent("A", response);
 
@@ -1050,8 +1050,8 @@ public final class URLConnectionTest {
         .hostnameVerifier(hostnameVerifier)
         .build();
 
-    assertContent("response 1", getResponse(newRequest(HttpUrl.get("https://android.com/foo"))));
-    assertContent("response 2", getResponse(newRequest(HttpUrl.get("https://android.com/foo"))));
+    assertContent("response 1", getResponse(newRequest(Url.get("https://android.com/foo"))));
+    assertContent("response 2", getResponse(newRequest(Url.get("https://android.com/foo"))));
   }
 
   @Test public void proxySelectorHttpWithConnectionReuse() throws IOException {
@@ -1070,7 +1070,7 @@ public final class URLConnectionTest {
               URI uri, SocketAddress socketAddress, IOException e) {
           }
         }).build();
-    HttpUrl url = HttpUrl.get("http://android.com/foo");
+    Url url = Url.get("http://android.com/foo");
     assertContent("response 1", getResponse(newRequest(url)));
     Assertions.assertThat(getResponse(newRequest(url)).code()).isEqualTo(407);
   }
@@ -1101,10 +1101,10 @@ public final class URLConnectionTest {
     AtomicReference<Call> callReference = new AtomicReference<>();
 
     class DisconnectingCookieJar implements CookieJar {
-      @Override public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
+      @Override public void saveFromResponse(Url url, List<Cookie> cookies) {
       }
 
-      @Override public List<Cookie> loadForRequest(HttpUrl url) {
+      @Override public List<Cookie> loadForRequest(Url url) {
         callReference.get().cancel();
         return Collections.emptyList();
       }
@@ -1292,7 +1292,7 @@ public final class URLConnectionTest {
         .addHeader("Content-Encoding: gzip"));
 
     Response response = getResponse(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .header("Accept-Encoding", "gzip")
         .build());
     InputStream gunzippedIn = new GZIPInputStream(response.body().byteStream());
@@ -1326,7 +1326,7 @@ public final class URLConnectionTest {
         .addHeader("Content-Encoding: custom"));
 
     Response response = getResponse(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .header("Accept-Encoding", "custom")
         .build());
     Assertions.assertThat(readAscii(response.body().byteStream(), Integer.MAX_VALUE)).isEqualTo(
@@ -1363,7 +1363,7 @@ public final class URLConnectionTest {
 
     Response response1 = getResponse(new Request.Builder()
         .header("Accept-Encoding", "gzip")
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     InputStream gunzippedIn = new GZIPInputStream(response1.body().byteStream());
     Assertions.assertThat(readAscii(gunzippedIn, Integer.MAX_VALUE)).isEqualTo(
@@ -1371,7 +1371,7 @@ public final class URLConnectionTest {
     Assertions.assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
 
     Response response2 = getResponse(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Assertions.assertThat(readAscii(response2.body().byteStream(), Integer.MAX_VALUE)).isEqualTo(
         "two (identity)");
@@ -1481,7 +1481,7 @@ public final class URLConnectionTest {
     server.enqueue(new MockResponse());
 
     Response response = getResponse(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(TransferKind.CHUNKED.newRequestBody("ABCDEFGHIJKLMNOPQ"))
         .build());
     Assertions.assertThat(response.code()).isEqualTo(200);
@@ -1513,7 +1513,7 @@ public final class URLConnectionTest {
         .authenticator(new JavaNetAuthenticator())
         .build();
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(streamingMode.newRequestBody("ABCD"))
         .build();
     Response response = getResponse(request);
@@ -1556,7 +1556,7 @@ public final class URLConnectionTest {
         .build();
 
     Response response = getResponse(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(RequestBody.create(null, body))
         .build());
     Assertions.assertThat(response.code()).isEqualTo(200);
@@ -1646,7 +1646,7 @@ public final class URLConnectionTest {
           .proxy(server.toProxyAddress())
           .proxyAuthenticator(new JavaNetAuthenticator())
           .build();
-      response = getResponse(newRequest(HttpUrl.get("http://android.com/")));
+      response = getResponse(newRequest(Url.get("http://android.com/")));
     } else {
       client = client.newBuilder()
           .authenticator(new JavaNetAuthenticator())
@@ -1680,7 +1680,7 @@ public final class URLConnectionTest {
 
   private void assertMethodPermitsRequestBody(String requestMethod) {
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .method(requestMethod, RequestBody.create(null, "abc"))
         .build();
     Assertions.assertThat(request.method()).isEqualTo(requestMethod);
@@ -1689,7 +1689,7 @@ public final class URLConnectionTest {
   private void assertMethodForbidsRequestBody(String requestMethod) {
     try {
       new Request.Builder()
-          .url(server.url("/"))
+          .url(server.url("/").toString())
           .method(requestMethod, RequestBody.create(null, "abc"))
           .build();
     } catch (IllegalArgumentException expected) {
@@ -1698,7 +1698,7 @@ public final class URLConnectionTest {
 
   private void assertMethodPermitsNoRequestBody(String requestMethod) {
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .method(requestMethod, null)
         .build();
     Assertions.assertThat(request.method()).isEqualTo(requestMethod);
@@ -1707,7 +1707,7 @@ public final class URLConnectionTest {
   private void assertMethodForbidsNoRequestBody(String requestMethod) {
     try {
       new Request.Builder()
-          .url(server.url("/"))
+          .url(server.url("/").toString())
           .method(requestMethod, null)
           .build();
     } catch (IllegalArgumentException expected) {
@@ -1725,7 +1725,7 @@ public final class URLConnectionTest {
   private void assertValidRequestMethod(String requestMethod) throws Exception {
     server.enqueue(new MockResponse());
     Response response = getResponse(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .method(requestMethod, null)
         .build());
     Assertions.assertThat(response.code()).isEqualTo(200);
@@ -1781,7 +1781,7 @@ public final class URLConnectionTest {
         .hostnameVerifier(new RecordingHostnameVerifier())
         .build();
     Response response = getResponse(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(streamingMode.newRequestBody("ABCD"))
         .build());
     Assertions.assertThat(readAscii(response.body().byteStream(), Integer.MAX_VALUE)).isEqualTo(
@@ -1816,7 +1816,7 @@ public final class URLConnectionTest {
         .authenticator(new JavaNetAuthenticator())
         .build();
     Response response = getResponse(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(RequestBody.create(null, "ABCD"))
         .build());
     Assertions.assertThat(readAscii(response.body().byteStream(), Integer.MAX_VALUE)).isEqualTo(
@@ -2129,11 +2129,11 @@ public final class URLConnectionTest {
 
     Response response = getResponse(newRequest("/"));
     assertContent("This is the 2nd server!", response);
-    Assertions.assertThat(response.request().url()).isEqualTo(server2.url("/"));
+    Assertions.assertThat(response.request().url()).isEqualTo(Url.get(server2.url("/").toString()));
 
     // make sure the first server was careful to recycle the connection
-    assertContent("This is the first server again!", getResponse(newRequest(server.url("/"))));
-    assertContent("This is the 2nd server, again!", getResponse(newRequest(server2.url("/"))));
+    assertContent("This is the first server again!", getResponse(newRequest(server.url("/").toString())));
+    assertContent("This is the 2nd server, again!", getResponse(newRequest(server2.url("/").toString())));
 
     String server1Host = server.getHostName() + ":" + server.getPort();
     String server2Host = server2.getHostName() + ":" + server2.getPort();
@@ -2232,7 +2232,7 @@ public final class URLConnectionTest {
         .setBody("Page 2"));
 
     Response response = getResponse(new Request.Builder()
-        .url(server.url("/page1"))
+        .url(server.url("/page1").toString())
         .post(transferKind.newRequestBody("ABCD"))
         .build());
     Assertions.assertThat(readAscii(response.body().byteStream(), Integer.MAX_VALUE)).isEqualTo(
@@ -2254,7 +2254,7 @@ public final class URLConnectionTest {
         .setBody("Page 2"));
 
     Response response = getResponse(new Request.Builder()
-        .url(server.url("/page1"))
+        .url(server.url("/page1").toString())
         .post(RequestBody.create(MediaType.get("text/plain; charset=utf-8"), "ABCD"))
         .header("Transfer-Encoding", "identity")
         .build());
@@ -2333,7 +2333,7 @@ public final class URLConnectionTest {
         .setBody("Page 2"));
 
     Request.Builder requestBuilder = new Request.Builder()
-        .url(server.url("/page1"));
+        .url(server.url("/page1").toString());
     if (method.equals("POST")) {
       requestBuilder.post(RequestBody.create(null, "ABCD"));
     } else {
@@ -2378,7 +2378,7 @@ public final class URLConnectionTest {
 
     Response response = getResponse(newRequest("/0"));
     assertContent("Success!", response);
-    Assertions.assertThat(response.request().url()).isEqualTo(server.url("/20"));
+    Assertions.assertThat(response.request().url()).isEqualTo(Url.get(server.url("/20").toString()));
   }
 
   @Test public void doesNotFollow21Redirects() throws Exception {
@@ -2451,7 +2451,7 @@ public final class URLConnectionTest {
     enqueueClientRequestTimeoutResponses();
 
     Response response = getResponse(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(RequestBody.create(null, "Hello"))
         .build());
 
@@ -2470,7 +2470,7 @@ public final class URLConnectionTest {
     enqueueClientRequestTimeoutResponses();
 
     Response response = getResponse(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(TransferKind.CHUNKED.newRequestBody("Hello"))
         .build());
 
@@ -2536,7 +2536,7 @@ public final class URLConnectionTest {
         .throttleBody(1, 1, TimeUnit.SECONDS)); // Prevent the server from reading!
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(new RequestBody() {
           @Override public MediaType contentType() {
             return null;
@@ -2559,7 +2559,7 @@ public final class URLConnectionTest {
     server.enqueue(new MockResponse());
 
     Response response = getResponse(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .header("Transfer-encoding", "chunked")
         .post(TransferKind.CHUNKED.newRequestBody("ABC"))
         .build());
@@ -2574,7 +2574,7 @@ public final class URLConnectionTest {
     server.enqueue(new MockResponse());
 
     Response a = getResponse(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .header("Connection", "close")
         .build());
     Assertions.assertThat(a.code()).isEqualTo(200);
@@ -2691,7 +2691,7 @@ public final class URLConnectionTest {
 
     AtomicReference<BufferedSink> sinkReference = new AtomicReference<>();
     Response response = getResponse(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(new ForwardingRequestBody(transferKind.newRequestBody("def")) {
           @Override public void writeTo(BufferedSink sink) throws IOException {
             sinkReference.set(sink);
@@ -2730,7 +2730,7 @@ public final class URLConnectionTest {
         .dns(new FakeDns())
         .build();
     try {
-      getResponse(newRequest(HttpUrl.get("http://host.unlikelytld")));
+      getResponse(newRequest(Url.get("http://host.unlikelytld")));
       fail();
     } catch (IOException expected) {
     }
@@ -2738,7 +2738,7 @@ public final class URLConnectionTest {
 
   @Test public void malformedUrlThrowsUnknownHostException() throws IOException {
     try {
-      getResponse(newRequest(HttpUrl.get("http://./foo.html")));
+      getResponse(newRequest(Url.get("http://./foo.html")));
       fail();
     } catch (UnknownHostException expected) {
     }
@@ -2781,7 +2781,7 @@ public final class URLConnectionTest {
   @Test public void getOutputStreamOnGetFails() {
     try {
       new Request.Builder()
-          .url(server.url("/"))
+          .url(server.url("/").toString())
           .method("GET", RequestBody.create(null, "abc"))
           .build();
       fail();
@@ -2793,7 +2793,7 @@ public final class URLConnectionTest {
     server.enqueue(new MockResponse()
         .setBody("A"));
     Response response = getResponse(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(RequestBody.create(null, "ABC"))
         .build());
     Assertions.assertThat(readAscii(response.body().byteStream(), Integer.MAX_VALUE)).isEqualTo(
@@ -2834,7 +2834,7 @@ public final class URLConnectionTest {
     server.enqueue(new MockResponse()
         .setBody("A"));
 
-    HttpUrl url = server.url("?query");
+    Url url = Url.get(server.url("?query").toString());
     Response response = getResponse(newRequest(url));
     Assertions.assertThat(readAscii(response.body().byteStream(), Integer.MAX_VALUE)).isEqualTo(
         "A");
@@ -2845,7 +2845,7 @@ public final class URLConnectionTest {
   @Test public void doOutputForMethodThatDoesntSupportOutput() {
     try {
       new Request.Builder()
-          .url(server.url("/"))
+          .url(server.url("/").toString())
           .method("HEAD", RequestBody.create(null, ""))
           .build();
       fail();
@@ -2928,7 +2928,7 @@ public final class URLConnectionTest {
     for (int j = 0; j < 2; j++) {
       try {
         Response response = getResponse(new Request.Builder()
-            .url(server.url("/b"))
+            .url(server.url("/b").toString())
             .post(transferKind.newRequestBody(requestBody))
             .build());
         assertContent("B", response);
@@ -2960,7 +2960,7 @@ public final class URLConnectionTest {
     assertContent("abc", getResponse(newRequest("/")));
 
     Response post = getResponse(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(RequestBody.create(null, "body!"))
         .build());
     assertContent("def", post);
@@ -2996,7 +2996,7 @@ public final class URLConnectionTest {
     };
     try {
       getResponse(new Request.Builder()
-          .url(server.url("/b"))
+          .url(server.url("/b").toString())
           .post(requestBody)
           .build());
       fail();
@@ -3023,7 +3023,7 @@ public final class URLConnectionTest {
     };
     try {
       getResponse(new Request.Builder()
-          .url(server.url("/b"))
+          .url(server.url("/b").toString())
           .post(requestBody)
           .build());
       fail();
@@ -3049,7 +3049,7 @@ public final class URLConnectionTest {
     server.enqueue(new MockResponse()
         .setBody("body"));
     Response response = getResponse(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .header("B", "")
         .build());
     assertContent("body", response);
@@ -3068,7 +3068,7 @@ public final class URLConnectionTest {
   @Test public void emptyRequestHeaderNameIsStrict() {
     try {
       new Request.Builder()
-          .url(server.url("/"))
+          .url(server.url("/").toString())
           .header("", "A")
           .build();
       fail();
@@ -3317,7 +3317,7 @@ public final class URLConnectionTest {
     server.enqueue(new MockResponse());
 
     Response response = getResponse(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .method(method, RequestBody.create(null, ""))
         .build());
     assertContent("", response);
@@ -3360,7 +3360,7 @@ public final class URLConnectionTest {
 
     long contentLength = Integer.MAX_VALUE + 1L;
     Response response = getResponse(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(new RequestBody() {
           @Override public MediaType contentType() {
             return null;
@@ -3470,7 +3470,7 @@ public final class URLConnectionTest {
     server.enqueue(new MockResponse());
 
     Response response = getResponse(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .delete(RequestBody.create(null, "BODY"))
         .build());
     Assertions.assertThat(response.code()).isEqualTo(200);
@@ -3492,7 +3492,7 @@ public final class URLConnectionTest {
 
   @Test public void urlWithSpaceInHost() {
     try {
-      HttpUrl.get("http://and roid.com/");
+      Url.get("http://and roid.com/");
       fail();
     } catch (IllegalArgumentException expected) {
     }
@@ -3500,7 +3500,7 @@ public final class URLConnectionTest {
 
   @Test public void urlWithSpaceInHostViaHttpProxy() {
     try {
-      HttpUrl.get("http://and roid.com/");
+      Url.get("http://and roid.com/");
       fail();
     } catch (IllegalArgumentException expected) {
     }
@@ -3508,7 +3508,7 @@ public final class URLConnectionTest {
 
   @Test public void urlHostWithNul() {
     try {
-      HttpUrl.get("http://host\u0000/");
+      Url.get("http://host\u0000/");
       fail();
     } catch (IllegalArgumentException expected) {
     }
@@ -3527,7 +3527,7 @@ public final class URLConnectionTest {
 
   @Test public void urlWithBadAsciiHost() {
     try {
-      HttpUrl.get("http://host\u0001/");
+      Url.get("http://host\u0001/");
       fail();
     } catch (IllegalArgumentException expected) {
     }
@@ -3567,7 +3567,7 @@ public final class URLConnectionTest {
     Thread.sleep(500);
 
     assertContent("def", getResponse(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(RequestBody.create(null, "123"))
         .build()));
 
@@ -3594,10 +3594,10 @@ public final class URLConnectionTest {
   }
 
   private Request newRequest(String s) {
-    return newRequest(server.url(s));
+    return newRequest(Url.get(server.url(s).toString()));
   }
 
-  private Request newRequest(HttpUrl url) {
+  private Request newRequest(Url url) {
     return new Request.Builder()
         .url(url)
         .build();
@@ -3739,7 +3739,7 @@ public final class URLConnectionTest {
         throws IOException;
 
     public Call connect(
-        MockWebServer server, HttpClient client, HttpUrl url) throws IOException {
+        MockWebServer server, HttpClient client, Url url) throws IOException {
       Request request = new Request.Builder()
           .url(url)
           .build();

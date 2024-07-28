@@ -276,7 +276,7 @@ import static okhttp3.internal.Util.verifyAsIpAddress;
  * constructors. For example, there's no API to compose a URI with a custom port without also
  * providing a query and fragment.
  *
- * <p>Instances of {@link HttpUrl} are well-formed and always have a scheme, host, and path. With
+ * <p>Instances of {@link Url} are well-formed and always have a scheme, host, and path. With
  * {@code java.net.URL} it's possible to create an awkward URL like {@code http:/} with scheme and
  * path but no hostname. Building APIs that consume such malformed values is difficult!
  *
@@ -285,7 +285,7 @@ import static okhttp3.internal.Util.verifyAsIpAddress;
  * returns null if the input is an invalid URL. You can even be explicit about whether each
  * component has been encoded already.
  */
-public final class HttpUrl {
+public final class Url {
   private static final char[] HEX_DIGITS =
       {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
   static final String USERNAME_ENCODE_SET = " \"':;<=>@[]^`{}|/\\?#";
@@ -335,7 +335,7 @@ public final class HttpUrl {
   /** Canonical URL. */
   private final String url;
 
-  HttpUrl(Builder builder) {
+  Url(Builder builder) {
     this.scheme = builder.scheme;
     this.username = percentDecode(builder.encodedUsername, false);
     this.password = percentDecode(builder.encodedPassword, false);
@@ -863,7 +863,7 @@ public final class HttpUrl {
    * Returns the URL that would be retrieved by following {@code link} from this URL, or null if
    * the resulting URL is not well-formed.
    */
-  public HttpUrl resolve(String link) {
+  public Url resolve(String link) {
     Builder builder = newBuilder(link);
     return builder != null ? builder.build() : null;
   }
@@ -899,7 +899,7 @@ public final class HttpUrl {
    * Returns a new {@code HttpUrl} representing {@code url} if it is a well-formed HTTP or HTTPS
    * URL, or null if it isn't.
    */
-  public static HttpUrl parse(String url) {
+  public static Url parse(String url) {
     try {
       return get(url);
     } catch (IllegalArgumentException ignored) {
@@ -912,24 +912,24 @@ public final class HttpUrl {
    *
    * @throws IllegalArgumentException If {@code url} is not a well-formed HTTP or HTTPS URL.
    */
-  public static HttpUrl get(String url) {
+  public static Url get(String url) {
     return new Builder().parse(null, url).build();
   }
 
   /**
-   * Returns an {@link HttpUrl} for {@code url} if its protocol is {@code http} or {@code https}, or
+   * Returns an {@link Url} for {@code url} if its protocol is {@code http} or {@code https}, or
    * null if it has any other protocol.
    */
-  public static HttpUrl get(URL url) {
+  public static Url get(URL url) {
     return parse(url.toString());
   }
 
-  public static HttpUrl get(URI uri) {
+  public static Url get(URI uri) {
     return parse(uri.toString());
   }
 
   @Override public boolean equals(Object other) {
-    return other instanceof HttpUrl && ((HttpUrl) other).url.equals(url);
+    return other instanceof Url && ((Url) other).url.equals(url);
   }
 
   @Override public int hashCode() {
@@ -1248,10 +1248,10 @@ public final class HttpUrl {
       return this;
     }
 
-    public HttpUrl build() {
+    public Url build() {
       if (scheme == null) throw new IllegalStateException("scheme == null");
       if (host == null) throw new IllegalStateException("host == null");
-      return new HttpUrl(this);
+      return new Url(this);
     }
 
     @Override public String toString() {
@@ -1308,7 +1308,7 @@ public final class HttpUrl {
 
     static final String INVALID_HOST = "Invalid URL host";
 
-    Builder parse(HttpUrl base, String input) {
+    Builder parse(Url base, String input) {
       int pos = skipLeadingAsciiWhitespace(input, 0, input.length());
       int limit = skipTrailingAsciiWhitespace(input, pos, input.length());
 

@@ -93,7 +93,7 @@ public final class CertificatePinnerChainValidationTest {
         .setBody("abc")
         .setSocketPolicy(SocketPolicy.DISCONNECT_AT_END));
     Call call1 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response1 = call1.execute();
     assertThat(response1.body().string()).isEqualTo("abc");
@@ -103,7 +103,7 @@ public final class CertificatePinnerChainValidationTest {
         .setBody("def")
         .setSocketPolicy(SocketPolicy.DISCONNECT_AT_END));
     Call call2 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response2 = call2.execute();
     assertThat(response2.body().string()).isEqualTo("def");
@@ -152,7 +152,7 @@ public final class CertificatePinnerChainValidationTest {
         .setBody("abc")
         .setSocketPolicy(SocketPolicy.DISCONNECT_AT_END));
     Call call1 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response1 = call1.execute();
     assertThat(response1.body().string()).isEqualTo("abc");
@@ -166,7 +166,7 @@ public final class CertificatePinnerChainValidationTest {
         .setBody("def")
         .setSocketPolicy(SocketPolicy.DISCONNECT_AT_END));
     Call call2 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response2 = call2.execute();
     assertThat(response2.body().string()).isEqualTo("def");
@@ -236,7 +236,7 @@ public final class CertificatePinnerChainValidationTest {
     // Make a request from client to server. It should succeed certificate checks (unfortunately the
     // rogue CA is trusted) but it should fail certificate pinning.
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     Call call = client.newCall(request);
     try {
@@ -312,7 +312,7 @@ public final class CertificatePinnerChainValidationTest {
     // Make a request from client to server. It should succeed certificate checks (unfortunately the
     // rogue CA is trusted) but it should fail certificate pinning.
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     Call call = client.newCall(request);
     try {

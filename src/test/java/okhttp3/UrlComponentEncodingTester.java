@@ -230,7 +230,7 @@ class UrlComponentEncodingTester {
   private void testParseAlreadyEncoded(int codePoint, Encoding encoding, Component component) {
     String encoded = encoding.encode(codePoint);
     String urlString = component.urlString(encoded);
-    HttpUrl url = HttpUrl.get(urlString);
+    Url url = Url.get(urlString);
     if (!component.encodedValue(url).equals(encoded)) {
       fail(Util.format("Encoding %s %#x using %s", component, codePoint, encoding));
     }
@@ -238,9 +238,9 @@ class UrlComponentEncodingTester {
 
   private void testEncodeAndDecode(int codePoint, Component component) {
     String expected = Encoding.IDENTITY.encode(codePoint);
-    HttpUrl.Builder builder = HttpUrl.get("http://host/").newBuilder();
+    Url.Builder builder = Url.get("http://host/").newBuilder();
     component.set(builder, expected);
-    HttpUrl url = builder.build();
+    Url url = builder.build();
     String actual = component.get(url);
     if (!expected.equals(actual)) {
       fail(Util.format("Roundtrip %s %#x %s", component, codePoint, url));
@@ -252,7 +252,7 @@ class UrlComponentEncodingTester {
     if (encoding != Encoding.PERCENT) return;
     String identity = Encoding.IDENTITY.encode(codePoint);
     String urlString = component.urlString(identity);
-    HttpUrl url = HttpUrl.get(urlString);
+    Url url = Url.get(urlString);
 
     String s = component.encodedValue(url);
     if (!s.equals(encoded)) {
@@ -262,8 +262,8 @@ class UrlComponentEncodingTester {
 
   private void testToUrl(int codePoint, Encoding encoding, Component component) {
     String encoded = encoding.encode(codePoint);
-    HttpUrl httpUrl = HttpUrl.get(component.urlString(encoded));
-    URL javaNetUrl = httpUrl.url();
+    Url url = Url.get(component.urlString(encoded));
+    URL javaNetUrl = url.url();
     if (!javaNetUrl.toString().equals(javaNetUrl.toString())) {
       fail(Util.format("Encoding %s %#x using %s", component, codePoint, encoding));
     }
@@ -271,9 +271,9 @@ class UrlComponentEncodingTester {
 
   private void testFromUrl(int codePoint, Encoding encoding, Component component) {
     String encoded = encoding.encode(codePoint);
-    HttpUrl httpUrl = HttpUrl.get(component.urlString(encoded));
-    HttpUrl toAndFromJavaNetUrl = HttpUrl.get(httpUrl.url());
-    if (!toAndFromJavaNetUrl.equals(httpUrl)) {
+    Url url = Url.get(component.urlString(encoded));
+    Url toAndFromJavaNetUrl = Url.get(url.url());
+    if (!toAndFromJavaNetUrl.equals(url)) {
       fail(Util.format("Encoding %s %#x using %s", component, codePoint, encoding));
     }
   }
@@ -282,12 +282,12 @@ class UrlComponentEncodingTester {
       int codePoint, Encoding encoding, Component component, boolean uriEscaped) {
     String string = new String(new int[] {codePoint}, 0, 1);
     String encoded = encoding.encode(codePoint);
-    HttpUrl httpUrl = HttpUrl.get(component.urlString(encoded));
-    URI uri = httpUrl.uri();
-    HttpUrl toAndFromUri = HttpUrl.get(uri);
+    Url url = Url.get(component.urlString(encoded));
+    URI uri = url.uri();
+    Url toAndFromUri = Url.get(uri);
     if (uriEscaped) {
       // The URI has more escaping than the HttpURL. Check that the decoded values still match.
-      if (uri.toString().equals(httpUrl.toString())) {
+      if (uri.toString().equals(url.toString())) {
         fail(Util.format("Encoding %s %#x using %s", component, codePoint, encoding));
       }
       if (!component.get(toAndFromUri).equals(string)) {
@@ -295,10 +295,10 @@ class UrlComponentEncodingTester {
       }
     } else {
       // Check that the URI and HttpURL have the exact same escaping.
-      if (!toAndFromUri.equals(httpUrl)) {
+      if (!toAndFromUri.equals(url)) {
         fail(Util.format("Encoding %s %#x using %s", component, codePoint, encoding));
       }
-      if (!uri.toString().equals(httpUrl.toString())) {
+      if (!uri.toString().equals(url.toString())) {
         fail(Util.format("Encoding %s %#x using %s", component, codePoint, encoding));
       }
     }
@@ -335,15 +335,15 @@ class UrlComponentEncodingTester {
         return "http://" + value + "@example.com/";
       }
 
-      @Override public String encodedValue(HttpUrl url) {
+      @Override public String encodedValue(Url url) {
         return url.encodedUsername();
       }
 
-      @Override public void set(HttpUrl.Builder builder, String value) {
+      @Override public void set(Url.Builder builder, String value) {
         builder.username(value);
       }
 
-      @Override public String get(HttpUrl url) {
+      @Override public String get(Url url) {
         return url.username();
       }
     },
@@ -352,15 +352,15 @@ class UrlComponentEncodingTester {
         return "http://:" + value + "@example.com/";
       }
 
-      @Override public String encodedValue(HttpUrl url) {
+      @Override public String encodedValue(Url url) {
         return url.encodedPassword();
       }
 
-      @Override public void set(HttpUrl.Builder builder, String value) {
+      @Override public void set(Url.Builder builder, String value) {
         builder.password(value);
       }
 
-      @Override public String get(HttpUrl url) {
+      @Override public String get(Url url) {
         return url.password();
       }
     },
@@ -369,16 +369,16 @@ class UrlComponentEncodingTester {
         return "http://example.com/a" + value + "z/";
       }
 
-      @Override public String encodedValue(HttpUrl url) {
+      @Override public String encodedValue(Url url) {
         String path = url.encodedPath();
         return path.substring(2, path.length() - 2);
       }
 
-      @Override public void set(HttpUrl.Builder builder, String value) {
+      @Override public void set(Url.Builder builder, String value) {
         builder.addPathSegment("a" + value + "z");
       }
 
-      @Override public String get(HttpUrl url) {
+      @Override public String get(Url url) {
         String pathSegment = url.pathSegments().get(0);
         return pathSegment.substring(1, pathSegment.length() - 1);
       }
@@ -388,16 +388,16 @@ class UrlComponentEncodingTester {
         return "http://example.com/?a" + value + "z";
       }
 
-      @Override public String encodedValue(HttpUrl url) {
+      @Override public String encodedValue(Url url) {
         String query = url.encodedQuery();
         return query.substring(1, query.length() - 1);
       }
 
-      @Override public void set(HttpUrl.Builder builder, String value) {
+      @Override public void set(Url.Builder builder, String value) {
         builder.query("a" + value + "z");
       }
 
-      @Override public String get(HttpUrl url) {
+      @Override public String get(Url url) {
         String query = url.query();
         return query.substring(1, query.length() - 1);
       }
@@ -407,16 +407,16 @@ class UrlComponentEncodingTester {
         return "http://example.com/?q=a" + value + "z";
       }
 
-      @Override public String encodedValue(HttpUrl url) {
+      @Override public String encodedValue(Url url) {
         String query = url.encodedQuery();
         return query.substring(3, query.length() - 1);
       }
 
-      @Override public void set(HttpUrl.Builder builder, String value) {
+      @Override public void set(Url.Builder builder, String value) {
         builder.addQueryParameter("q", "a" + value + "z");
       }
 
-      @Override public String get(HttpUrl url) {
+      @Override public String get(Url url) {
         String value = url.queryParameter("q");
         return value.substring(1, value.length() - 1);
       }
@@ -426,16 +426,16 @@ class UrlComponentEncodingTester {
         return "http://example.com/#a" + value + "z";
       }
 
-      @Override public String encodedValue(HttpUrl url) {
+      @Override public String encodedValue(Url url) {
         String fragment = url.encodedFragment();
         return fragment.substring(1, fragment.length() - 1);
       }
 
-      @Override public void set(HttpUrl.Builder builder, String value) {
+      @Override public void set(Url.Builder builder, String value) {
         builder.fragment("a" + value + "z");
       }
 
-      @Override public String get(HttpUrl url) {
+      @Override public String get(Url url) {
         String fragment = url.fragment();
         return fragment.substring(1, fragment.length() - 1);
       }
@@ -443,10 +443,10 @@ class UrlComponentEncodingTester {
 
     public abstract String urlString(String value);
 
-    public abstract String encodedValue(HttpUrl url);
+    public abstract String encodedValue(Url url);
 
-    public abstract void set(HttpUrl.Builder builder, String value);
+    public abstract void set(Url.Builder builder, String value);
 
-    public abstract String get(HttpUrl url);
+    public abstract String get(Url url);
   }
 }

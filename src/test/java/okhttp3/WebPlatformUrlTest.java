@@ -61,7 +61,7 @@ public final class WebPlatformUrlTest {
       "Parsing: <http://０Ｘｃ０．０２５０．０１> against <http://other.com/>"
   );
 
-  /** Test how {@link HttpUrl} does against the web platform test suite. */
+  /** Test how {@link Url} does against the web platform test suite. */
   @Test public void httpUrl() throws Exception {
     if (!testData.scheme.isEmpty() && !HTTP_URL_SCHEMES.contains(testData.scheme)) {
       System.err.println("Ignoring unsupported scheme " + testData.scheme);
@@ -90,11 +90,11 @@ public final class WebPlatformUrlTest {
   }
 
   private void testHttpUrl() {
-    HttpUrl url;
+    Url url;
     if (testData.base.equals("about:blank")) {
-      url = HttpUrl.parse(testData.input);
+      url = Url.parse(testData.input);
     } else {
-      HttpUrl baseUrl = HttpUrl.get(testData.base);
+      Url baseUrl = Url.get(testData.base);
       url = baseUrl.resolve(testData.input);
     }
 
@@ -103,7 +103,7 @@ public final class WebPlatformUrlTest {
     } else {
       assertThat(url).overridingErrorMessage(
           "Expected URL to parse successfully, but was null").isNotNull();
-      String effectivePort = url.port() != HttpUrl.defaultPort(url.scheme())
+      String effectivePort = url.port() != Url.defaultPort(url.scheme())
           ? Integer.toString(url.port())
           : "";
       String effectiveQuery = url.encodedQuery() != null ? "?" + url.encodedQuery() : "";

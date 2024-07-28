@@ -17,8 +17,8 @@ package okhttp3.internal.http;
 
 import java.net.HttpURLConnection;
 import java.net.Proxy;
-import okhttp3.HttpUrl;
 import okhttp3.Request;
+import okhttp3.Url;
 
 public final class RequestLine {
   private RequestLine() {
@@ -56,7 +56,7 @@ public final class RequestLine {
    * Returns the path to request, like the '/' in 'GET / HTTP/1.1'. Never empty, even if the request
    * URL is. Includes the query component if it exists.
    */
-  public static String requestPath(HttpUrl url) {
+  public static String requestPath(Url url) {
     String path = url.encodedPath();
     String query = url.encodedQuery();
     return query != null ? (path + '?' + query) : path;

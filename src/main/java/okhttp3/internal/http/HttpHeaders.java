@@ -27,8 +27,8 @@ import okhttp3.Challenge;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.Headers;
-import okhttp3.HttpUrl;
 import okhttp3.Response;
+import okhttp3.Url;
 import okio.Buffer;
 import okio.ByteString;
 
@@ -226,7 +226,7 @@ public final class HttpHeaders {
     return new String(array);
   }
 
-  public static void receiveHeaders(CookieJar cookieJar, HttpUrl url, Headers headers) {
+  public static void receiveHeaders(CookieJar cookieJar, Url url, Headers headers) {
     if (cookieJar == CookieJar.NO_COOKIES) return;
 
     List<Cookie> cookies = Cookie.parseAll(url, headers);

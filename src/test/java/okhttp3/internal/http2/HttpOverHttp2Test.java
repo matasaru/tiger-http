@@ -157,7 +157,7 @@ public final class HttpOverHttp2Test {
         .setStatus("HTTP/1.1 200 Sweet"));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/foo"))
+        .url(server.url("/foo").toString())
         .build());
     Response response = call.execute();
 
@@ -177,7 +177,7 @@ public final class HttpOverHttp2Test {
     server.enqueue(new MockResponse());
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/foo"))
+        .url(server.url("/foo").toString())
         .build());
     Response response = call.execute();
 
@@ -191,7 +191,7 @@ public final class HttpOverHttp2Test {
     server.enqueue(new MockResponse().setBody("ABCDE"));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/foo"))
+        .url(server.url("/foo").toString())
         .post(new RequestBody() {
           @Override public MediaType contentType() {
             return MediaType.get("text/plain; charset=utf-8");
@@ -218,7 +218,7 @@ public final class HttpOverHttp2Test {
     server.enqueue(new MockResponse().setBody("ABCDE"));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/foo"))
+        .url(server.url("/foo").toString())
         .post(new RequestBody() {
           @Override public MediaType contentType() {
             return MediaType.get("text/plain; charset=utf-8");
@@ -250,7 +250,7 @@ public final class HttpOverHttp2Test {
     server.enqueue(new MockResponse().setBody("ABCDE"));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/foo"))
+        .url(server.url("/foo").toString())
         .post(new RequestBody() {
           @Override public MediaType contentType() {
             return MediaType.get("text/plain; charset=utf-8");
@@ -283,10 +283,10 @@ public final class HttpOverHttp2Test {
     server.enqueue(new MockResponse().setBody("GHIJKL"));
 
     Call call1 = client.newCall(new Request.Builder()
-        .url(server.url("/r1"))
+        .url(server.url("/r1").toString())
         .build());
     Call call2 = client.newCall(new Request.Builder()
-        .url(server.url("/r1"))
+        .url(server.url("/r1").toString())
         .build());
     Response response1 = call1.execute();
     Response response2 = call2.execute();
@@ -309,7 +309,7 @@ public final class HttpOverHttp2Test {
         .setBody("abc"));
 
     Call call1 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response1 = call1.execute();
 
@@ -322,7 +322,7 @@ public final class HttpOverHttp2Test {
         "Call should not have completed successfully.").isFalse();
 
     Call call2 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response2 = call2.execute();
     Assertions.assertThat(response2.body().string()).isEqualTo("abc");
@@ -347,7 +347,7 @@ public final class HttpOverHttp2Test {
         .setBody("abc"));
 
     Call call1 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response1 = call1.execute();
 
@@ -359,7 +359,7 @@ public final class HttpOverHttp2Test {
     response1.close();
 
     Call call2 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response2 = call2.execute();
     Assertions.assertThat(response2.body().string()).isEqualTo("abc");
@@ -372,7 +372,7 @@ public final class HttpOverHttp2Test {
         .setBody("abc"));
 
     Call call1 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response1 = call1.execute();
 
@@ -386,7 +386,7 @@ public final class HttpOverHttp2Test {
     // Make a second call that should transmit the response headers. The response body won't be
     // transmitted until the flow-control window is updated from the first request.
     Call call2 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response2 = call2.execute();
     Assertions.assertThat(response2.code()).isEqualTo(200);
@@ -418,7 +418,7 @@ public final class HttpOverHttp2Test {
         .setBody(gzip("ABCABCABC")));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/r1"))
+        .url(server.url("/r1").toString())
         .build());
 
     Response response = call.execute();
@@ -439,7 +439,7 @@ public final class HttpOverHttp2Test {
         .build();
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     Assertions.assertThat(response.body().string()).isEqualTo("Successful auth!");
@@ -458,7 +458,7 @@ public final class HttpOverHttp2Test {
     server.enqueue(new MockResponse().setBody("This is the new location!"));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
 
     Response response = call.execute();
@@ -474,7 +474,7 @@ public final class HttpOverHttp2Test {
     server.enqueue(new MockResponse().setBody("ABC"));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
 
@@ -498,7 +498,7 @@ public final class HttpOverHttp2Test {
 
     // Make a call expecting a timeout reading the response headers.
     Call call1 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     try {
       call1.execute();
@@ -509,7 +509,7 @@ public final class HttpOverHttp2Test {
 
     // Confirm that a subsequent request on the same connection is not impacted.
     Call call2 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response2 = call2.execute();
     Assertions.assertThat(response2.body().string()).isEqualTo("A");
@@ -535,7 +535,7 @@ public final class HttpOverHttp2Test {
         .build();
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
 
     Response response = call.execute();
@@ -562,7 +562,7 @@ public final class HttpOverHttp2Test {
 
     // Make a call expecting a timeout reading the response body.
     Call call1 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response1 = call1.execute();
     try {
@@ -574,7 +574,7 @@ public final class HttpOverHttp2Test {
 
     // Confirm that a subsequent request on the same connection is not impacted.
     Call call2 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response2 = call2.execute();
     Assertions.assertThat(response2.body().string()).isEqualTo(body);
@@ -594,7 +594,7 @@ public final class HttpOverHttp2Test {
         .build();
     Call call1 = client1
         .newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
 
     HttpClient client2 = client.newBuilder()
@@ -602,7 +602,7 @@ public final class HttpOverHttp2Test {
         .build();
     Call call2 = client2
         .newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
 
     Response response1 = call1.execute();
@@ -633,7 +633,7 @@ public final class HttpOverHttp2Test {
 
     server.enqueue(new MockResponse());
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     Assertions.assertThat(response.body().string()).isEqualTo("");
@@ -652,7 +652,7 @@ public final class HttpOverHttp2Test {
         .addHeader("set-cookie: a=b"));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     Assertions.assertThat(response.body().string()).isEqualTo("");
@@ -668,7 +668,7 @@ public final class HttpOverHttp2Test {
 
     // Disconnect before the stream is created. A connection is still established!
     Call call1 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call1.execute();
     call1.cancel();
@@ -676,7 +676,7 @@ public final class HttpOverHttp2Test {
     // That connection is pooled, and it works.
     Assertions.assertThat(client.connectionPool().connectionCount()).isEqualTo(1);
     Call call2 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response2 = call2.execute();
     Assertions.assertThat(response2.body().string()).isEqualTo("def");
@@ -694,7 +694,7 @@ public final class HttpOverHttp2Test {
         .setBody("abc"));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     Assertions.assertThat(response.body().string()).isEqualTo("abc");
@@ -717,7 +717,7 @@ public final class HttpOverHttp2Test {
         .build();
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     Assertions.assertThat(response.body().string()).isEqualTo("abc");
@@ -743,7 +743,7 @@ public final class HttpOverHttp2Test {
         .build();
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     Assertions.assertThat(response.body().string()).isEqualTo("abc");
@@ -771,7 +771,7 @@ public final class HttpOverHttp2Test {
 
     // Make a second request to ensure the connection is reused.
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     Assertions.assertThat(response.body().string()).isEqualTo("def");
@@ -797,7 +797,7 @@ public final class HttpOverHttp2Test {
 
     // Make a third request to ensure the connection is reused.
     Call call = client.newCall(new Request.Builder()
-            .url(server.url("/"))
+            .url(server.url("/").toString())
             .build());
     Response response = call.execute();
     Assertions.assertThat(response.body().string()).isEqualTo("ghi");
@@ -807,7 +807,7 @@ public final class HttpOverHttp2Test {
   /** Make a call and canceling it as soon as it's accepted by the server. */
   private void callAndCancel(int expectedSequenceNumber) throws Exception {
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     CountDownLatch latch = new CountDownLatch(1);
     call.enqueue(new Callback() {
@@ -845,7 +845,7 @@ public final class HttpOverHttp2Test {
         .build();
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     try {
       call.execute();
@@ -897,7 +897,7 @@ public final class HttpOverHttp2Test {
 
     // Make the first request waiting until we get our auth challenge.
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     blockingAuthClient.newCall(request).enqueue(callback);
     String response1 = responses.take();
@@ -927,7 +927,7 @@ public final class HttpOverHttp2Test {
         .addHeaderLenient("β", "Beta"));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     response.close();
@@ -945,7 +945,7 @@ public final class HttpOverHttp2Test {
         .withPush(pushPromise));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/foo"))
+        .url(server.url("/foo").toString())
         .build());
     Response response = call.execute();
 
@@ -974,7 +974,7 @@ public final class HttpOverHttp2Test {
         .withPush(pushPromise));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/foo"))
+        .url(server.url("/foo").toString())
         .build());
     Response response = call.execute();
     Assertions.assertThat(response.body().string()).isEqualTo("ABCDE");
@@ -998,7 +998,7 @@ public final class HttpOverHttp2Test {
         .setBody("ABC"));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .method("DELETE", null)
         .build());
     Response response = call.execute();
@@ -1016,7 +1016,7 @@ public final class HttpOverHttp2Test {
         .setBody("ABC"));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .method("DELETE", Util.EMPTY_REQUEST)
         .build());
     Response response = call.execute();
@@ -1042,7 +1042,7 @@ public final class HttpOverHttp2Test {
         .setBody("ABC"));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     Assertions.assertThat(response.body().string()).isEqualTo("ABC");
@@ -1074,7 +1074,7 @@ public final class HttpOverHttp2Test {
 
     // Make a call. It'll fail as soon as our pings detect a problem.
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     long executeAtNanos = System.nanoTime();
     try {
@@ -1112,7 +1112,7 @@ public final class HttpOverHttp2Test {
 
     // The first call times out.
     Call call1 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     try {
       call1.execute();
@@ -1122,7 +1122,7 @@ public final class HttpOverHttp2Test {
 
     // The second call times out because it uses the same bad connection.
     Call call2 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     try {
       call2.execute();
@@ -1133,7 +1133,7 @@ public final class HttpOverHttp2Test {
     // But after the degraded pong timeout, that connection is abandoned.
     Thread.sleep(TimeUnit.NANOSECONDS.toMillis(Http2Connection.DEGRADED_PONG_TIMEOUT_NS));
     Call call3 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     try (Response response = call3.execute()) {
       Assertions.assertThat(response.body().string()).isEqualTo("fresh connection");
@@ -1155,7 +1155,7 @@ public final class HttpOverHttp2Test {
 
     // The first call times out.
     Call call1 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     try (Response response = call1.execute()) {
       response.body().string();
@@ -1165,7 +1165,7 @@ public final class HttpOverHttp2Test {
 
     // The second call succeeds.
     Call call2 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     try (Response response = call2.execute()) {
       Assertions.assertThat(response.body().string()).isEqualTo("b");
@@ -1174,7 +1174,7 @@ public final class HttpOverHttp2Test {
     // Calls succeed after the degraded pong timeout because the degraded pong was received.
     Thread.sleep(TimeUnit.NANOSECONDS.toMillis(Http2Connection.DEGRADED_PONG_TIMEOUT_NS));
     Call call3 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     try (Response response = call3.execute()) {
       Assertions.assertThat(response.body().string()).isEqualTo("c");
@@ -1217,7 +1217,7 @@ public final class HttpOverHttp2Test {
     server.enqueue(new MockResponse().withSettings(settings));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     Assertions.assertThat(response.body().string()).isEqualTo("");
@@ -1230,17 +1230,17 @@ public final class HttpOverHttp2Test {
         .setBody("GHI"));
 
     Call call1 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response1 = call1.execute();
 
     Call call2 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response2 = call2.execute();
 
     Call call3 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response3 = call3.execute();
 
@@ -1265,13 +1265,13 @@ public final class HttpOverHttp2Test {
         .setBody("DEF"));
 
     Call call1 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response1 = call1.execute();
     Assertions.assertThat(response1.body().string()).isEqualTo("ABC");
 
     Call call2 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response2 = call2.execute();
     Assertions.assertThat(response2.body().string()).isEqualTo("DEF");
@@ -1300,7 +1300,7 @@ public final class HttpOverHttp2Test {
               // server to send a GOAWAY frame, leaving the connection in a shutdown state.
               executedCall = true;
               Call call = client.newCall(new Request.Builder()
-                  .url(server.url("/"))
+                  .url(server.url("/").toString())
                   .build());
               Response response = call.execute();
               Assertions.assertThat(response.body().string()).isEqualTo("ABC");
@@ -1314,7 +1314,7 @@ public final class HttpOverHttp2Test {
         .build();
 
     Call call = client2.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     Assertions.assertThat(response.body().string()).isEqualTo("DEF");
@@ -1340,8 +1340,8 @@ public final class HttpOverHttp2Test {
         System.out.println(e);
       }
     };
-    client.newCall(new Request.Builder().url(server.url("/")).build()).enqueue(callback);
-    client.newCall(new Request.Builder().url(server.url("/")).build()).enqueue(callback);
+    client.newCall(new Request.Builder().url(server.url("/").toString()).build()).enqueue(callback);
+    client.newCall(new Request.Builder().url(server.url("/").toString()).build()).enqueue(callback);
 
     Assertions.assertThat(bodies.poll(2, SECONDS)).isEqualTo("DEF");
     Assertions.assertThat(bodies.poll(2, SECONDS)).isEqualTo("ABC");
@@ -1452,7 +1452,7 @@ public final class HttpOverHttp2Test {
     server.enqueue(new MockResponse());
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
 
     Response response = call.execute();
@@ -1483,7 +1483,7 @@ public final class HttpOverHttp2Test {
     @Override public void run() {
       try {
         Call call = client.newCall(new Request.Builder()
-            .url(server.url(path))
+            .url(server.url(path).toString())
             .build());
         Response response = call.execute();
         Assertions.assertThat(response.body().string()).isEqualTo("A");
@@ -1523,8 +1523,8 @@ public final class HttpOverHttp2Test {
       }
     }).build();
 
-    client.newCall(new Request.Builder().url(server.url("")).build()).enqueue(callback);
-    client.newCall(new Request.Builder().url(server.url("")).build()).enqueue(callback);
+    client.newCall(new Request.Builder().url(server.url("").toString()).build()).enqueue(callback);
+    client.newCall(new Request.Builder().url(server.url("").toString()).build()).enqueue(callback);
 
     latch.await();
   }

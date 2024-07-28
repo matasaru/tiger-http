@@ -34,7 +34,7 @@ import okhttp3.internal.Util;
  * <p>HTTP requests that share the same {@code Address} may also share the same {@link Connection}.
  */
 public final class Address {
-  final HttpUrl url;
+  final Url url;
   final Dns dns;
   final SocketFactory socketFactory;
   final Authenticator proxyAuthenticator;
@@ -51,7 +51,7 @@ public final class Address {
       CertificatePinner certificatePinner, Authenticator proxyAuthenticator,
       Proxy proxy, List<Protocol> protocols, List<ConnectionSpec> connectionSpecs,
       ProxySelector proxySelector) {
-    this.url = new HttpUrl.Builder()
+    this.url = new Url.Builder()
         .scheme(sslSocketFactory != null ? "https" : "http")
         .host(uriHost)
         .port(uriPort)
@@ -87,7 +87,7 @@ public final class Address {
    * Returns a URL with the hostname and port of the origin server. The path, query, and fragment of
    * this URL are always empty, since they are not significant for planning a route.
    */
-  public HttpUrl url() {
+  public Url url() {
     return url;
   }
 

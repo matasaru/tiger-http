@@ -101,7 +101,7 @@ public final class EventListenerTest {
         .setBody("abc"));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     Assertions.assertThat(response.code()).isEqualTo(200);
@@ -120,7 +120,7 @@ public final class EventListenerTest {
         .setBody("abc"));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
 
     final CountDownLatch completionLatch = new CountDownLatch(1);
@@ -152,7 +152,7 @@ public final class EventListenerTest {
     client = client.newBuilder().readTimeout(250, TimeUnit.MILLISECONDS).build();
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     try {
       call.execute();
@@ -179,7 +179,7 @@ public final class EventListenerTest {
         .build();
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
 
     Response response = call.execute();
@@ -202,7 +202,7 @@ public final class EventListenerTest {
 
   @Test public void canceledCallEventSequence() {
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     call.cancel();
     try {
@@ -218,7 +218,7 @@ public final class EventListenerTest {
 
   private void assertSuccessfulEventOrder(Matcher<Response> responseMatcher) throws IOException {
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     Assertions.assertThat(response.code()).isEqualTo(200);
@@ -242,13 +242,13 @@ public final class EventListenerTest {
     server.enqueue(new MockResponse());
 
     client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build()).execute().close();
 
     listener.removeUpToEvent(CallEnd.class);
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     response.close();
@@ -384,7 +384,7 @@ public final class EventListenerTest {
     server.enqueue(new MockResponse());
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     Assertions.assertThat(response.code()).isEqualTo(200);
@@ -406,7 +406,7 @@ public final class EventListenerTest {
 
     // Seed the pool.
     Call call1 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response1 = call1.execute();
     Assertions.assertThat(response1.code()).isEqualTo(200);
@@ -415,7 +415,7 @@ public final class EventListenerTest {
     listener.clearAllEvents();
 
     Call call2 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response2 = call2.execute();
     Assertions.assertThat(response2.code()).isEqualTo(200);
@@ -501,7 +501,7 @@ public final class EventListenerTest {
     server.enqueue(new MockResponse());
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     Assertions.assertThat(response.code()).isEqualTo(200);
@@ -527,7 +527,7 @@ public final class EventListenerTest {
         .setSocketPolicy(SocketPolicy.FAIL_HANDSHAKE));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     try {
       call.execute();
@@ -561,7 +561,7 @@ public final class EventListenerTest {
         .build();
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     Assertions.assertThat(response.code()).isEqualTo(200);
@@ -649,7 +649,7 @@ public final class EventListenerTest {
         .build();
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     Assertions.assertThat(response.code()).isEqualTo(200);
@@ -669,7 +669,7 @@ public final class EventListenerTest {
     server.enqueue(new MockResponse());
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     Assertions.assertThat(response.code()).isEqualTo(200);
@@ -689,7 +689,7 @@ public final class EventListenerTest {
         .setSocketPolicy(SocketPolicy.FAIL_HANDSHAKE));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     try {
       call.execute();
@@ -716,7 +716,7 @@ public final class EventListenerTest {
         .build();
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     Assertions.assertThat(response.code()).isEqualTo(200);
@@ -741,7 +741,7 @@ public final class EventListenerTest {
         .build();
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     Assertions.assertThat(response.code()).isEqualTo(200);
@@ -765,7 +765,7 @@ public final class EventListenerTest {
 
     // Seed the pool.
     Call call1 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response1 = call1.execute();
     Assertions.assertThat(response1.code()).isEqualTo(200);
@@ -774,7 +774,7 @@ public final class EventListenerTest {
     listener.clearAllEvents();
 
     Call call2 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response2 = call2.execute();
     Assertions.assertThat(response2.code()).isEqualTo(200);
@@ -789,7 +789,7 @@ public final class EventListenerTest {
     server.enqueue(new MockResponse());
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     Assertions.assertThat(response.code()).isEqualTo(200);
@@ -808,7 +808,7 @@ public final class EventListenerTest {
         .setBody("ABC"));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     Assertions.assertThat(response.body().string()).isEqualTo("ABC");
@@ -825,7 +825,7 @@ public final class EventListenerTest {
 
     // Seed the pool.
     Call call1 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response1 = call1.execute();
     Assertions.assertThat(response1.code()).isEqualTo(200);
@@ -835,7 +835,7 @@ public final class EventListenerTest {
     listener.clearAllEvents();
 
     Call call2 = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response2 = call2.execute();
     Assertions.assertThat(response2.code()).isEqualTo(200);
@@ -855,7 +855,7 @@ public final class EventListenerTest {
         .setBody("ABC"));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     Assertions.assertThat(response.body().string()).isEqualTo("ABC");
@@ -888,7 +888,7 @@ public final class EventListenerTest {
         .setSocketPolicy(SocketPolicy.DISCONNECT_DURING_RESPONSE_BODY));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     if (expectedProtocol == Protocol.HTTP_2) {
@@ -913,7 +913,7 @@ public final class EventListenerTest {
         .setSocketPolicy(SocketPolicy.DISCONNECT_DURING_RESPONSE_BODY));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     response.body().close();
@@ -931,7 +931,7 @@ public final class EventListenerTest {
         .setBody(""));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     response.body().close();
@@ -950,7 +950,7 @@ public final class EventListenerTest {
         .setSocketPolicy(SocketPolicy.DISCONNECT_DURING_RESPONSE_BODY));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     response.body().close();
@@ -1002,7 +1002,7 @@ public final class EventListenerTest {
         .setSocketPolicy(SocketPolicy.DISCONNECT_DURING_REQUEST_BODY));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(requestBody)
         .build());
     try {
@@ -1043,7 +1043,7 @@ public final class EventListenerTest {
         .setSocketPolicy(SocketPolicy.DISCONNECT_DURING_REQUEST_BODY));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(requestBody)
         .build());
     try {
@@ -1105,7 +1105,7 @@ public final class EventListenerTest {
             .setLevel(HttpLoggingInterceptor.Level.BODY))
         .build();
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     Response response = call.execute();
     Assertions.assertThat(response.code()).isEqualTo(200);
@@ -1124,7 +1124,7 @@ public final class EventListenerTest {
     server.enqueue(new MockResponse().setResponseCode(200).setBody("World!"));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(body)
         .build());
     Response response = call.execute();
@@ -1150,7 +1150,7 @@ public final class EventListenerTest {
             .addHeader("Location: /foo"));
     server.enqueue(new MockResponse());
 
-    Call call = client.newCall(new Request.Builder().url(server.url("/")).build());
+    Call call = client.newCall(new Request.Builder().url(server.url("/").toString()).build());
     call.execute();
 
     List<String> expectedEvents = Arrays.asList("CallStart", "DnsStart", "DnsEnd",
@@ -1171,7 +1171,7 @@ public final class EventListenerTest {
             .addHeader("Location: " + otherServer.url("/foo")));
     otherServer.enqueue(new MockResponse());
 
-    Call call = client.newCall(new Request.Builder().url(server.url("/")).build());
+    Call call = client.newCall(new Request.Builder().url(server.url("/").toString()).build());
     Response response = call.execute();
 
     List<String> expectedEvents = Arrays.asList("CallStart", "DnsStart", "DnsEnd",
@@ -1197,7 +1197,7 @@ public final class EventListenerTest {
         })
         .build();
 
-    Call call = client.newCall(new Request.Builder().url(server.url("/")).build());
+    Call call = client.newCall(new Request.Builder().url(server.url("/").toString()).build());
     Response response = call.execute();
     Assertions.assertThat(response.body().string()).isEqualTo("b");
 
@@ -1224,7 +1224,7 @@ public final class EventListenerTest {
             .build())
         .build();
 
-    Call call = client.newCall(new Request.Builder().url(server.url("/")).build());
+    Call call = client.newCall(new Request.Builder().url(server.url("/").toString()).build());
     Response response = call.execute();
     Assertions.assertThat(response.body().string()).isEqualTo("a");
 
@@ -1238,7 +1238,7 @@ public final class EventListenerTest {
         .setSocketPolicy(SocketPolicy.EXPECT_CONTINUE));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .header("Expect", "100-continue")
         .post(RequestBody.create(MediaType.get("text/plain"), "abc"))
         .build();

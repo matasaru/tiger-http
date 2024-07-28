@@ -43,12 +43,12 @@ import okhttp3.ConnectionSpec;
 import okhttp3.EventListener;
 import okhttp3.Handshake;
 import okhttp3.HttpClient;
-import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.Route;
+import okhttp3.Url;
 import okhttp3.internal.Internal;
 import okhttp3.internal.Util;
 import okhttp3.internal.Version;
@@ -223,7 +223,7 @@ public final class RealConnection extends Http2Connection.Listener implements Co
   private void connectTunnel(int connectTimeout, int readTimeout, int writeTimeout, Call call,
       EventListener eventListener) throws IOException {
     Request tunnelRequest = createTunnelRequest();
-    HttpUrl url = tunnelRequest.url();
+    Url url = tunnelRequest.url();
     for (int i = 0; i < MAX_TUNNEL_ATTEMPTS; i++) {
       connectSocket(connectTimeout, readTimeout, call, eventListener);
       tunnelRequest = createTunnel(readTimeout, writeTimeout, tunnelRequest, url);
@@ -381,7 +381,7 @@ public final class RealConnection extends Http2Connection.Listener implements Co
    * the proxy connection. This may need to be retried if the proxy requires authorization.
    */
   private Request createTunnel(int readTimeout, int writeTimeout, Request tunnelRequest,
-      HttpUrl url) throws IOException {
+      Url url) throws IOException {
     // Make an SSL Tunnel on the first message pair of each SSL + proxy connection.
     String requestLine = "CONNECT " + Util.hostHeader(url, true) + " HTTP/1.1";
     while (true) {
@@ -518,7 +518,7 @@ public final class RealConnection extends Http2Connection.Listener implements Co
     return false;
   }
 
-  public boolean supportsUrl(HttpUrl url) {
+  public boolean supportsUrl(Url url) {
     if (url.port() != route.address().url().port()) {
       return false; // Port mismatch.
     }

@@ -41,7 +41,7 @@ public final class WholeOperationTimeoutTest {
 
   @Test public void defaultConfigIsNoTimeout() throws Exception {
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     Call call = client.newCall(request);
     assertThat(call.timeout().timeoutNanos()).isEqualTo(0);
@@ -49,7 +49,7 @@ public final class WholeOperationTimeoutTest {
 
   @Test public void configureClientDefault() throws Exception {
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
 
     HttpClient timeoutClient = client.newBuilder()
@@ -64,7 +64,7 @@ public final class WholeOperationTimeoutTest {
     server.enqueue(new MockResponse());
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(sleepingRequestBody(500))
         .build();
 
@@ -83,7 +83,7 @@ public final class WholeOperationTimeoutTest {
     server.enqueue(new MockResponse());
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(sleepingRequestBody(500))
         .build();
 
@@ -114,7 +114,7 @@ public final class WholeOperationTimeoutTest {
         .setHeadersDelay(500, TimeUnit.MILLISECONDS));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
 
     Call call = client.newCall(request);
@@ -133,7 +133,7 @@ public final class WholeOperationTimeoutTest {
         .setHeadersDelay(500, TimeUnit.MILLISECONDS));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
 
     final CountDownLatch latch = new CountDownLatch(1);
@@ -163,7 +163,7 @@ public final class WholeOperationTimeoutTest {
         .setBody(BIG_ENOUGH_BODY));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
 
     Call call = client.newCall(request);
@@ -184,7 +184,7 @@ public final class WholeOperationTimeoutTest {
         .setBody(BIG_ENOUGH_BODY));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
 
     final CountDownLatch latch = new CountDownLatch(1);
@@ -243,7 +243,7 @@ public final class WholeOperationTimeoutTest {
     server.enqueue(new MockResponse());
 
     Request request = new Request.Builder()
-        .url(server.url("/a"))
+        .url(server.url("/a").toString())
         .build();
 
     Call call = client.newCall(request);
@@ -268,7 +268,7 @@ public final class WholeOperationTimeoutTest {
 
     otherServer.enqueue(new MockResponse().setHeadersDelay(500, TimeUnit.MILLISECONDS));
 
-    Request request = new Request.Builder().url(server.url("/")).build();
+    Request request = new Request.Builder().url(server.url("/").toString()).build();
 
     Call call = client.newCall(request);
     call.timeout().timeout(250, TimeUnit.MILLISECONDS);
@@ -287,7 +287,7 @@ public final class WholeOperationTimeoutTest {
         .setBody(BIG_ENOUGH_BODY));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(sleepingRequestBody(250))
         .build();
 

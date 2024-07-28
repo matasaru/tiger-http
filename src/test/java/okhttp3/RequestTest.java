@@ -122,7 +122,7 @@ public final class RequestTest {
   @Test public void uninitializedURI() throws Exception {
     Request request = new Request.Builder().url("http://localhost/api").build();
     assertThat(request.url().uri()).isEqualTo(new URI("http://localhost/api"));
-    assertThat(request.url()).isEqualTo(HttpUrl.get("http://localhost/api"));
+    assertThat(request.url()).isEqualTo(Url.get("http://localhost/api"));
   }
 
   @Test public void newBuilderUrlResetsUrl() {
@@ -130,7 +130,7 @@ public final class RequestTest {
     Request builtRequestWithoutCache =
         requestWithoutCache.newBuilder().url("http://localhost/api/foo").build();
     assertThat(builtRequestWithoutCache.url()).isEqualTo(
-        HttpUrl.get("http://localhost/api/foo"));
+        Url.get("http://localhost/api/foo"));
 
     Request requestWithCache = new Request.Builder().url("http://localhost/api").build();
     // cache url object
@@ -138,7 +138,7 @@ public final class RequestTest {
     Request builtRequestWithCache = requestWithCache.newBuilder().url(
         "http://localhost/api/foo").build();
     assertThat(builtRequestWithCache.url()).isEqualTo(
-        HttpUrl.get("http://localhost/api/foo"));
+        Url.get("http://localhost/api/foo"));
   }
 
   @Test public void headerAcceptsPermittedCharacters() {

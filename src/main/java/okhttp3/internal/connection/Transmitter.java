@@ -29,9 +29,9 @@ import okhttp3.CertificatePinner;
 import okhttp3.Connection;
 import okhttp3.EventListener;
 import okhttp3.HttpClient;
-import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.Request;
+import okhttp3.Url;
 import okhttp3.internal.Internal;
 import okhttp3.internal.http.ExchangeCodec;
 import okio.AsyncTimeout;
@@ -141,7 +141,7 @@ public final class Transmitter {
         call, eventListener);
   }
 
-  private Address createAddress(HttpUrl url) {
+  private Address createAddress(Url url) {
     SSLSocketFactory sslSocketFactory = null;
     HostnameVerifier hostnameVerifier = null;
     CertificatePinner certificatePinner = null;

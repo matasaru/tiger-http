@@ -21,9 +21,9 @@ import java.net.ProtocolException;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Headers;
 import okhttp3.HttpClient;
-import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.Url;
 import okhttp3.internal.Internal;
 import okhttp3.internal.Util;
 import okhttp3.internal.connection.RealConnection;
@@ -272,7 +272,7 @@ public final class Http1ExchangeCodec implements ExchangeCodec {
     return new FixedLengthSource(length);
   }
 
-  private Source newChunkedSource(HttpUrl url) {
+  private Source newChunkedSource(Url url) {
     if (state != STATE_OPEN_RESPONSE_BODY) throw new IllegalStateException("state: " + state);
     state = STATE_READING_RESPONSE_BODY;
     return new ChunkedSource(url);
@@ -453,11 +453,11 @@ public final class Http1ExchangeCodec implements ExchangeCodec {
   /** An HTTP body with alternating chunk sizes and chunk bodies. */
   private class ChunkedSource extends AbstractSource {
     private static final long NO_CHUNK_YET = -1L;
-    private final HttpUrl url;
+    private final Url url;
     private long bytesRemainingInChunk = NO_CHUNK_YET;
     private boolean hasMoreChunks = true;
 
-    ChunkedSource(HttpUrl url) {
+    ChunkedSource(Url url) {
       this.url = url;
     }
 

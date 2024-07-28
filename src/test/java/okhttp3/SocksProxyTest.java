@@ -53,11 +53,11 @@ public final class SocksProxyTest {
         .proxy(socksProxy.proxy())
         .build();
 
-    Request request1 = new Request.Builder().url(server.url("/")).build();
+    Request request1 = new Request.Builder().url(server.url("/").toString()).build();
     Response response1 = client.newCall(request1).execute();
     assertThat(response1.body().string()).isEqualTo("abc");
 
-    Request request2 = new Request.Builder().url(server.url("/")).build();
+    Request request2 = new Request.Builder().url(server.url("/").toString()).build();
     Response response2 = client.newCall(request2).execute();
     assertThat(response2.body().string()).isEqualTo("def");
 
@@ -82,7 +82,7 @@ public final class SocksProxyTest {
         .proxySelector(proxySelector)
         .build();
 
-    Request request = new Request.Builder().url(server.url("/")).build();
+    Request request = new Request.Builder().url(server.url("/").toString()).build();
     Response response = client.newCall(request).execute();
     assertThat(response.body().string()).isEqualTo("abc");
 
@@ -97,7 +97,7 @@ public final class SocksProxyTest {
         .proxy(socksProxy.proxy())
         .build();
 
-    HttpUrl url = server.url("/")
+    Url url = Url.get(server.url("/").toString())
         .newBuilder()
         .host(SocksProxy.HOSTNAME_THAT_ONLY_THE_PROXY_KNOWS)
         .build();

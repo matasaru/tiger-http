@@ -267,8 +267,8 @@ public final class CertificatePinner {
     Pin(String pattern, String pin) {
       this.pattern = pattern;
       this.canonicalHostname = pattern.startsWith(WILDCARD)
-          ? HttpUrl.get("http://" + pattern.substring(WILDCARD.length())).host()
-          : HttpUrl.get("http://" + pattern).host();
+          ? Url.get("http://" + pattern.substring(WILDCARD.length())).host()
+          : Url.get("http://" + pattern).host();
       if (pin.startsWith("sha1/")) {
         this.hashAlgorithm = "sha1/";
         this.hash = ByteString.decodeBase64(pin.substring("sha1/".length()));

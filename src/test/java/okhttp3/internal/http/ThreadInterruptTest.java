@@ -85,7 +85,7 @@ public final class ThreadInterruptTest {
     server.start();
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(new RequestBody() {
           @Override public MediaType contentType() {
             return null;
@@ -119,7 +119,7 @@ public final class ThreadInterruptTest {
     server.start();
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
 
     Response response = call.execute();

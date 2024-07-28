@@ -28,7 +28,7 @@ import okhttp3.internal.http.HttpMethod;
  * immutable.
  */
 public final class Request {
-  final HttpUrl url;
+  final Url url;
   final String method;
   final Headers headers;
   final RequestBody body;
@@ -42,7 +42,7 @@ public final class Request {
     this.tags = Util.immutableMap(builder.tags);
   }
 
-  public HttpUrl url() {
+  public Url url() {
     return url;
   }
 
@@ -105,7 +105,7 @@ public final class Request {
   }
 
   public static class Builder {
-    HttpUrl url;
+    Url url;
     String method;
     Headers.Builder headers;
     RequestBody body;
@@ -128,7 +128,7 @@ public final class Request {
       this.headers = request.headers.newBuilder();
     }
 
-    public Builder url(HttpUrl url) {
+    public Builder url(Url url) {
       if (url == null) throw new NullPointerException("url == null");
       this.url = url;
       return this;
@@ -138,7 +138,7 @@ public final class Request {
      * Sets the URL target of this request.
      *
      * @throws IllegalArgumentException if {@code url} is not a valid HTTP or HTTPS URL. Avoid this
-     * exception by calling {@link HttpUrl#parse}; it returns null for invalid URLs.
+     * exception by calling {@link Url#parse}; it returns null for invalid URLs.
      */
     public Builder url(String url) {
       if (url == null) throw new NullPointerException("url == null");
@@ -150,7 +150,7 @@ public final class Request {
         url = "https:" + url.substring(4);
       }
 
-      return url(HttpUrl.get(url));
+      return url(Url.get(url));
     }
 
     /**
@@ -161,7 +161,7 @@ public final class Request {
      */
     public Builder url(URL url) {
       if (url == null) throw new NullPointerException("url == null");
-      return url(HttpUrl.get(url.toString()));
+      return url(Url.get(url.toString()));
     }
 
     /**

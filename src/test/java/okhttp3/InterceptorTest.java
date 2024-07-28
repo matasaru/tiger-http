@@ -90,7 +90,7 @@ public final class InterceptorTest {
         .build();
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
 
     try {
@@ -115,7 +115,7 @@ public final class InterceptorTest {
         .build();
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
 
     try {
@@ -143,7 +143,7 @@ public final class InterceptorTest {
         .build();
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
 
     try {
@@ -168,7 +168,7 @@ public final class InterceptorTest {
         .build();
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     client.newCall(request).execute();
   }
@@ -196,7 +196,7 @@ public final class InterceptorTest {
         .build();
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
 
     // No extra headers in the application's request.
@@ -228,7 +228,7 @@ public final class InterceptorTest {
         .build();
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .get()
         .build();
 
@@ -259,7 +259,7 @@ public final class InterceptorTest {
     });
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .addHeader("Original-Header", "foo")
         .method("PUT", RequestBody.create(MediaType.get("text/plain"), "abc"))
         .build();
@@ -295,7 +295,7 @@ public final class InterceptorTest {
     });
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
 
     Response response = client.newCall(request).execute();
@@ -335,7 +335,7 @@ public final class InterceptorTest {
     });
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
 
     Response response = client.newCall(request).execute();
@@ -366,7 +366,7 @@ public final class InterceptorTest {
     });
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     client.newCall(request).enqueue(callback);
 
@@ -388,7 +388,7 @@ public final class InterceptorTest {
         .build();
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
 
     Response response = client.newCall(request).execute();
@@ -404,7 +404,7 @@ public final class InterceptorTest {
         .addInterceptor(chain -> {
           if (chain.request().url().encodedPath().equals("/b")) {
             Request requestA = new Request.Builder()
-                .url(server.url("/a"))
+                .url(server.url("/a").toString())
                 .build();
             Response responseA = client.newCall(requestA).execute();
             assertThat(responseA.body().string()).isEqualTo("a");
@@ -415,7 +415,7 @@ public final class InterceptorTest {
         .build();
 
     Request requestB = new Request.Builder()
-        .url(server.url("/b"))
+        .url(server.url("/b").toString())
         .build();
     Response responseB = client.newCall(requestB).execute();
     assertThat(responseB.body().string()).isEqualTo("b");
@@ -430,7 +430,7 @@ public final class InterceptorTest {
         .addInterceptor(chain -> {
           if (chain.request().url().encodedPath().equals("/b")) {
             Request requestA = new Request.Builder()
-                .url(server.url("/a"))
+                .url(server.url("/a").toString())
                 .build();
 
             try {
@@ -447,7 +447,7 @@ public final class InterceptorTest {
         .build();
 
     Request requestB = new Request.Builder()
-        .url(server.url("/b"))
+        .url(server.url("/b").toString())
         .build();
     RecordingCallback callbackB = new RecordingCallback();
     client.newCall(requestB).enqueue(callbackB);
@@ -470,7 +470,7 @@ public final class InterceptorTest {
     addInterceptor(network, chain -> { throw new RuntimeException("boom!"); });
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
 
     try {
@@ -497,7 +497,7 @@ public final class InterceptorTest {
         .build();
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .header("User-Agent", "user request")
         .build();
 
@@ -530,11 +530,11 @@ public final class InterceptorTest {
         .build();
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     Call call = client.newCall(request);
     call.enqueue(callback);
-    RecordedResponse recordedResponse = callback.await(server.url("/"));
+    RecordedResponse recordedResponse = callback.await(Url.get(server.url("/").toString()));
     assertThat(recordedResponse.failure)
         .hasMessage("canceled due to java.lang.RuntimeException: boom!");
     assertThat(recordedResponse.failure).hasSuppressedException(boom);
@@ -560,7 +560,7 @@ public final class InterceptorTest {
         .build();
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     try {
       client.newCall(request).execute();
@@ -588,7 +588,7 @@ public final class InterceptorTest {
         .build();
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     try {
       client.newCall(request).execute();
@@ -615,7 +615,7 @@ public final class InterceptorTest {
         .build();
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
 
     Response response = client.newCall(request).execute();
@@ -636,7 +636,7 @@ public final class InterceptorTest {
         .build();
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     try {
       client.newCall(request).execute();
@@ -661,7 +661,7 @@ public final class InterceptorTest {
         .build();
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     try {
       client.newCall(request).execute();
@@ -742,7 +742,7 @@ public final class InterceptorTest {
         .throttleBody(1, 1, TimeUnit.SECONDS));
 
     Request request1 = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     Call call = client.newCall(request1);
     Response response = call.execute();
@@ -781,7 +781,7 @@ public final class InterceptorTest {
 
     byte[] data = new byte[2 * 1024 * 1024]; // 2 MiB.
     Request request1 = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(RequestBody.create(MediaType.get("text/plain"), data))
         .build();
     Call call = client.newCall(request1);
@@ -812,7 +812,7 @@ public final class InterceptorTest {
         .build();
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     Call call = client.newCall(request);
 

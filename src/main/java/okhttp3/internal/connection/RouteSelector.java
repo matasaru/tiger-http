@@ -29,8 +29,8 @@ import java.util.NoSuchElementException;
 import okhttp3.Address;
 import okhttp3.Call;
 import okhttp3.EventListener;
-import okhttp3.HttpUrl;
 import okhttp3.Route;
+import okhttp3.Url;
 import okhttp3.internal.Util;
 
 /**
@@ -106,7 +106,7 @@ final class RouteSelector {
   }
 
   /** Prepares the proxy servers to try. */
-  private void resetNextProxy(HttpUrl url, Proxy proxy) {
+  private void resetNextProxy(Url url, Proxy proxy) {
     if (proxy != null) {
       // If the user specifies a proxy, try that and only that.
       proxies = Collections.singletonList(proxy);

@@ -223,7 +223,7 @@ public final class CallTest {
     server.enqueue(new MockResponse().addHeader("Content-Type: text/plain"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .head()
         .header("User-Agent", "SyncApiTest")
         .build();
@@ -247,7 +247,7 @@ public final class CallTest {
         .setBody("abc"));
 
     Request headRequest = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .head()
         .build();
     Response response = client.newCall(headRequest).execute();
@@ -255,7 +255,7 @@ public final class CallTest {
     assertArrayEquals(new byte[0], response.body().bytes());
 
     Request getRequest = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     executeSynchronously(getRequest)
         .assertCode(200)
@@ -273,7 +273,7 @@ public final class CallTest {
         .setBody("abc"));
 
     Request headRequest = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .head()
         .build();
     executeSynchronously(headRequest)
@@ -282,7 +282,7 @@ public final class CallTest {
         .assertBody("");
 
     Request getRequest = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     executeSynchronously(getRequest)
         .assertCode(200)
@@ -306,7 +306,7 @@ public final class CallTest {
     server.enqueue(new MockResponse().setBody("abc"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(RequestBody.create(MediaType.get("text/plain"), "def"))
         .build();
 
@@ -336,7 +336,7 @@ public final class CallTest {
     server.enqueue(new MockResponse().setBody("abc"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .method("POST", RequestBody.create(null, new byte[0]))
         .build();
 
@@ -395,7 +395,7 @@ public final class CallTest {
     server.enqueue(new MockResponse());
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .method("POST", RequestBody.create(null, body))
         .build();
 
@@ -446,7 +446,7 @@ public final class CallTest {
         .build();
 
     try {
-      client.newCall(new Request.Builder().url(server.url("/0")).build()).execute();
+      client.newCall(new Request.Builder().url(server.url("/0").toString()).build()).execute();
       fail();
     } catch (IOException expected) {
       assertThat(expected.getMessage()).isEqualTo("Too many follow-up requests: 21");
@@ -479,7 +479,7 @@ public final class CallTest {
     server.enqueue(new MockResponse().setBody("abc"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .delete()
         .build();
 
@@ -508,7 +508,7 @@ public final class CallTest {
     server.enqueue(new MockResponse().setBody("abc"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .method("DELETE", RequestBody.create(MediaType.get("text/plain"), "def"))
         .build();
 
@@ -525,7 +525,7 @@ public final class CallTest {
     server.enqueue(new MockResponse().setBody("abc"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .put(RequestBody.create(MediaType.get("text/plain"), "def"))
         .build();
 
@@ -555,7 +555,7 @@ public final class CallTest {
     server.enqueue(new MockResponse().setBody("abc"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .patch(RequestBody.create(MediaType.get("text/plain"), "def"))
         .build();
 
@@ -585,7 +585,7 @@ public final class CallTest {
     server.enqueue(new MockResponse().setBody("abc"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .method("CUSTOM", RequestBody.create(MediaType.get("text/plain"), "def"))
         .build();
 
@@ -605,7 +605,7 @@ public final class CallTest {
     server.enqueue(new MockResponse());
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .method("POST", RequestBody.create(null, "abc"))
         .build();
 
@@ -623,7 +623,7 @@ public final class CallTest {
         .addHeader("Content-Type: text/plain"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .header("User-Agent", "SyncApiTest")
         .build();
 
@@ -654,7 +654,7 @@ public final class CallTest {
         .addHeader("Content-Type: text/plain"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .header("User-Agent", "SyncApiTest")
         .build();
 
@@ -685,7 +685,7 @@ public final class CallTest {
     server.enqueue(new MockResponse().setBody("def"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
 
     Call call = client.newCall(request);
@@ -703,7 +703,7 @@ public final class CallTest {
     server.enqueue(new MockResponse().setBody("def"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
 
     Call call = client.newCall(request);
@@ -729,7 +729,7 @@ public final class CallTest {
         .addHeader("Content-Type: text/plain"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .header("User-Agent", "AsyncApiTest")
         .build();
     client.newCall(request).enqueue(callback);
@@ -746,7 +746,7 @@ public final class CallTest {
     server.enqueue(new MockResponse());
 
     Request request = new Request.Builder()
-        .url(server.url("/secret"))
+        .url(server.url("/secret").toString())
         .build();
 
     client.newCall(request).enqueue(new Callback() {
@@ -782,14 +782,14 @@ public final class CallTest {
     server.enqueue(new MockResponse().setBody("def"));
     server.enqueue(new MockResponse().setBody("ghi"));
 
-    client.newCall(new Request.Builder().url(server.url("/a")).build()).enqueue(callback);
-    callback.await(server.url("/a")).assertBody("abc");
+    client.newCall(new Request.Builder().url(server.url("/a").toString()).build()).enqueue(callback);
+    callback.await(Url.get(server.url("/a").toString())).assertBody("abc");
 
-    client.newCall(new Request.Builder().url(server.url("/b")).build()).enqueue(callback);
-    callback.await(server.url("/b")).assertBody("def");
+    client.newCall(new Request.Builder().url(server.url("/b").toString()).build()).enqueue(callback);
+    callback.await(Url.get(server.url("/b").toString())).assertBody("def");
 
-    client.newCall(new Request.Builder().url(server.url("/c")).build()).enqueue(callback);
-    callback.await(server.url("/c")).assertBody("ghi");
+    client.newCall(new Request.Builder().url(server.url("/c").toString()).build()).enqueue(callback);
+    callback.await(Url.get(server.url("/c").toString())).assertBody("ghi");
 
     assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
     assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(1);
@@ -800,7 +800,7 @@ public final class CallTest {
     server.enqueue(new MockResponse().setBody("abc"));
     server.enqueue(new MockResponse().setBody("def"));
 
-    Request request = new Request.Builder().url(server.url("/a")).build();
+    Request request = new Request.Builder().url(server.url("/a").toString()).build();
     client.newCall(request).enqueue(new Callback() {
       @Override public void onFailure(Call call, IOException e) {
         throw new AssertionError();
@@ -813,11 +813,11 @@ public final class CallTest {
         assertThat(bytes.read()).isEqualTo('c');
 
         // This request will share a connection with 'A' cause it's all done.
-        client.newCall(new Request.Builder().url(server.url("/b")).build()).enqueue(callback);
+        client.newCall(new Request.Builder().url(server.url("/b").toString()).build()).enqueue(callback);
       }
     });
 
-    callback.await(server.url("/b")).assertCode(200).assertBody("def");
+    callback.await(Url.get(server.url("/b").toString())).assertCode(200).assertBody("def");
     // New connection.
     assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
     // Connection reuse!
@@ -838,7 +838,7 @@ public final class CallTest {
     client = client.newBuilder()
         .readTimeout(250, TimeUnit.MILLISECONDS)
         .build();
-    Request request = new Request.Builder().url(server.url("/b")).build();
+    Request request = new Request.Builder().url(server.url("/b").toString()).build();
     Response response = client.newCall(request).execute();
     BufferedSource bodySource = response.body().source();
     assertThat(bodySource.readByte()).isEqualTo((byte) 'd');
@@ -871,7 +871,7 @@ public final class CallTest {
         .readTimeout(100, TimeUnit.MILLISECONDS)
         .build();
 
-    Request request = new Request.Builder().url(server.url("/")).build();
+    Request request = new Request.Builder().url(server.url("/").toString()).build();
     try {
       // If this succeeds, too many requests were made.
       client.newCall(request).execute();
@@ -924,7 +924,7 @@ public final class CallTest {
         .build();
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     executeSynchronously(request)
         .assertCode(200);
@@ -952,7 +952,7 @@ public final class CallTest {
         .build();
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     executeSynchronously(request)
         .assertCode(200)
@@ -991,7 +991,7 @@ public final class CallTest {
     HttpClient c = clientTestRule.client.newBuilder()
         .addInterceptor(chain -> { throw new IOException(); })
         .build();
-    Request request = new Request.Builder().url(server.url("/")).build();
+    Request request = new Request.Builder().url(server.url("/").toString()).build();
     c.newCall(request).enqueue(callback);
     RecordedResponse response = callback.await(request.url());
     assertThat(response.request).isEqualTo(request);
@@ -1013,7 +1013,7 @@ public final class CallTest {
       }
     };
     Request request1 = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .method("POST", requestBody1)
         .build();
     Response response1 = client.newCall(request1).execute();
@@ -1031,7 +1031,7 @@ public final class CallTest {
       }
     };
     Request request2 = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .method("POST", requestBody2)
         .build();
     Response response2 = client.newCall(request2).execute();
@@ -1047,14 +1047,14 @@ public final class CallTest {
     server.enqueue(new MockResponse().setBody("def"));
 
     // Call 1: set a deadline on the response body.
-    Request request1 = new Request.Builder().url(server.url("/")).build();
+    Request request1 = new Request.Builder().url(server.url("/").toString()).build();
     Response response1 = client.newCall(request1).execute();
     BufferedSource body1 = response1.body().source();
     assertThat(body1.readUtf8()).isEqualTo("abc");
     body1.timeout().deadline(5, TimeUnit.SECONDS);
 
     // Call 2: check for the absence of a deadline on the request body.
-    Request request2 = new Request.Builder().url(server.url("/")).build();
+    Request request2 = new Request.Builder().url(server.url("/").toString()).build();
     Response response2 = client.newCall(request2).execute();
     BufferedSource body2 = response2.body().source();
     assertThat(body2.readUtf8()).isEqualTo("def");
@@ -1081,7 +1081,7 @@ public final class CallTest {
         .addHeader("Content-Type: text/plain"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     client.newCall(request).enqueue(callback);
 
@@ -1191,7 +1191,7 @@ public final class CallTest {
         .hostnameVerifier(new RecordingHostnameVerifier())
         .build();
 
-    Request request = new Request.Builder().url(server.url("/")).build();
+    Request request = new Request.Builder().url(server.url("/").toString()).build();
     try {
       client.newCall(request).execute();
       fail();
@@ -1219,7 +1219,7 @@ public final class CallTest {
         .build();
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     client.newCall(request).enqueue(callback);
 
@@ -1237,7 +1237,7 @@ public final class CallTest {
     server.useHttps(handshakeCertificates.sslSocketFactory(), false);
     server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.FAIL_HANDSHAKE));
 
-    Request request = new Request.Builder().url(server.url("/")).build();
+    Request request = new Request.Builder().url(server.url("/").toString()).build();
     try {
       client.newCall(request).execute();
       fail();
@@ -1317,7 +1317,7 @@ public final class CallTest {
 
     server.enqueue(new MockResponse());
 
-    Request request = new Request.Builder().url(server.url("/")).build();
+    Request request = new Request.Builder().url(server.url("/").toString()).build();
     try {
       client.newCall(request).execute();
       fail();
@@ -1336,7 +1336,7 @@ public final class CallTest {
     server.enqueue(new MockResponse());
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     try {
       call.execute();
@@ -1357,7 +1357,7 @@ public final class CallTest {
         .followSslRedirects(false)
         .build();
 
-    Request request = new Request.Builder().url(server.url("/")).build();
+    Request request = new Request.Builder().url(server.url("/").toString()).build();
     Response response = client.newCall(request).execute();
     assertThat(response.code()).isEqualTo(301);
     response.body().close();
@@ -1371,7 +1371,7 @@ public final class CallTest {
     server.enqueue(new MockResponse());
 
     // Make a first request without certificate pinning. Use it to collect certificates to pin.
-    Request request1 = new Request.Builder().url(server.url("/")).build();
+    Request request1 = new Request.Builder().url(server.url("/").toString()).build();
     Response response1 = client.newCall(request1).execute();
     CertificatePinner.Builder certificatePinnerBuilder = new CertificatePinner.Builder();
     for (Certificate certificate : response1.handshake().peerCertificates()) {
@@ -1383,7 +1383,7 @@ public final class CallTest {
     client = client.newBuilder()
         .certificatePinner(certificatePinnerBuilder.build())
         .build();
-    Request request2 = new Request.Builder().url(server.url("/")).build();
+    Request request2 = new Request.Builder().url(server.url("/").toString()).build();
     Response response2 = client.newCall(request2).execute();
     assertThat(response1.handshake()).isNotSameAs(response2.handshake());
     response2.body().close();
@@ -1401,7 +1401,7 @@ public final class CallTest {
         .build();
 
     // When we pin the wrong certificate, connectivity fails.
-    Request request = new Request.Builder().url(server.url("/")).build();
+    Request request = new Request.Builder().url(server.url("/").toString()).build();
     try {
       client.newCall(request).execute();
       fail();
@@ -1414,7 +1414,7 @@ public final class CallTest {
     server.enqueue(new MockResponse().setBody("abc"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(RequestBody.create(MediaType.get("text/plain"), "def"))
         .build();
     client.newCall(request).enqueue(callback);
@@ -1436,12 +1436,12 @@ public final class CallTest {
     server.enqueue(new MockResponse().setBody("def"));
 
     // Seed the connection pool so we have something that can fail.
-    Request request1 = new Request.Builder().url(server.url("/")).build();
+    Request request1 = new Request.Builder().url(server.url("/").toString()).build();
     Response response1 = client.newCall(request1).execute();
     assertThat(response1.body().string()).isEqualTo("abc");
 
     Request request2 = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(RequestBody.create(MediaType.get("text/plain"), "body!"))
         .build();
     Response response2 = client.newCall(request2).execute();
@@ -1503,7 +1503,7 @@ public final class CallTest {
     server.enqueue(new MockResponse().setBody("Page 2"));
 
     Response response = client.newCall(new Request.Builder()
-        .url(server.url("/page1"))
+        .url(server.url("/page1").toString())
         .post(RequestBody.create(MediaType.get("text/plain"), "Request Body"))
         .build()).execute();
     assertThat(response.body().string()).isEqualTo("Page 2");
@@ -1525,7 +1525,7 @@ public final class CallTest {
     server.enqueue(new MockResponse().setBody("Body"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     Response response = client.newCall(request).execute();
 
@@ -1541,7 +1541,7 @@ public final class CallTest {
         .setBody("You took too long!"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     Response response = client.newCall(request).execute();
 
@@ -1557,7 +1557,7 @@ public final class CallTest {
     server.enqueue(new MockResponse().setBody("Body"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(RequestBody.create(MediaType.get("text/plain"), "Hello"))
         .build();
     Response response = client.newCall(request).execute();
@@ -1583,7 +1583,7 @@ public final class CallTest {
         .build();
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     Response response = client.newCall(request).execute();
 
@@ -1604,7 +1604,7 @@ public final class CallTest {
         .setBody("You took too long!"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     Response response = client.newCall(request).execute();
 
@@ -1629,7 +1629,7 @@ public final class CallTest {
         .setBody("You took too long!"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     Response response = client.newCall(request).execute();
 
@@ -1649,7 +1649,7 @@ public final class CallTest {
     server.enqueue(new MockResponse().setBody("Body"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     Response response = client.newCall(request).execute();
 
@@ -1665,7 +1665,7 @@ public final class CallTest {
         .setBody("thank you for retrying"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(new RequestBody() {
           int attempt = 0;
 
@@ -1696,7 +1696,7 @@ public final class CallTest {
         .setBody("thank you for retrying"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(new RequestBody() {
           int attempt = 0;
 
@@ -1731,7 +1731,7 @@ public final class CallTest {
 
     // when
     Response response = client.newCall(new Request.Builder()
-        .url(server.url("/page1"))
+        .url(server.url("/page1").toString())
         .method("PROPFIND", RequestBody.create(MediaType.get("text/plain"), "Request Body"))
         .build()).execute();
 
@@ -1803,7 +1803,7 @@ public final class CallTest {
         .build();
 
     Response response = client.newCall(new Request.Builder()
-        .url(server.url("/page1"))
+        .url(server.url("/page1").toString())
         .build()).execute();
     assertThat(response.body().string()).isEqualTo("Page 2");
 
@@ -1826,7 +1826,7 @@ public final class CallTest {
         .authenticator(new RecordingOkAuthenticator(Credentials.basic("jesse", "secret"), null))
         .build();
 
-    Request request = new Request.Builder().url(server.url("/a")).build();
+    Request request = new Request.Builder().url(server.url("/a").toString()).build();
     Response response = client.newCall(request).execute();
     assertThat(response.body().string()).isEqualTo("Page 2");
 
@@ -1848,10 +1848,10 @@ public final class CallTest {
         .setBody("/b has moved!"));
     server.enqueue(new MockResponse().setBody("C"));
 
-    Request request = new Request.Builder().url(server.url("/a")).build();
+    Request request = new Request.Builder().url(server.url("/a").toString()).build();
     client.newCall(request).enqueue(callback);
 
-    callback.await(server.url("/a"))
+    callback.await(Url.get(server.url("/a").toString()))
         .assertCode(200)
         .assertBody("C")
         .priorResponse()
@@ -1892,9 +1892,9 @@ public final class CallTest {
     }
     server.enqueue(new MockResponse().setBody("Success!"));
 
-    Request request = new Request.Builder().url(server.url("/0")).build();
+    Request request = new Request.Builder().url(server.url("/0").toString()).build();
     client.newCall(request).enqueue(callback);
-    callback.await(server.url("/0"))
+    callback.await(Url.get(server.url("/0").toString()))
         .assertCode(200)
         .assertBody("Success!");
   }
@@ -1908,7 +1908,7 @@ public final class CallTest {
     }
 
     try {
-      client.newCall(new Request.Builder().url(server.url("/0")).build()).execute();
+      client.newCall(new Request.Builder().url(server.url("/0").toString()).build()).execute();
       fail();
     } catch (IOException expected) {
       assertThat(expected.getMessage()).isEqualTo("Too many follow-up requests: 21");
@@ -1923,9 +1923,9 @@ public final class CallTest {
           .setBody("Redirecting to /" + (i + 1)));
     }
 
-    Request request = new Request.Builder().url(server.url("/0")).build();
+    Request request = new Request.Builder().url(server.url("/0").toString()).build();
     client.newCall(request).enqueue(callback);
-    callback.await(server.url("/0")).assertFailure("Too many follow-up requests: 21");
+    callback.await(Url.get(server.url("/0").toString())).assertFailure("Too many follow-up requests: 21");
   }
 
   @Test public void http204WithBodyDisallowed() throws IOException {
@@ -1966,7 +1966,7 @@ public final class CallTest {
   }
 
   @Test public void canceledBeforeExecute() throws Exception {
-    Call call = client.newCall(new Request.Builder().url(server.url("/a")).build());
+    Call call = client.newCall(new Request.Builder().url(server.url("/a").toString()).build());
     call.cancel();
 
     try {
@@ -1992,7 +1992,7 @@ public final class CallTest {
 
     long cancelDelayMillis = 300L;
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/").newBuilder().scheme(scheme).build())
+        .url(Url.get(server.url("/").toString()).newBuilder().scheme(scheme).build())
         .build());
     cancelLater(call, cancelDelayMillis);
 
@@ -2022,22 +2022,22 @@ public final class CallTest {
         .build();
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/a"))
+        .url(server.url("/a").toString())
         .build());
     call.enqueue(callback);
     call.cancel();
     latch.countDown();
 
-    callback.await(server.url("/a")).assertFailure("Canceled", "Socket closed");
+    callback.await(Url.get(server.url("/a").toString())).assertFailure("Canceled", "Socket closed");
   }
 
   @Test public void cancelAll() throws Exception {
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
     call.enqueue(callback);
     client.dispatcher().cancelAll();
-    callback.await(server.url("/")).assertFailure("Canceled", "Socket closed");
+    callback.await(Url.get(server.url("/").toString())).assertFailure("Canceled", "Socket closed");
   }
 
   @Test
@@ -2056,7 +2056,7 @@ public final class CallTest {
     };
     client = client.newBuilder().eventListener(listener).build();
 
-    Call call = client.newCall(new Request.Builder().url(server.url("/a")).build());
+    Call call = client.newCall(new Request.Builder().url(server.url("/a").toString()).build());
     try {
       call.execute();
       fail();
@@ -2073,7 +2073,7 @@ public final class CallTest {
   @Test public void cancelBeforeBodyIsRead() throws Exception {
     server.enqueue(new MockResponse().setBody("def").throttleBody(1, 750, TimeUnit.MILLISECONDS));
 
-    final Call call = client.newCall(new Request.Builder().url(server.url("/a")).build());
+    final Call call = client.newCall(new Request.Builder().url(server.url("/a").toString()).build());
     ExecutorService executor = Executors.newSingleThreadExecutor();
     Future<Response> result = executor.submit(call::execute);
 
@@ -2089,7 +2089,7 @@ public final class CallTest {
   }
 
   @Test public void cancelInFlightBeforeResponseReadThrowsIOE() throws Exception {
-    Request request = new Request.Builder().url(server.url("/a")).build();
+    Request request = new Request.Builder().url(server.url("/a").toString()).build();
     final Call call = client.newCall(request);
 
     server.setDispatcher(new Dispatcher() {
@@ -2128,8 +2128,8 @@ public final class CallTest {
         .dispatcher(dispatcher)
         .build();
 
-    Request requestA = new Request.Builder().url(server.url("/a")).build();
-    Request requestB = new Request.Builder().url(server.url("/b")).build();
+    Request requestA = new Request.Builder().url(server.url("/a").toString()).build();
+    Request requestB = new Request.Builder().url(server.url("/b").toString()).build();
     final Call callA = client.newCall(requestA);
     final Call callB = client.newCall(requestB);
 
@@ -2162,7 +2162,7 @@ public final class CallTest {
   }
 
   @Test public void canceledBeforeResponseReadSignalsOnFailure() throws Exception {
-    Request requestA = new Request.Builder().url(server.url("/a")).build();
+    Request requestA = new Request.Builder().url(server.url("/a").toString()).build();
     final Call call = client.newCall(requestA);
     server.setDispatcher(new Dispatcher() {
       @Override public MockResponse dispatch(RecordedRequest request) {
@@ -2199,7 +2199,7 @@ public final class CallTest {
     final AtomicReference<String> bodyRef = new AtomicReference<>();
     final AtomicBoolean failureRef = new AtomicBoolean();
 
-    Request request = new Request.Builder().url(server.url("/a")).build();
+    Request request = new Request.Builder().url(server.url("/a").toString()).build();
     final Call call = client.newCall(request);
     call.enqueue(new Callback() {
       @Override public void onFailure(Call call, IOException e) {
@@ -2245,7 +2245,7 @@ public final class CallTest {
         })
         .build();
 
-    Call call = client.newCall(new Request.Builder().url(server.url("/a")).build());
+    Call call = client.newCall(new Request.Builder().url(server.url("/a").toString()).build());
     call.cancel();
 
     try {
@@ -2306,7 +2306,7 @@ public final class CallTest {
 
     // Make a range request.
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .header("Range", "bytes=0-")
         .build();
     Call call = client.newCall(request);
@@ -2326,7 +2326,7 @@ public final class CallTest {
     server.enqueue(new MockResponse().setBody("def"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .header("User-Agent", "SyncApiTest")
         .build();
 
@@ -2390,7 +2390,7 @@ public final class CallTest {
         .setSocketPolicy(SocketPolicy.EXPECT_CONTINUE));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .header("Expect", "100-continue")
         .post(RequestBody.create(MediaType.get("text/plain"), "abc"))
         .build();
@@ -2406,7 +2406,7 @@ public final class CallTest {
     server.enqueue(new MockResponse());
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .header("Expect", "100-continue")
         .post(RequestBody.create(MediaType.get("text/plain"), ""))
         .build();
@@ -2430,7 +2430,7 @@ public final class CallTest {
         .build();
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .header("Expect", "100-continue")
         .post(RequestBody.create(MediaType.get("text/plain"), "abc"))
         .build();
@@ -2456,7 +2456,7 @@ public final class CallTest {
         .setSocketPolicy(SocketPolicy.CONTINUE_ALWAYS));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(RequestBody.create(MediaType.get("text/plain"), "abc"))
         .build();
 
@@ -2482,7 +2482,7 @@ public final class CallTest {
         .setStatus("HTTP/1.1 100 Continue"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(RequestBody.create(MediaType.get("text/plain"), "abc"))
         .build();
 
@@ -2508,12 +2508,12 @@ public final class CallTest {
     server.enqueue(new MockResponse());
 
     executeSynchronously(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .header("Expect", "100-continue")
         .post(RequestBody.create(MediaType.get("text/plain"), "abc"))
         .build());
     executeSynchronously(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
 
     assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
@@ -2530,12 +2530,12 @@ public final class CallTest {
     server.enqueue(new MockResponse());
 
     executeSynchronously(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .header("Expect", "100-continue")
         .post(RequestBody.create(MediaType.get("text/plain"), "abc"))
         .build());
     executeSynchronously(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
 
     assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
@@ -2549,12 +2549,12 @@ public final class CallTest {
     server.enqueue(new MockResponse());
 
     executeSynchronously(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .header("Expect", "100-continue")
         .post(RequestBody.create(MediaType.get("text/plain"), "abc"))
         .build());
     executeSynchronously(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
 
     assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
@@ -2587,7 +2587,7 @@ public final class CallTest {
 
     server.enqueue(new MockResponse());
     Request request = new Request.Builder()
-        .url(server.url("/").newBuilder().host("android.com").build())
+        .url(Url.get(server.url("/").toString()).newBuilder().host("android.com").build())
         .build();
     executeSynchronously(request).assertCode(200);
 
@@ -2604,7 +2604,7 @@ public final class CallTest {
 
     server.enqueue(new MockResponse());
     Request request = new Request.Builder()
-        .url(server.url("/").newBuilder().host("android.com").build())
+        .url(Url.get(server.url("/").toString()).newBuilder().host("android.com").build())
         .build();
     executeSynchronously(request).assertFailure(dns + " returned no addresses for android.com");
 
@@ -2634,7 +2634,7 @@ public final class CallTest {
       }
     };
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(requestBody)
         .build());
     assertThat(call.execute().body().string()).isEqualTo("Response 1");
@@ -3018,7 +3018,7 @@ public final class CallTest {
         .addHeader("content-length: 0")
         .addHeaderLenient("a b", "c"));
 
-    Call call = client.newCall(new Request.Builder().url(server.url("/")).build());
+    Call call = client.newCall(new Request.Builder().url(server.url("/").toString()).build());
     Response response = call.execute();
     assertThat(response.header("a b")).isEqualTo("c");
   }
@@ -3029,7 +3029,7 @@ public final class CallTest {
         .addHeader("content-length: 0")
         .addHeaderLenient("a\tb", "c"));
 
-    Call call = client.newCall(new Request.Builder().url(server.url("/")).build());
+    Call call = client.newCall(new Request.Builder().url(server.url("/").toString()).build());
     Response response = call.execute();
     assertThat(response.header("a\tb")).isEqualTo("c");
   }
@@ -3053,7 +3053,7 @@ public final class CallTest {
     server2.shutdown();
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(RequestBody.create(MediaType.get("text/plain"), "abc"))
         .build();
 
@@ -3064,7 +3064,7 @@ public final class CallTest {
   @Ignore // This may fail in DNS lookup, which we don't have timeouts for.
   @Test public void invalidHost() throws Exception {
     Request request = new Request.Builder()
-        .url(HttpUrl.get("http://1234.1.1.1/"))
+        .url(Url.get("http://1234.1.1.1/"))
         .build();
 
     executeSynchronously(request)
@@ -3103,7 +3103,7 @@ public final class CallTest {
       final boolean chunked, final int size, final int writeSize) throws Exception {
     server.enqueue(new MockResponse());
     executeSynchronously(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(requestBody(chunked, size, writeSize))
         .build());
   }
@@ -3180,7 +3180,7 @@ public final class CallTest {
         .build();
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
 
     Level original = logger.getLevel();
@@ -3209,7 +3209,7 @@ public final class CallTest {
         .build();
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
 
     Level original = logger.getLevel();
@@ -3252,7 +3252,7 @@ public final class CallTest {
         .build();
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
 
     executeSynchronously(request)
@@ -3270,7 +3270,7 @@ public final class CallTest {
         .build();
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
 
     executeSynchronously(request)
@@ -3303,7 +3303,7 @@ public final class CallTest {
 
     // Make a request.
     server.enqueue(new MockResponse());
-    HttpUrl url = server.url("/").newBuilder()
+    Url url = Url.get(server.url("/").toString()).newBuilder()
         .host(localIpAddress)
         .build();
     Request request = new Request.Builder()
@@ -3333,7 +3333,7 @@ public final class CallTest {
     };
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(body)
         .build();
 
@@ -3357,7 +3357,7 @@ public final class CallTest {
     server.enqueue(mockResponse);
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
 
     Response response = call.execute();
@@ -3384,7 +3384,7 @@ public final class CallTest {
     enableProtocol(Protocol.HTTP_2);
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
 
     try (Response response = call.execute()) {
@@ -3405,7 +3405,7 @@ public final class CallTest {
     server.enqueue(new MockResponse());
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(new RequestBody() {
           @Override public MediaType contentType() {
             return null;
@@ -3472,7 +3472,7 @@ public final class CallTest {
         .retryOnConnectionFailure(false)
         .build();
     Call call = nonRetryingClient.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(requestBody)
         .build());
     try {
@@ -3485,7 +3485,7 @@ public final class CallTest {
 
   private RecordedResponse executeSynchronously(String path, String... headers) throws IOException {
     Request.Builder builder = new Request.Builder();
-    builder.url(server.url(path));
+    builder.url(server.url(path).toString());
     for (int i = 0, size = headers.length; i < size; i += 2) {
       builder.addHeader(headers[i], headers[i + 1]);
     }

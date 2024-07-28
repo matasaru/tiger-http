@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 @RunWith(Parameterized.class)
-public final class HttpUrlTest {
+public final class UrlTest {
   @Parameterized.Parameters(name = "Use get = {0}")
   public static Collection<Object[]> parameters() {
     return Arrays.asList(
@@ -45,14 +45,14 @@ public final class HttpUrlTest {
   @Parameterized.Parameter
   public boolean useGet;
 
-  HttpUrl parse(String url) {
+  Url parse(String url) {
     return useGet
-        ? HttpUrl.get(url)
-        : HttpUrl.parse(url);
+        ? Url.get(url)
+        : Url.parse(url);
   }
 
   @Test public void parseTrimsAsciiWhitespace() throws Exception {
-    HttpUrl expected = parse("http://host/");
+    Url expected = parse("http://host/");
     // Leading.
     assertThat(parse("http://host/\f\n\t \r")).isEqualTo(expected);
     // Trailing.
@@ -163,7 +163,7 @@ public final class HttpUrlTest {
 
   @Test public void newBuilderResolve() throws Exception {
     // Non-exhaustive tests because implementation is the same as resolve.
-    HttpUrl base = parse("http://host/a/b");
+    Url base = parse("http://host/a/b");
     assertThat(base.newBuilder("https://host2").build()).isEqualTo(parse("https://host2/"));
     assertThat(base.newBuilder("//host2").build()).isEqualTo(parse("http://host2/"));
     assertThat(base.newBuilder("/path").build()).isEqualTo(parse("http://host/path"));
@@ -179,16 +179,16 @@ public final class HttpUrlTest {
   }
 
   @Test public void redactedUrl() {
-    HttpUrl baseWithPasswordAndUsername = parse("http://username:password@host/a/b#fragment");
-    HttpUrl baseWithUsernameOnly = parse("http://username@host/a/b#fragment");
-    HttpUrl baseWithPasswordOnly = parse("http://password@host/a/b#fragment");
+    Url baseWithPasswordAndUsername = parse("http://username:password@host/a/b#fragment");
+    Url baseWithUsernameOnly = parse("http://username@host/a/b#fragment");
+    Url baseWithPasswordOnly = parse("http://password@host/a/b#fragment");
     assertThat(baseWithPasswordAndUsername.redact()).isEqualTo("http://host/...");
     assertThat(baseWithUsernameOnly.redact()).isEqualTo("http://host/...");
     assertThat(baseWithPasswordOnly.redact()).isEqualTo("http://host/...");
   }
 
   @Test public void resolveNoScheme() throws Exception {
-    HttpUrl base = parse("http://host/a/b");
+    Url base = parse("http://host/a/b");
     assertThat(base.resolve("//host2")).isEqualTo(parse("http://host2/"));
     assertThat(base.resolve("/path")).isEqualTo(parse("http://host/path"));
     assertThat(base.resolve("path")).isEqualTo(parse("http://host/a/path"));
@@ -199,7 +199,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void resolveUnsupportedScheme() throws Exception {
-    HttpUrl base = parse("http://a/");
+    Url base = parse("http://a/");
     assertThat(base.resolve("ftp://b")).isNull();
     assertThat(base.resolve("ht+tp://b")).isNull();
     assertThat(base.resolve("ht-tp://b")).isNull();
@@ -207,7 +207,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void resolveSchemeLikePath() throws Exception {
-    HttpUrl base = parse("http://a/");
+    Url base = parse("http://a/");
     assertThat(base.resolve("http//b/")).isEqualTo(parse("http://a/http//b/"));
     assertThat(base.resolve("ht+tp//b/")).isEqualTo(parse("http://a/ht+tp//b/"));
     assertThat(base.resolve("ht-tp//b/")).isEqualTo(parse("http://a/ht-tp//b/"));
@@ -216,7 +216,7 @@ public final class HttpUrlTest {
 
   /** https://tools.ietf.org/html/rfc3986#section-5.4.1 */
   @Test public void rfc3886NormalExamples() {
-    HttpUrl url = parse("http://a/b/c/d;p?q");
+    Url url = parse("http://a/b/c/d;p?q");
     // No 'g:' scheme in HttpUrl.
     assertThat(url.resolve("g:h")).isNull();
     assertThat(url.resolve("g")).isEqualTo(parse("http://a/b/c/g"));
@@ -245,7 +245,7 @@ public final class HttpUrlTest {
 
   /** https://tools.ietf.org/html/rfc3986#section-5.4.2 */
   @Test public void rfc3886AbnormalExamples() {
-    HttpUrl url = parse("http://a/b/c/d;p?q");
+    Url url = parse("http://a/b/c/d;p?q");
     assertThat(url.resolve("../../../g")).isEqualTo(parse("http://a/g"));
     assertThat(url.resolve("../../../../g")).isEqualTo(parse("http://a/g"));
     assertThat(url.resolve("/./g")).isEqualTo(parse("http://a/g"));
@@ -287,7 +287,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void resolveAuthoritySlashCountDoesntMatterWithDifferentScheme() throws Exception {
-    HttpUrl base = parse("https://a/b/c");
+    Url base = parse("https://a/b/c");
     assertThat(base.resolve("http:host/path")).isEqualTo(parse("http://host/path"));
     assertThat(base.resolve("http:/host/path")).isEqualTo(parse("http://host/path"));
     assertThat(base.resolve("http:\\host/path")).isEqualTo(parse("http://host/path"));
@@ -306,7 +306,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void resolveAuthoritySlashCountMattersWithSameScheme() throws Exception {
-    HttpUrl base = parse("http://a/b/c");
+    Url base = parse("http://a/b/c");
     assertThat(base.resolve("http:host/path")).isEqualTo(parse("http://a/b/host/path"));
     assertThat(base.resolve("http:/host/path")).isEqualTo(parse("http://a/host/path"));
     assertThat(base.resolve("http:\\host/path")).isEqualTo(parse("http://a/host/path"));
@@ -331,18 +331,18 @@ public final class HttpUrlTest {
 
   /** Given multiple '@' characters, the last one is the delimiter. */
   @Test public void authorityWithMultipleAtSigns() throws Exception {
-    HttpUrl httpUrl = parse("http://foo@bar@baz/path");
-    assertThat(httpUrl.username()).isEqualTo("foo@bar");
-    assertThat(httpUrl.password()).isEqualTo("");
-    assertThat(httpUrl).isEqualTo(parse("http://foo%40bar@baz/path"));
+    Url url = parse("http://foo@bar@baz/path");
+    assertThat(url.username()).isEqualTo("foo@bar");
+    assertThat(url.password()).isEqualTo("");
+    assertThat(url).isEqualTo(parse("http://foo%40bar@baz/path"));
   }
 
   /** Given multiple ':' characters, the first one is the delimiter. */
   @Test public void authorityWithMultipleColons() throws Exception {
-    HttpUrl httpUrl = parse("http://foo:pass1@bar:pass2@baz/path");
-    assertThat(httpUrl.username()).isEqualTo("foo");
-    assertThat(httpUrl.password()).isEqualTo("pass1@bar:pass2");
-    assertThat(httpUrl).isEqualTo(parse("http://foo:pass1%40bar%3Apass2@baz/path"));
+    Url url = parse("http://foo:pass1@bar:pass2@baz/path");
+    assertThat(url.username()).isEqualTo("foo");
+    assertThat(url.password()).isEqualTo("pass1@bar:pass2");
+    assertThat(url).isEqualTo(parse("http://foo:pass1%40bar%3Apass2@baz/path"));
   }
 
   @Test public void usernameAndPassword() throws Exception {
@@ -604,7 +604,7 @@ public final class HttpUrlTest {
 
   /** The builder permits square braces but does not require them. */
   @Test public void hostIpv6Builder() throws Exception {
-    HttpUrl base = parse("http://example.com/");
+    Url base = parse("http://example.com/");
     assertThat(base.newBuilder().host("[::1]").build().toString()).isEqualTo(
         "http://[::1]/");
     assertThat(base.newBuilder().host("[::0001]").build().toString()).isEqualTo(
@@ -671,7 +671,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void fragmentNonAscii() throws Exception {
-    HttpUrl url = parse("http://host/#Σ");
+    Url url = parse("http://host/#Σ");
     assertThat(url.toString()).isEqualTo("http://host/#Σ");
     assertThat(url.fragment()).isEqualTo("Σ");
     assertThat(url.encodedFragment()).isEqualTo("Σ");
@@ -679,7 +679,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void fragmentNonAsciiThatOffendsJavaNetUri() throws Exception {
-    HttpUrl url = parse("http://host/#\u0080");
+    Url url = parse("http://host/#\u0080");
     assertThat(url.toString()).isEqualTo("http://host/#\u0080");
     assertThat(url.fragment()).isEqualTo("\u0080");
     assertThat(url.encodedFragment()).isEqualTo("\u0080");
@@ -688,7 +688,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void fragmentPercentEncodedNonAscii() throws Exception {
-    HttpUrl url = parse("http://host/#%C2%80");
+    Url url = parse("http://host/#%C2%80");
     assertThat(url.toString()).isEqualTo("http://host/#%C2%80");
     assertThat(url.fragment()).isEqualTo("\u0080");
     assertThat(url.encodedFragment()).isEqualTo("%C2%80");
@@ -696,7 +696,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void fragmentPercentEncodedPartialCodePoint() throws Exception {
-    HttpUrl url = parse("http://host/#%80");
+    Url url = parse("http://host/#%80");
     assertThat(url.toString()).isEqualTo("http://host/#%80");
     // Unicode replacement character.
     assertThat(url.fragment()).isEqualTo("\ufffd");
@@ -705,7 +705,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void relativePath() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c");
+    Url base = parse("http://host/a/b/c");
     assertThat(base.resolve("d/e/f")).isEqualTo(parse("http://host/a/b/d/e/f"));
     assertThat(base.resolve("../../d/e/f")).isEqualTo(parse("http://host/d/e/f"));
     assertThat(base.resolve("..")).isEqualTo(parse("http://host/a/"));
@@ -727,7 +727,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void relativePathWithTrailingSlash() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c/");
+    Url base = parse("http://host/a/b/c/");
     assertThat(base.resolve("..")).isEqualTo(parse("http://host/a/b/"));
     assertThat(base.resolve("../")).isEqualTo(parse("http://host/a/b/"));
     assertThat(base.resolve("../..")).isEqualTo(parse("http://host/a/"));
@@ -742,14 +742,14 @@ public final class HttpUrlTest {
   }
 
   @Test public void pathWithBackslash() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c");
+    Url base = parse("http://host/a/b/c");
     assertThat(base.resolve("d\\e\\f")).isEqualTo(parse("http://host/a/b/d/e/f"));
     assertThat(base.resolve("../..\\d\\e\\f")).isEqualTo(parse("http://host/d/e/f"));
     assertThat(base.resolve("..\\..")).isEqualTo(parse("http://host/"));
   }
 
   @Test public void relativePathWithSameScheme() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c");
+    Url base = parse("http://host/a/b/c");
     assertThat(base.resolve("http:d/e/f")).isEqualTo(parse("http://host/a/b/d/e/f"));
     assertThat(base.resolve("http:../../d/e/f")).isEqualTo(parse("http://host/d/e/f"));
   }
@@ -806,13 +806,13 @@ public final class HttpUrlTest {
 
   @Test public void incompleteUrlComposition() throws Exception {
     try {
-      new HttpUrl.Builder().scheme("http").build();
+      new Url.Builder().scheme("http").build();
       fail();
     } catch (IllegalStateException expected) {
       assertThat(expected.getMessage()).isEqualTo("host == null");
     }
     try {
-      new HttpUrl.Builder().host("host").build();
+      new Url.Builder().host("host").build();
       fail();
     } catch (IllegalStateException expected) {
       assertThat(expected.getMessage()).isEqualTo("scheme == null");
@@ -825,17 +825,17 @@ public final class HttpUrlTest {
   }
 
   @Test public void incompleteBuilderToString() {
-    assertThat(new HttpUrl.Builder().scheme("https").encodedPath("/path").toString()).isEqualTo(
+    assertThat(new Url.Builder().scheme("https").encodedPath("/path").toString()).isEqualTo(
         "https:///path");
-    assertThat(new HttpUrl.Builder().host("host.com").encodedPath("/path").toString()).isEqualTo(
+    assertThat(new Url.Builder().host("host.com").encodedPath("/path").toString()).isEqualTo(
         "//host.com/path");
     assertThat(
-        (Object) new HttpUrl.Builder().host("host.com").encodedPath("/path").port(8080).toString()).isEqualTo(
+        (Object) new Url.Builder().host("host.com").encodedPath("/path").port(8080).toString()).isEqualTo(
         "//host.com:8080/path");
   }
 
   @Test public void minimalUrlComposition() throws Exception {
-    HttpUrl url = new HttpUrl.Builder().scheme("http").host("host").build();
+    Url url = new Url.Builder().scheme("http").host("host").build();
     assertThat(url.toString()).isEqualTo("http://host/");
     assertThat(url.scheme()).isEqualTo("http");
     assertThat(url.username()).isEqualTo("");
@@ -848,7 +848,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void fullUrlComposition() throws Exception {
-    HttpUrl url = new HttpUrl.Builder()
+    Url url = new Url.Builder()
         .scheme("http")
         .username("username")
         .password("password")
@@ -888,7 +888,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void composeEncodesWhitespace() throws Exception {
-    HttpUrl url = new HttpUrl.Builder()
+    Url url = new Url.Builder()
         .scheme("http")
         .username("a\r\n\f\t b")
         .password("c\r\n\f\t d")
@@ -907,7 +907,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void composeFromUnencodedComponents() throws Exception {
-    HttpUrl url = new HttpUrl.Builder()
+    Url url = new Url.Builder()
         .scheme("http")
         .username("a:\u0001@/\\?#%b")
         .password("c:\u0001@/\\?#%d")
@@ -934,7 +934,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void composeFromEncodedComponents() throws Exception {
-    HttpUrl url = new HttpUrl.Builder()
+    Url url = new Url.Builder()
         .scheme("http")
         .encodedUsername("a:\u0001@/\\?#%25b")
         .encodedPassword("c:\u0001@/\\?#%25d")
@@ -961,7 +961,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void composeWithEncodedPath() throws Exception {
-    HttpUrl url = new HttpUrl.Builder()
+    Url url = new Url.Builder()
         .scheme("http")
         .host("host")
         .encodedPath("/a%2Fb/c")
@@ -972,7 +972,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void composeMixingPathSegments() throws Exception {
-    HttpUrl url = new HttpUrl.Builder()
+    Url url = new Url.Builder()
         .scheme("http")
         .host("host")
         .encodedPath("/a%2fb/c")
@@ -987,7 +987,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void composeWithAddSegment() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c");
+    Url base = parse("http://host/a/b/c");
     assertThat(base.newBuilder().addPathSegment("").build().encodedPath()).isEqualTo(
         "/a/b/c/");
     assertThat(
@@ -1007,7 +1007,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void addPathSegments() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c");
+    Url base = parse("http://host/a/b/c");
 
     // Add a string with zero slashes: resulting URL gains one slash.
     assertThat(base.newBuilder().addPathSegments("").build().encodedPath()).isEqualTo(
@@ -1037,7 +1037,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void addPathSegmentsOntoTrailingSlash() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c/");
+    Url base = parse("http://host/a/b/c/");
 
     // Add a string with zero slashes: resulting URL gains zero slashes.
     assertThat(base.newBuilder().addPathSegments("").build().encodedPath()).isEqualTo(
@@ -1067,7 +1067,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void addPathSegmentsWithBackslash() throws Exception {
-    HttpUrl base = parse("http://host/");
+    Url base = parse("http://host/");
     assertThat(base.newBuilder().addPathSegments("d\\e").build().encodedPath()).isEqualTo(
         "/d/e");
     assertThat(base.newBuilder().addEncodedPathSegments("d\\e").build().encodedPath()).isEqualTo(
@@ -1075,26 +1075,26 @@ public final class HttpUrlTest {
   }
 
   @Test public void addPathSegmentsWithEmptyPaths() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c");
+    Url base = parse("http://host/a/b/c");
     assertThat(base.newBuilder().addPathSegments("/d/e///f").build().encodedPath()).isEqualTo(
         "/a/b/c//d/e///f");
   }
 
   @Test public void addEncodedPathSegments() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c");
+    Url base = parse("http://host/a/b/c");
     assertThat(
         (Object) base.newBuilder().addEncodedPathSegments("d/e/%20/\n").build().encodedPath()).isEqualTo(
         "/a/b/c/d/e/%20/");
   }
 
   @Test public void addPathSegmentDotDoesNothing() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c");
+    Url base = parse("http://host/a/b/c");
     assertThat(base.newBuilder().addPathSegment(".").build().encodedPath()).isEqualTo(
         "/a/b/c");
   }
 
   @Test public void addPathSegmentEncodes() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c");
+    Url base = parse("http://host/a/b/c");
     assertThat(base.newBuilder().addPathSegment("%2e").build().encodedPath()).isEqualTo(
         "/a/b/c/%252e");
     assertThat(base.newBuilder().addPathSegment("%2e%2e").build().encodedPath()).isEqualTo(
@@ -1102,31 +1102,31 @@ public final class HttpUrlTest {
   }
 
   @Test public void addPathSegmentDotDotPopsDirectory() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c");
+    Url base = parse("http://host/a/b/c");
     assertThat(base.newBuilder().addPathSegment("..").build().encodedPath()).isEqualTo(
         "/a/b/");
   }
 
   @Test public void addPathSegmentDotAndIgnoredCharacter() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c");
+    Url base = parse("http://host/a/b/c");
     assertThat(base.newBuilder().addPathSegment(".\n").build().encodedPath()).isEqualTo(
         "/a/b/c/.%0A");
   }
 
   @Test public void addEncodedPathSegmentDotAndIgnoredCharacter() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c");
+    Url base = parse("http://host/a/b/c");
     assertThat(base.newBuilder().addEncodedPathSegment(".\n").build().encodedPath()).isEqualTo(
         "/a/b/c");
   }
 
   @Test public void addEncodedPathSegmentDotDotAndIgnoredCharacter() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c");
+    Url base = parse("http://host/a/b/c");
     assertThat(base.newBuilder().addEncodedPathSegment("..\n").build().encodedPath()).isEqualTo(
         "/a/b/");
   }
 
   @Test public void setPathSegment() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c");
+    Url base = parse("http://host/a/b/c");
     assertThat(base.newBuilder().setPathSegment(0, "d").build().encodedPath()).isEqualTo(
         "/d/b/c");
     assertThat(base.newBuilder().setPathSegment(1, "d").build().encodedPath()).isEqualTo(
@@ -1136,7 +1136,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void setPathSegmentEncodes() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c");
+    Url base = parse("http://host/a/b/c");
     assertThat(base.newBuilder().setPathSegment(0, "%25").build().encodedPath()).isEqualTo(
         "/%2525/b/c");
     assertThat(base.newBuilder().setPathSegment(0, ".\n").build().encodedPath()).isEqualTo(
@@ -1146,7 +1146,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void setPathSegmentAcceptsEmpty() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c");
+    Url base = parse("http://host/a/b/c");
     assertThat(base.newBuilder().setPathSegment(0, "").build().encodedPath()).isEqualTo(
         "//b/c");
     assertThat(base.newBuilder().setPathSegment(2, "").build().encodedPath()).isEqualTo(
@@ -1154,7 +1154,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void setPathSegmentRejectsDot() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c");
+    Url base = parse("http://host/a/b/c");
     try {
       base.newBuilder().setPathSegment(0, ".");
       fail();
@@ -1163,7 +1163,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void setPathSegmentRejectsDotDot() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c");
+    Url base = parse("http://host/a/b/c");
     try {
       base.newBuilder().setPathSegment(0, "..");
       fail();
@@ -1172,27 +1172,27 @@ public final class HttpUrlTest {
   }
 
   @Test public void setPathSegmentWithSlash() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c");
-    HttpUrl url = base.newBuilder().setPathSegment(1, "/").build();
+    Url base = parse("http://host/a/b/c");
+    Url url = base.newBuilder().setPathSegment(1, "/").build();
     assertThat(url.encodedPath()).isEqualTo("/a/%2F/c");
   }
 
   @Test public void setPathSegmentOutOfBounds() throws Exception {
     try {
-      new HttpUrl.Builder().setPathSegment(1, "a");
+      new Url.Builder().setPathSegment(1, "a");
       fail();
     } catch (IndexOutOfBoundsException expected) {
     }
   }
 
   @Test public void setEncodedPathSegmentEncodes() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c");
+    Url base = parse("http://host/a/b/c");
     assertThat(base.newBuilder().setEncodedPathSegment(0, "%25").build().encodedPath()).isEqualTo(
         "/%25/b/c");
   }
 
   @Test public void setEncodedPathSegmentRejectsDot() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c");
+    Url base = parse("http://host/a/b/c");
     try {
       base.newBuilder().setEncodedPathSegment(0, ".");
       fail();
@@ -1201,7 +1201,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void setEncodedPathSegmentRejectsDotAndIgnoredCharacter() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c");
+    Url base = parse("http://host/a/b/c");
     try {
       base.newBuilder().setEncodedPathSegment(0, ".\n");
       fail();
@@ -1210,7 +1210,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void setEncodedPathSegmentRejectsDotDot() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c");
+    Url base = parse("http://host/a/b/c");
     try {
       base.newBuilder().setEncodedPathSegment(0, "..");
       fail();
@@ -1219,7 +1219,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void setEncodedPathSegmentRejectsDotDotAndIgnoredCharacter() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c");
+    Url base = parse("http://host/a/b/c");
     try {
       base.newBuilder().setEncodedPathSegment(0, "..\n");
       fail();
@@ -1228,30 +1228,30 @@ public final class HttpUrlTest {
   }
 
   @Test public void setEncodedPathSegmentWithSlash() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c");
-    HttpUrl url = base.newBuilder().setEncodedPathSegment(1, "/").build();
+    Url base = parse("http://host/a/b/c");
+    Url url = base.newBuilder().setEncodedPathSegment(1, "/").build();
     assertThat(url.encodedPath()).isEqualTo("/a/%2F/c");
   }
 
   @Test public void setEncodedPathSegmentOutOfBounds() throws Exception {
     try {
-      new HttpUrl.Builder().setEncodedPathSegment(1, "a");
+      new Url.Builder().setEncodedPathSegment(1, "a");
       fail();
     } catch (IndexOutOfBoundsException expected) {
     }
   }
 
   @Test public void removePathSegment() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c");
-    HttpUrl url = base.newBuilder()
+    Url base = parse("http://host/a/b/c");
+    Url url = base.newBuilder()
         .removePathSegment(0)
         .build();
     assertThat(url.encodedPath()).isEqualTo("/b/c");
   }
 
   @Test public void removePathSegmentDoesntRemovePath() throws Exception {
-    HttpUrl base = parse("http://host/a/b/c");
-    HttpUrl url = base.newBuilder()
+    Url base = parse("http://host/a/b/c");
+    Url url = base.newBuilder()
         .removePathSegment(0)
         .removePathSegment(0)
         .removePathSegment(0)
@@ -1262,44 +1262,44 @@ public final class HttpUrlTest {
 
   @Test public void removePathSegmentOutOfBounds() throws Exception {
     try {
-      new HttpUrl.Builder().removePathSegment(1);
+      new Url.Builder().removePathSegment(1);
       fail();
     } catch (IndexOutOfBoundsException expected) {
     }
   }
 
   @Test public void toJavaNetUrl() throws Exception {
-    HttpUrl httpUrl = parse("http://username:password@host/path?query#fragment");
-    URL javaNetUrl = httpUrl.url();
+    Url url = parse("http://username:password@host/path?query#fragment");
+    URL javaNetUrl = url.url();
     assertThat(javaNetUrl.toString()).isEqualTo(
         "http://username:password@host/path?query#fragment");
   }
 
   @Test public void toUri() throws Exception {
-    HttpUrl httpUrl = parse("http://username:password@host/path?query#fragment");
-    URI uri = httpUrl.uri();
+    Url url = parse("http://username:password@host/path?query#fragment");
+    URI uri = url.uri();
     assertThat(uri.toString()).isEqualTo(
         "http://username:password@host/path?query#fragment");
   }
 
   @Test public void toUriSpecialQueryCharacters() throws Exception {
-    HttpUrl httpUrl = parse("http://host/?d=abc!@[]^`{}|\\");
-    URI uri = httpUrl.uri();
+    Url url = parse("http://host/?d=abc!@[]^`{}|\\");
+    URI uri = url.uri();
     assertThat(uri.toString()).isEqualTo("http://host/?d=abc!@[]%5E%60%7B%7D%7C%5C");
   }
 
   @Test public void toUriWithUsernameNoPassword() throws Exception {
-    HttpUrl httpUrl = new HttpUrl.Builder()
+    Url url = new Url.Builder()
         .scheme("http")
         .username("user")
         .host("host")
         .build();
-    assertThat(httpUrl.toString()).isEqualTo("http://user@host/");
-    assertThat(httpUrl.uri().toString()).isEqualTo("http://user@host/");
+    assertThat(url.toString()).isEqualTo("http://user@host/");
+    assertThat(url.uri().toString()).isEqualTo("http://user@host/");
   }
 
   @Test public void toUriUsernameSpecialCharacters() throws Exception {
-    HttpUrl url = new HttpUrl.Builder()
+    Url url = new Url.Builder()
         .scheme("http")
         .host("host")
         .username("=[]:;\"~|?#@^/$%*")
@@ -1311,7 +1311,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void toUriPasswordSpecialCharacters() throws Exception {
-    HttpUrl url = new HttpUrl.Builder()
+    Url url = new Url.Builder()
         .scheme("http")
         .host("host")
         .username("user")
@@ -1324,7 +1324,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void toUriPathSpecialCharacters() throws Exception {
-    HttpUrl url = new HttpUrl.Builder()
+    Url url = new Url.Builder()
         .scheme("http")
         .host("host")
         .addPathSegment("=[]:;\"~|?#@^/$%*")
@@ -1335,7 +1335,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void toUriQueryParameterNameSpecialCharacters() throws Exception {
-    HttpUrl url = new HttpUrl.Builder()
+    Url url = new Url.Builder()
         .scheme("http")
         .host("host")
         .addQueryParameter("=[]:;\"~|?#@^/$%*", "a")
@@ -1348,7 +1348,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void toUriQueryParameterValueSpecialCharacters() throws Exception {
-    HttpUrl url = new HttpUrl.Builder()
+    Url url = new Url.Builder()
         .scheme("http")
         .host("host")
         .addQueryParameter("a", "=[]:;\"~|?#@^/$%*")
@@ -1361,7 +1361,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void toUriQueryValueSpecialCharacters() throws Exception {
-    HttpUrl url = new HttpUrl.Builder()
+    Url url = new Url.Builder()
         .scheme("http")
         .host("host")
         .query("=[]:;\"~|?#@^/$%*")
@@ -1371,7 +1371,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void queryCharactersEncodedWhenComposed() throws Exception {
-    HttpUrl url = new HttpUrl.Builder()
+    Url url = new Url.Builder()
         .scheme("http")
         .host("host")
         .addQueryParameter("a", "!$(),/:;?@[]\\^`{|}~")
@@ -1386,7 +1386,7 @@ public final class HttpUrlTest {
    * We retain the encoded (or non-encoded) state of the input.
    */
   @Test public void queryCharactersNotReencodedWhenComposedWithAddEncoded() throws Exception {
-    HttpUrl url = new HttpUrl.Builder()
+    Url url = new Url.Builder()
         .scheme("http")
         .host("host")
         .addEncodedQueryParameter("a", "!$(),/:;?@[]\\^`{|}~")
@@ -1400,13 +1400,13 @@ public final class HttpUrlTest {
    * into a canonical form because doing so could be semantically different.
    */
   @Test public void queryCharactersNotReencodedWhenParsed() throws Exception {
-    HttpUrl url = parse("http://host/?a=!$(),/:;?@[]\\^`{|}~");
+    Url url = parse("http://host/?a=!$(),/:;?@[]\\^`{|}~");
     assertThat(url.toString()).isEqualTo("http://host/?a=!$(),/:;?@[]\\^`{|}~");
     assertThat(url.queryParameter("a")).isEqualTo("!$(),/:;?@[]\\^`{|}~");
   }
 
   @Test public void toUriFragmentSpecialCharacters() throws Exception {
-    HttpUrl url = new HttpUrl.Builder()
+    Url url = new Url.Builder()
         .scheme("http")
         .host("host")
         .fragment("=[]:;\"~|?#@^/$%*")
@@ -1471,36 +1471,36 @@ public final class HttpUrlTest {
 
   @Test public void fromJavaNetUrl() throws Exception {
     URL javaNetUrl = new URL("http://username:password@host/path?query#fragment");
-    HttpUrl httpUrl = HttpUrl.get(javaNetUrl);
-    assertThat(httpUrl.toString()).isEqualTo(
+    Url url = Url.get(javaNetUrl);
+    assertThat(url.toString()).isEqualTo(
         "http://username:password@host/path?query#fragment");
   }
 
   @Test public void fromJavaNetUrlUnsupportedScheme() throws Exception {
     URL javaNetUrl = new URL("mailto:user@example.com");
-    assertThat(HttpUrl.get(javaNetUrl)).isNull();
+    assertThat(Url.get(javaNetUrl)).isNull();
   }
 
   @Test public void fromUri() throws Exception {
     URI uri = new URI("http://username:password@host/path?query#fragment");
-    HttpUrl httpUrl = HttpUrl.get(uri);
-    assertThat(httpUrl.toString()).isEqualTo(
+    Url url = Url.get(uri);
+    assertThat(url.toString()).isEqualTo(
         "http://username:password@host/path?query#fragment");
   }
 
   @Test public void fromUriUnsupportedScheme() throws Exception {
     URI uri = new URI("mailto:user@example.com");
-    assertThat(HttpUrl.get(uri)).isNull();
+    assertThat(Url.get(uri)).isNull();
   }
 
   @Test public void fromUriPartial() throws Exception {
     URI uri = new URI("/path");
-    assertThat(HttpUrl.get(uri)).isNull();
+    assertThat(Url.get(uri)).isNull();
   }
 
   @Test public void composeQueryWithComponents() throws Exception {
-    HttpUrl base = parse("http://host/");
-    HttpUrl url = base.newBuilder().addQueryParameter("a+=& b", "c+=& d").build();
+    Url base = parse("http://host/");
+    Url url = base.newBuilder().addQueryParameter("a+=& b", "c+=& d").build();
     assertThat(url.toString()).isEqualTo("http://host/?a%2B%3D%26%20b=c%2B%3D%26%20d");
     assertThat(url.queryParameterValue(0)).isEqualTo("c+=& d");
     assertThat(url.queryParameterName(0)).isEqualTo("a+=& b");
@@ -1514,14 +1514,14 @@ public final class HttpUrlTest {
   }
 
   @Test public void composeQueryWithEncodedComponents() throws Exception {
-    HttpUrl base = parse("http://host/");
-    HttpUrl url = base.newBuilder().addEncodedQueryParameter("a+=& b", "c+=& d").build();
+    Url base = parse("http://host/");
+    Url url = base.newBuilder().addEncodedQueryParameter("a+=& b", "c+=& d").build();
     assertThat(url.toString()).isEqualTo("http://host/?a+%3D%26%20b=c+%3D%26%20d");
     assertThat(url.queryParameter("a =& b")).isEqualTo("c =& d");
   }
 
   @Test public void composeQueryRemoveQueryParameter() throws Exception {
-    HttpUrl url = parse("http://host/").newBuilder()
+    Url url = parse("http://host/").newBuilder()
         .addQueryParameter("a+=& b", "c+=& d")
         .removeAllQueryParameters("a+=& b")
         .build();
@@ -1530,7 +1530,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void composeQueryRemoveEncodedQueryParameter() throws Exception {
-    HttpUrl url = parse("http://host/").newBuilder()
+    Url url = parse("http://host/").newBuilder()
         .addEncodedQueryParameter("a+=& b", "c+=& d")
         .removeAllEncodedQueryParameters("a+=& b")
         .build();
@@ -1539,7 +1539,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void composeQuerySetQueryParameter() throws Exception {
-    HttpUrl url = parse("http://host/").newBuilder()
+    Url url = parse("http://host/").newBuilder()
         .addQueryParameter("a+=& b", "c+=& d")
         .setQueryParameter("a+=& b", "ef")
         .build();
@@ -1548,7 +1548,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void composeQuerySetEncodedQueryParameter() throws Exception {
-    HttpUrl url = parse("http://host/").newBuilder()
+    Url url = parse("http://host/").newBuilder()
         .addEncodedQueryParameter("a+=& b", "c+=& d")
         .setEncodedQueryParameter("a+=& b", "ef")
         .build();
@@ -1557,7 +1557,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void composeQueryMultipleEncodedValuesForParameter() throws Exception {
-    HttpUrl url = parse("http://host/").newBuilder()
+    Url url = parse("http://host/").newBuilder()
         .addQueryParameter("a+=& b", "c+=& d")
         .addQueryParameter("a+=& b", "e+=& f")
         .build();
@@ -1570,14 +1570,14 @@ public final class HttpUrlTest {
   }
 
   @Test public void absentQueryIsZeroNameValuePairs() throws Exception {
-    HttpUrl url = parse("http://host/").newBuilder()
+    Url url = parse("http://host/").newBuilder()
         .query(null)
         .build();
     assertThat(url.querySize()).isEqualTo(0);
   }
 
   @Test public void emptyQueryIsSingleNameValuePairWithEmptyKey() throws Exception {
-    HttpUrl url = parse("http://host/").newBuilder()
+    Url url = parse("http://host/").newBuilder()
         .query("")
         .build();
     assertThat(url.querySize()).isEqualTo(1);
@@ -1586,7 +1586,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void ampersandQueryIsTwoNameValuePairsWithEmptyKeys() throws Exception {
-    HttpUrl url = parse("http://host/").newBuilder()
+    Url url = parse("http://host/").newBuilder()
         .query("&")
         .build();
     assertThat(url.querySize()).isEqualTo(2);
@@ -1597,7 +1597,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void removeAllDoesNotRemoveQueryIfNoParametersWereRemoved() throws Exception {
-    HttpUrl url = parse("http://host/").newBuilder()
+    Url url = parse("http://host/").newBuilder()
         .query("")
         .removeAllQueryParameters("a")
         .build();
@@ -1605,7 +1605,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void queryParametersWithoutValues() throws Exception {
-    HttpUrl url = parse("http://host/?foo&bar&baz");
+    Url url = parse("http://host/?foo&bar&baz");
     assertThat(url.querySize()).isEqualTo(3);
     assertThat(url.queryParameterNames()).isEqualTo(
         new LinkedHashSet<>(Arrays.asList("foo", "bar", "baz")));
@@ -1618,7 +1618,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void queryParametersWithEmptyValues() throws Exception {
-    HttpUrl url = parse("http://host/?foo=&bar=&baz=");
+    Url url = parse("http://host/?foo=&bar=&baz=");
     assertThat(url.querySize()).isEqualTo(3);
     assertThat(url.queryParameterNames()).isEqualTo(
         new LinkedHashSet<>(Arrays.asList("foo", "bar", "baz")));
@@ -1631,7 +1631,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void queryParametersWithRepeatedName() throws Exception {
-    HttpUrl url = parse("http://host/?foo[]=1&foo[]=2&foo[]=3");
+    Url url = parse("http://host/?foo[]=1&foo[]=2&foo[]=3");
     assertThat(url.querySize()).isEqualTo(3);
     assertThat(url.queryParameterNames()).isEqualTo(Collections.singleton("foo[]"));
     assertThat(url.queryParameterValue(0)).isEqualTo("1");
@@ -1641,7 +1641,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void queryParameterLookupWithNonCanonicalEncoding() throws Exception {
-    HttpUrl url = parse("http://host/?%6d=m&+=%20");
+    Url url = parse("http://host/?%6d=m&+=%20");
     assertThat(url.queryParameterName(0)).isEqualTo("m");
     assertThat(url.queryParameterName(1)).isEqualTo(" ");
     assertThat(url.queryParameter("m")).isEqualTo("m");
@@ -1649,14 +1649,14 @@ public final class HttpUrlTest {
   }
 
   @Test public void parsedQueryDoesntIncludeFragment() {
-    HttpUrl url = parse("http://host/?#fragment");
+    Url url = parse("http://host/?#fragment");
     assertThat(url.fragment()).isEqualTo("fragment");
     assertThat(url.query()).isEqualTo("");
     assertThat(url.encodedQuery()).isEqualTo("");
   }
 
   @Test public void roundTripBuilder() throws Exception {
-    HttpUrl url = new HttpUrl.Builder()
+    Url url = new Url.Builder()
         .scheme("http")
         .username("%")
         .password("%")
@@ -1677,7 +1677,7 @@ public final class HttpUrlTest {
    */
   @Test public void rawEncodingRetained() throws Exception {
     String urlString = "http://%6d%6D:%6d%6D@host/%6d%6D?%6d%6D#%6d%6D";
-    HttpUrl url = parse(urlString);
+    Url url = parse(urlString);
     assertThat(url.encodedUsername()).isEqualTo("%6d%6D");
     assertThat(url.encodedPassword()).isEqualTo("%6d%6D");
     assertThat(url.encodedPath()).isEqualTo("/%6d%6D");
@@ -1691,7 +1691,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void clearFragment() throws Exception {
-    HttpUrl url = parse("http://host/#fragment")
+    Url url = parse("http://host/#fragment")
         .newBuilder()
         .fragment(null)
         .build();
@@ -1701,7 +1701,7 @@ public final class HttpUrlTest {
   }
 
   @Test public void clearEncodedFragment() throws Exception {
-    HttpUrl url = parse("http://host/#fragment")
+    Url url = parse("http://host/#fragment")
         .newBuilder()
         .encodedFragment(null)
         .build();

@@ -47,7 +47,7 @@ public final class ConnectionReuseTest {
     server.enqueue(new MockResponse().setBody("b"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     assertConnectionReused(request, request);
   }
@@ -58,7 +58,7 @@ public final class ConnectionReuseTest {
     server.enqueue(new MockResponse().setBody("b"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     assertConnectionReused(request, request);
   }
@@ -68,11 +68,11 @@ public final class ConnectionReuseTest {
     server.enqueue(new MockResponse().setBody("b"));
 
     Request requestA = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .header("Connection", "close")
         .build();
     Request requestB = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     assertConnectionNotReused(requestA, requestB);
   }
@@ -84,10 +84,10 @@ public final class ConnectionReuseTest {
     server.enqueue(new MockResponse().setBody("b"));
 
     Request requestA = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     Request requestB = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     assertConnectionNotReused(requestA, requestB);
   }
@@ -100,7 +100,7 @@ public final class ConnectionReuseTest {
     server.enqueue(new MockResponse().setBody("b"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     assertConnectionNotReused(request, request);
   }
@@ -113,7 +113,7 @@ public final class ConnectionReuseTest {
     server.enqueue(new MockResponse().setBody("b"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     assertConnectionNotReused(request, request);
   }
@@ -129,7 +129,7 @@ public final class ConnectionReuseTest {
     server.enqueue(new MockResponse().setBody("b"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     Response response = client.newCall(request).execute();
     assertThat(response.body().string()).isEqualTo("b");
@@ -149,7 +149,7 @@ public final class ConnectionReuseTest {
     server.enqueue(new MockResponse().setBody("b"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     Response response = client.newCall(request).execute();
     assertThat(response.body().string()).isEqualTo("b");
@@ -163,7 +163,7 @@ public final class ConnectionReuseTest {
     server.enqueue(new MockResponse().setBody("b"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
 
     Response responseA = client.newCall(request).execute();
@@ -182,7 +182,7 @@ public final class ConnectionReuseTest {
     server.enqueue(new MockResponse().setBody("b"));
 
     Request requestA = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     Response responseA = client.newCall(requestA).execute();
     assertThat(responseA.body().string()).isEqualTo("a");
@@ -192,7 +192,7 @@ public final class ConnectionReuseTest {
     Thread.sleep(250);
 
     Request requestB = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(RequestBody.create(MediaType.get("text/plain"), "b"))
         .build();
     Response responseB = client.newCall(requestB).execute();
@@ -206,7 +206,7 @@ public final class ConnectionReuseTest {
     server.enqueue(new MockResponse().setBody("b"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     Response response1 = client.newCall(request).execute();
     Response response2 = client.newCall(request).execute();
@@ -224,7 +224,7 @@ public final class ConnectionReuseTest {
         .connectionPool(new ConnectionPool(5, 250, TimeUnit.MILLISECONDS))
         .build();
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
 
     Response response1 = client.newCall(request).execute();
@@ -246,7 +246,7 @@ public final class ConnectionReuseTest {
     server.enqueue(new MockResponse());
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
 
     Response response = client.newCall(request).execute();
@@ -273,7 +273,7 @@ public final class ConnectionReuseTest {
     server.enqueue(new MockResponse());
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
 
     Response response1 = client.newCall(request).execute();
@@ -326,7 +326,7 @@ public final class ConnectionReuseTest {
         .setBody("/b is here"));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build();
     Call call = client.newCall(request);
     try (Response response = call.execute()) {

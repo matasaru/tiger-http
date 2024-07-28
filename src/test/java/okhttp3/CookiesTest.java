@@ -54,7 +54,7 @@ public class CookiesTest {
     MockWebServer server = new MockWebServer();
     server.start();
 
-    HttpUrl urlWithIpAddress = urlWithIpAddress(server, "/path/foo");
+    Url urlWithIpAddress = urlWithIpAddress(server, "/path/foo");
     server.enqueue(new MockResponse().addHeader("Set-Cookie: a=android; "
         + "expires=Fri, 31-Dec-9999 23:59:59 GMT; "
         + "path=/path; "
@@ -84,7 +84,7 @@ public class CookiesTest {
     MockWebServer server = new MockWebServer();
     server.start();
 
-    HttpUrl urlWithIpAddress = urlWithIpAddress(server, "/path/foo");
+    Url urlWithIpAddress = urlWithIpAddress(server, "/path/foo");
     server.enqueue(new MockResponse().addHeader("Set-Cookie: a=android; "
         + "Comment=this cookie is delicious; "
         + "Domain=" + urlWithIpAddress.host() + "; "
@@ -115,7 +115,7 @@ public class CookiesTest {
     MockWebServer server = new MockWebServer();
     server.start();
 
-    HttpUrl urlWithIpAddress = urlWithIpAddress(server, "/path/foo");
+    Url urlWithIpAddress = urlWithIpAddress(server, "/path/foo");
     server.enqueue(new MockResponse().addHeader("Set-Cookie: a=\"android\"; "
         + "Comment=\"this cookie is delicious\"; "
         + "CommentURL=\"http://google.com/\"; "
@@ -143,7 +143,7 @@ public class CookiesTest {
     MockWebServer server = new MockWebServer();
     server.enqueue(new MockResponse());
     server.start();
-    HttpUrl serverUrl = urlWithIpAddress(server, "/");
+    Url serverUrl = urlWithIpAddress(server, "/");
 
     CookieManager cookieManager = new CookieManager(null, ACCEPT_ORIGINAL_SERVER);
     HttpCookie cookieA = new HttpCookie("a", "android");
@@ -168,7 +168,7 @@ public class CookiesTest {
     final MockWebServer server = new MockWebServer();
     server.enqueue(new MockResponse());
     server.start();
-    final HttpUrl serverUrl = urlWithIpAddress(server, "/");
+    final Url serverUrl = urlWithIpAddress(server, "/");
 
     CookieHandler androidCookieHandler = new CookieHandler() {
       @Override public Map<String, List<String>> get(URI uri, Map<String, List<String>> map)
@@ -218,14 +218,14 @@ public class CookiesTest {
     MockWebServer redirectTarget = new MockWebServer();
     redirectTarget.enqueue(new MockResponse().setBody("A"));
     redirectTarget.start();
-    HttpUrl redirectTargetUrl = urlWithIpAddress(redirectTarget, "/");
+    Url redirectTargetUrl = urlWithIpAddress(redirectTarget, "/");
 
     MockWebServer redirectSource = new MockWebServer();
     redirectSource.enqueue(new MockResponse()
         .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP)
         .addHeader("Location: " + redirectTargetUrl));
     redirectSource.start();
-    HttpUrl redirectSourceUrl = urlWithIpAddress(redirectSource, "/");
+    Url redirectSourceUrl = urlWithIpAddress(redirectSource, "/");
 
     CookieManager cookieManager = new CookieManager(null, ACCEPT_ORIGINAL_SERVER);
     HttpCookie cookie = new HttpCookie("c", "cookie");
@@ -267,7 +267,7 @@ public class CookiesTest {
     server.enqueue(new MockResponse());
     server.start();
 
-    get(server.url("/"));
+    get(Url.get(server.url("/").toString()));
 
     RecordedRequest request = server.takeRequest();
     assertThat(request.getHeader("Cookie")).isEqualTo("Bar=bar; Baz=baz");
@@ -279,7 +279,7 @@ public class CookiesTest {
     CookieManager cookieManager = new CookieManager(null, ACCEPT_ORIGINAL_SERVER);
     JavaNetCookieJar cookieJar = new JavaNetCookieJar(cookieManager);
 
-    HttpUrl url = HttpUrl.get("https://www.squareup.com/");
+    Url url = Url.get("https://www.squareup.com/");
     cookieJar.saveFromResponse(url, Arrays.asList(
         Cookie.parse(url, "a=android; Domain=squareup.com")));
     List<Cookie> actualCookies = cookieJar.loadForRequest(url);
@@ -292,7 +292,7 @@ public class CookiesTest {
     CookieManager cookieManager = new CookieManager(null, ACCEPT_ORIGINAL_SERVER);
     JavaNetCookieJar cookieJar = new JavaNetCookieJar(cookieManager);
 
-    HttpUrl url = HttpUrl.get("https://www.squareup.com/");
+    Url url = Url.get("https://www.squareup.com/");
     cookieJar.saveFromResponse(url, Arrays.asList(
         Cookie.parse(url, "a=android; Domain=.squareup.com")));
     List<Cookie> actualCookies = cookieJar.loadForRequest(url);
@@ -305,7 +305,7 @@ public class CookiesTest {
     CookieManager cookieManager = new CookieManager(null, ACCEPT_ORIGINAL_SERVER);
     JavaNetCookieJar cookieJar = new JavaNetCookieJar(cookieManager);
 
-    HttpUrl url = HttpUrl.get("https://squareup.com/");
+    Url url = Url.get("https://squareup.com/");
     cookieJar.saveFromResponse(url, Arrays.asList(
         Cookie.parse(url, "a=android; Domain=squareup.com")));
     List<Cookie> actualCookies = cookieJar.loadForRequest(url);
@@ -318,23 +318,23 @@ public class CookiesTest {
     CookieManager cookieManager = new CookieManager(null, ACCEPT_ORIGINAL_SERVER);
     JavaNetCookieJar cookieJar = new JavaNetCookieJar(cookieManager);
 
-    HttpUrl url1 = HttpUrl.get("https://api.squareup.com/");
+    Url url1 = Url.get("https://api.squareup.com/");
     cookieJar.saveFromResponse(url1, Arrays.asList(
         Cookie.parse(url1, "a=android; Domain=api.squareup.com")));
 
-    HttpUrl url2 = HttpUrl.get("https://www.squareup.com/");
+    Url url2 = Url.get("https://www.squareup.com/");
     List<Cookie> actualCookies = cookieJar.loadForRequest(url2);
     assertThat(actualCookies).isEmpty();
   }
 
-  private HttpUrl urlWithIpAddress(MockWebServer server, String path) throws Exception {
-    return server.url(path)
+  private Url urlWithIpAddress(MockWebServer server, String path) throws Exception {
+    return Url.get(server.url(path).toString())
         .newBuilder()
         .host(InetAddress.getByName(server.getHostName()).getHostAddress())
         .build();
   }
 
-  private void get(HttpUrl url) throws Exception {
+  private void get(Url url) throws Exception {
     Call call = client.newCall(new Request.Builder()
         .url(url)
         .build());

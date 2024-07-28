@@ -55,7 +55,7 @@ public final class DuplexTest {
 
   @Test public void http1DoesntSupportDuplex() throws IOException {
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(new AsyncRequestBody())
         .build());
     try {
@@ -81,7 +81,7 @@ public final class DuplexTest {
             .exhaustResponse());
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(new AsyncRequestBody())
         .build());
 
@@ -124,7 +124,7 @@ public final class DuplexTest {
             .exhaustRequest());
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(new AsyncRequestBody())
         .build());
 
@@ -164,7 +164,7 @@ public final class DuplexTest {
             .exhaustResponse());
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .build());
 
     try (Response response = call.execute()) {
@@ -193,7 +193,7 @@ public final class DuplexTest {
             .exhaustRequest());
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .method("POST", new AsyncRequestBody())
         .build();
     Call call = client.newCall(request);
@@ -219,7 +219,7 @@ public final class DuplexTest {
             .exhaustRequest());
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(new AsyncRequestBody())
         .build());
 
@@ -255,7 +255,7 @@ public final class DuplexTest {
             .exhaustRequest());
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .header("Expect", "100-continue")
         .post(new AsyncRequestBody())
         .build());
@@ -296,7 +296,7 @@ public final class DuplexTest {
         .setBody("this is /b"));
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(new AsyncRequestBody())
         .build());
 
@@ -355,7 +355,7 @@ public final class DuplexTest {
             .exhaustRequest());
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(new AsyncRequestBody())
         .build());
 
@@ -392,7 +392,7 @@ public final class DuplexTest {
         .setHeadersDelay(500, TimeUnit.MILLISECONDS));
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(new AsyncRequestBody())
         .build();
 
@@ -422,7 +422,7 @@ public final class DuplexTest {
             .exhaustRequest());
 
     Request request = new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(new AsyncRequestBody())
         .build();
 
@@ -461,7 +461,7 @@ public final class DuplexTest {
         .build();
 
     Call call = client.newCall(new Request.Builder()
-        .url(server.url("/"))
+        .url(server.url("/").toString())
         .post(new AsyncRequestBody())
         .build());
 

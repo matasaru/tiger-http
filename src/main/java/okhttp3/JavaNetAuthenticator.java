@@ -32,7 +32,7 @@ public final class JavaNetAuthenticator implements Authenticator {
   @Override public Request authenticate(Route route, Response response) throws IOException {
     List<Challenge> challenges = response.challenges();
     Request request = response.request();
-    HttpUrl url = request.url();
+    Url url = request.url();
     boolean proxyAuthorization = response.code() == 407;
     Proxy proxy = route.proxy();
 
@@ -65,7 +65,7 @@ public final class JavaNetAuthenticator implements Authenticator {
     return null; // No challenges were satisfied!
   }
 
-  private InetAddress getConnectToInetAddress(Proxy proxy, HttpUrl url) throws IOException {
+  private InetAddress getConnectToInetAddress(Proxy proxy, Url url) throws IOException {
     return proxy.type() != Proxy.Type.DIRECT
         ? ((InetSocketAddress) proxy.address()).getAddress()
         : InetAddress.getByName(url.host());

@@ -45,11 +45,11 @@ public final class RecordingCookieJar implements CookieJar {
     assertThat(actualCookieStrings).containsExactly(cookies);
   }
 
-  @Override public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
+  @Override public void saveFromResponse(Url url, List<Cookie> cookies) {
     responseCookies.add(cookies);
   }
 
-  @Override public List<Cookie> loadForRequest(HttpUrl url) {
+  @Override public List<Cookie> loadForRequest(Url url) {
     if (requestCookies.isEmpty()) return Collections.emptyList();
     return requestCookies.removeFirst();
   }

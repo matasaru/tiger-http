@@ -47,7 +47,7 @@ public final class ConnectionCoalescingTest {
   private HeldCertificate rootCa;
   private HeldCertificate certificate;
   private FakeDns dns = new FakeDns();
-  private HttpUrl url;
+  private Url url;
   private List<InetAddress> serverIps;
 
   @Before public void setUp() throws Exception {
@@ -89,7 +89,7 @@ public final class ConnectionCoalescingTest {
         .build();
     server.useHttps(serverHandshakeCertificates.sslSocketFactory(), false);
 
-    url = server.url("/robots.txt");
+    url = Url.get(server.url("/robots.txt").toString());
   }
 
   /**
@@ -102,7 +102,7 @@ public final class ConnectionCoalescingTest {
 
     assert200Http2Response(execute(url), server.getHostName());
 
-    HttpUrl sanUrl = url.newBuilder().host("san.com").build();
+    Url sanUrl = url.newBuilder().host("san.com").build();
     assert200Http2Response(execute(sanUrl), "san.com");
 
     assertThat(client.connectionPool().connectionCount()).isEqualTo(1);
@@ -123,7 +123,7 @@ public final class ConnectionCoalescingTest {
     server.enqueue(new MockResponse().setResponseCode(200));
 
     dns.set("san.com", Dns.SYSTEM.lookup(server.getHostName()).subList(0, 1));
-    HttpUrl sanUrl = url.newBuilder().host("san.com").build();
+    Url sanUrl = url.newBuilder().host("san.com").build();
 
     CountDownLatch request2ConnectStart = new CountDownLatch(1);
     CountDownLatch request1ConnectionAcquired = new CountDownLatch(1);
@@ -211,7 +211,7 @@ public final class ConnectionCoalescingTest {
     server.enqueue(new MockResponse().setResponseCode(200));
     server.enqueue(new MockResponse().setResponseCode(200));
 
-    HttpUrl sanUrl = url.newBuilder().host("san.com").build();
+    Url sanUrl = url.newBuilder().host("san.com").build();
     assert200Http2Response(execute(sanUrl), "san.com");
 
     assert200Http2Response(execute(url), server.getHostName());
@@ -238,7 +238,7 @@ public final class ConnectionCoalescingTest {
     // Simulate a stale connection in the pool.
     connection.get().socket().close();
 
-    HttpUrl sanUrl = url.newBuilder().host("san.com").build();
+    Url sanUrl = url.newBuilder().host("san.com").build();
     assert200Http2Response(execute(sanUrl), "san.com");
 
     assertThat(client.connectionPool().connectionCount()).isEqualTo(1);
@@ -250,7 +250,7 @@ public final class ConnectionCoalescingTest {
 
     assert200Http2Response(execute(url), server.getHostName());
 
-    HttpUrl differentDnsUrl = url.newBuilder().host("differentdns.com").build();
+    Url differentDnsUrl = url.newBuilder().host("differentdns.com").build();
     try {
       execute(differentDnsUrl);
       fail("expected a failed attempt to connect");
@@ -264,7 +264,7 @@ public final class ConnectionCoalescingTest {
 
     assert200Http2Response(execute(url), server.getHostName());
 
-    HttpUrl nonsanUrl = url.newBuilder().host("nonsan.com").build();
+    Url nonsanUrl = url.newBuilder().host("nonsan.com").build();
 
     try {
       execute(nonsanUrl);
@@ -285,7 +285,7 @@ public final class ConnectionCoalescingTest {
 
     assert200Http2Response(execute(url), server.getHostName());
 
-    HttpUrl sanUrl = url.newBuilder().host("san.com").build();
+    Url sanUrl = url.newBuilder().host("san.com").build();
 
     assert200Http2Response(execute(sanUrl), "san.com");
 
@@ -303,7 +303,7 @@ public final class ConnectionCoalescingTest {
 
     assert200Http2Response(execute(url), server.getHostName());
 
-    HttpUrl sanUrl = url.newBuilder().host("san.com").build();
+    Url sanUrl = url.newBuilder().host("san.com").build();
 
     try {
       execute(sanUrl);
@@ -325,7 +325,7 @@ public final class ConnectionCoalescingTest {
 
     assert200Http2Response(execute(url), server.getHostName());
 
-    HttpUrl sanUrl = url.newBuilder().host("san.com").build();
+    Url sanUrl = url.newBuilder().host("san.com").build();
 
     assert200Http2Response(execute(sanUrl), "san.com");
 
@@ -353,7 +353,7 @@ public final class ConnectionCoalescingTest {
 
     assert200Http2Response(execute(url), server.getHostName());
 
-    HttpUrl sanUrl = url.newBuilder().host("san.com").build();
+    Url sanUrl = url.newBuilder().host("san.com").build();
     dns.set("san.com",
         Arrays.asList(InetAddress.getByAddress("san.com", new byte[] {0, 0, 0, 0}),
             serverIps.get(0)));
@@ -371,7 +371,7 @@ public final class ConnectionCoalescingTest {
 
     assert200Http2Response(execute(url), server.getHostName());
 
-    HttpUrl sanUrl = url.newBuilder().host("www.wildcard.com").build();
+    Url sanUrl = url.newBuilder().host("www.wildcard.com").build();
     assert200Http2Response(execute(sanUrl), "www.wildcard.com");
 
     assertThat(client.connectionPool().connectionCount()).isEqualTo(1);
@@ -388,7 +388,7 @@ public final class ConnectionCoalescingTest {
 
     assert200Http2Response(execute(url), server.getHostName());
 
-    HttpUrl sanUrl = url.newBuilder().host("san.com").build();
+    Url sanUrl = url.newBuilder().host("san.com").build();
     assert200Http2Response(execute(sanUrl), "san.com");
 
     assertThat(client.connectionPool().connectionCount()).isEqualTo(1);
@@ -409,10 +409,10 @@ public final class ConnectionCoalescingTest {
   }
 
   private Response execute(String url) throws IOException {
-    return execute(HttpUrl.get(url));
+    return execute(Url.get(url));
   }
 
-  private Response execute(HttpUrl url) throws IOException {
+  private Response execute(Url url) throws IOException {
     return client.newCall(new Request.Builder().url(url).build()).execute();
   }
 
