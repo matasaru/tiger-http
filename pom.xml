@@ -4,8 +4,8 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>linktiger.http</groupId>
-  <artifactId>okhttp</artifactId>
-  <version>3.14.10-SNAPSHOT</version>
+  <artifactId>http-client</artifactId>
+  <version>1.0.0</version>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -72,7 +72,7 @@
         <configuration>
           <archive>
             <manifestEntries>
-              <Automatic-Module-Name>okhttp3</Automatic-Module-Name>
+              <Automatic-Module-Name>linktiger.http</Automatic-Module-Name>
             </manifestEntries>
           </archive>
         </configuration>
