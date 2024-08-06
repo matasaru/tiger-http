@@ -58,6 +58,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import linktiger.http.MediaType;
 import linktiger.http.Protocol;
 import linktiger.http.Request;
 import linktiger.http.RequestBody;

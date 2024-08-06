@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 import linktiger.http.RequestBody;
 
-import okhttp3.MediaType;
+import linktiger.http.MediaType;
 import okio.BufferedSink;
 
 import static junit.framework.TestCase.assertTrue;

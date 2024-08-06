@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.UUID;
 
-import okhttp3.MediaType;
 import okio.Buffer;
 import org.junit.Test;
 

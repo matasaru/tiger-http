@@ -15,6 +15,7 @@
  */
 package okhttp3;
 
+import linktiger.http.MediaType;
 import linktiger.http.ResponseBody;
 
 import okio.BufferedSource;

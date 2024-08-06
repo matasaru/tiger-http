@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLException;
 
+import linktiger.http.MediaType;
 import linktiger.http.Protocol;
 import linktiger.http.Request;
 import linktiger.http.RequestBody;

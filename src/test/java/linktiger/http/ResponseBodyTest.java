@@ -21,7 +21,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import okhttp3.MediaType;
 import okio.Buffer;
 import okio.BufferedSource;
 import okio.ByteString;
