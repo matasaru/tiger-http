@@ -18,8 +18,10 @@ package okhttp3.internal.duplex;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+
+import linktiger.http.RequestBody;
+
 import okhttp3.MediaType;
-import okhttp3.RequestBody;
 import okio.BufferedSink;
 
 import static junit.framework.TestCase.assertTrue;

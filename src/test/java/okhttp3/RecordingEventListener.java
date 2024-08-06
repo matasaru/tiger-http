@@ -25,6 +25,8 @@ import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
+import linktiger.http.Request;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public final class RecordingEventListener extends EventListener {
@@ -125,7 +127,7 @@ public final class RecordingEventListener extends EventListener {
   }
 
   @Override public void requestHeadersEnd(Call call, Request request) {
-    logEvent(new RequestHeadersEnd(call, request.headers.byteCount()));
+    logEvent(new RequestHeadersEnd(call, request.headers().byteCount()));
   }
 
   @Override public void requestBodyStart(Call call) {

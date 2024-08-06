@@ -17,10 +17,12 @@ package okhttp3.internal.connection;
 
 import java.io.IOException;
 import java.net.ProtocolException;
+
+import linktiger.http.Request;
+
 import okhttp3.Call;
 import okhttp3.EventListener;
 import okhttp3.Headers;
-import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okhttp3.internal.Internal;

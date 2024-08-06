@@ -55,6 +55,8 @@ import javax.net.ssl.SSLProtocolException;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
+import linktiger.http.Request;
+import linktiger.http.RequestBody;
 import linktiger.http.Url;
 
 import okhttp3.RecordingEventListener.CallEnd;

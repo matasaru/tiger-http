@@ -24,6 +24,8 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
+import linktiger.http.Request;
+
 import okhttp3.internal.NamedRunnable;
 import okhttp3.internal.connection.ConnectInterceptor;
 import okhttp3.internal.connection.Transmitter;

@@ -21,11 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+
+import linktiger.http.Request;
+
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.HttpClient;
 import okhttp3.Protocol;
-import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.internal.Internal;
 import okhttp3.internal.Util;

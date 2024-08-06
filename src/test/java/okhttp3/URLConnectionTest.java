@@ -58,6 +58,8 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import linktiger.http.Request;
+import linktiger.http.RequestBody;
 import linktiger.http.Url;
 
 import okhttp3.internal.Internal;

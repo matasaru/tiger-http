@@ -22,12 +22,14 @@ import java.net.Socket;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import javax.net.SocketFactory;
+
+import linktiger.http.Request;
+
 import okhttp3.Address;
 import okhttp3.Call;
 import okhttp3.ConnectionPool;
 import okhttp3.Dns;
 import okhttp3.HttpClient;
-import okhttp3.Request;
 import okhttp3.Route;
 import okhttp3.internal.Internal;
 import okhttp3.internal.RecordingOkAuthenticator;

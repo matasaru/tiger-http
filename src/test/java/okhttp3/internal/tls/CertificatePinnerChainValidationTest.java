@@ -26,11 +26,13 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509KeyManager;
 import javax.net.ssl.X509TrustManager;
+
+import linktiger.http.Request;
+
 import okhttp3.Call;
 import okhttp3.CertificatePinner;
 import okhttp3.HttpClient;
 import okhttp3.RecordingHostnameVerifier;
-import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;

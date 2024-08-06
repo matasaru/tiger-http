@@ -19,6 +19,9 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+
+import linktiger.http.Request;
+
 import okhttp3.internal.connection.Exchange;
 import okhttp3.internal.http.HttpHeaders;
 import okio.Buffer;

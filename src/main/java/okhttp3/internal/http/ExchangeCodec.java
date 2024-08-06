@@ -16,8 +16,10 @@
 package okhttp3.internal.http;
 
 import java.io.IOException;
+
+import linktiger.http.Request;
+
 import okhttp3.Headers;
-import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.internal.connection.RealConnection;
 import okio.Sink;

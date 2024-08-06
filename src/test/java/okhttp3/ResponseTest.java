@@ -16,6 +16,9 @@
 package okhttp3;
 
 import java.io.IOException;
+
+import linktiger.http.Request;
+
 import okio.Buffer;
 import okio.BufferedSource;
 import okio.Okio;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package okhttp3;
+package linktiger.http;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -21,8 +21,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.UUID;
 
-import linktiger.http.Url;
-
+import okhttp3.MediaType;
 import okio.Buffer;
 import org.junit.Test;
 

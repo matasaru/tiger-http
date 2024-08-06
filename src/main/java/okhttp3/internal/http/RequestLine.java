@@ -18,9 +18,8 @@ package okhttp3.internal.http;
 import java.net.HttpURLConnection;
 import java.net.Proxy;
 
+import linktiger.http.Request;
 import linktiger.http.Url;
-
-import okhttp3.Request;
 
 public final class RequestLine {
   private RequestLine() {

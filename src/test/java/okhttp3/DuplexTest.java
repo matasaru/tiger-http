@@ -21,6 +21,9 @@ import java.net.ProtocolException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import linktiger.http.Request;
+
 import okhttp3.internal.RecordingOkAuthenticator;
 import okhttp3.internal.duplex.AsyncRequestBody;
 import okhttp3.internal.duplex.MwsDuplexAccess;

@@ -23,6 +23,7 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 
+import linktiger.http.Request;
 import linktiger.http.Url;
 
 import okhttp3.mockwebserver.MockResponse;

@@ -18,10 +18,12 @@ package okhttp3.internal.http;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import linktiger.http.Request;
+
 import okhttp3.Call;
 import okhttp3.Connection;
 import okhttp3.Interceptor;
-import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.internal.connection.Exchange;
 import okhttp3.internal.connection.Transmitter;

@@ -17,6 +17,8 @@ package okhttp3;
 
 import java.io.IOException;
 
+import linktiger.http.Request;
+
 /**
  * Performs either <strong>preemptive</strong> authentication before connecting to a proxy server,
  * or <strong>reactive</strong> authentication after receiving a challenge from either an origin web
