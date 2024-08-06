@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.net.ssl.HostnameVerifier;
 
+import linktiger.http.Protocol;
 import linktiger.http.Request;
 import linktiger.http.Response;
 import linktiger.http.Url;

@@ -18,6 +18,8 @@ package okhttp3;
 
 import java.net.Socket;
 
+import linktiger.http.Protocol;
+
 /**
  * The sockets and streams of an HTTP, HTTPS, or HTTPS+HTTP/2 connection. May be used for multiple
  * HTTP request/response exchanges. Connections may be direct to the origin server or via a proxy.

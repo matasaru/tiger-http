@@ -18,9 +18,8 @@ package okhttp3.internal.http;
 import java.io.IOException;
 import java.net.ProtocolException;
 
+import linktiger.http.Protocol;
 import linktiger.http.Response;
-
-import okhttp3.Protocol;
 
 /** An HTTP response status line like "HTTP/1.1 200 OK". */
 public final class StatusLine {

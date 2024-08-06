@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLSocketFactory;
 
+import linktiger.http.Protocol;
 import linktiger.http.Request;
 import linktiger.http.Response;
 

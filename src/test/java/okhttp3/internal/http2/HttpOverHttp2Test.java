@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import linktiger.http.Protocol;
 import linktiger.http.Request;
 import linktiger.http.RequestBody;
 import linktiger.http.Response;
@@ -47,7 +48,6 @@ import okhttp3.HttpClient;
 import okhttp3.HttpClientTestRule;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
-import okhttp3.Protocol;
 import okhttp3.RecordingCookieJar;
 import okhttp3.RecordingHostnameVerifier;
 import okhttp3.TestLogHandler;
@@ -136,7 +136,7 @@ public final class HttpOverHttp2Test {
 
   @Before public void setUp() {
     if (protocol == Protocol.H2_PRIOR_KNOWLEDGE) {
-      server.setProtocols(Arrays.asList(Protocol.H2_PRIOR_KNOWLEDGE));
+      server.setProtocols(Arrays.asList(okhttp3.Protocol.H2_PRIOR_KNOWLEDGE));
     } else {
       server.useHttps(handshakeCertificates.sslSocketFactory(), false);
     }

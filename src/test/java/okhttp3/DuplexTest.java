@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import linktiger.http.Protocol;
 import linktiger.http.Request;
 import linktiger.http.Response;
 
@@ -70,7 +71,7 @@ public final class DuplexTest {
   }
 
   @Test public void trueDuplexClientWritesFirst() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     MockDuplexResponseBody mockDuplexResponseBody = enqueueResponseWithBody(
         new MockResponse()
             .clearHeaders(),
@@ -113,7 +114,7 @@ public final class DuplexTest {
   }
 
   @Test public void trueDuplexServerWritesFirst() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     MockDuplexResponseBody mockDuplexResponseBody = enqueueResponseWithBody(
         new MockResponse()
             .clearHeaders(),
@@ -156,7 +157,7 @@ public final class DuplexTest {
   }
 
   @Test public void clientReadsHeadersDataTrailers() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     MockDuplexResponseBody mockDuplexResponseBody = enqueueResponseWithBody(
         new MockResponse()
             .clearHeaders()
@@ -184,7 +185,7 @@ public final class DuplexTest {
   }
 
   @Test public void serverReadsHeadersData() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     MockDuplexResponseBody mockDuplexResponseBody = enqueueResponseWithBody(
         new MockResponse()
             .clearHeaders()
@@ -213,7 +214,7 @@ public final class DuplexTest {
   }
 
   @Test public void requestBodyEndsAfterResponseBody() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     MockDuplexResponseBody mockDuplexResponseBody = enqueueResponseWithBody(
         new MockResponse()
             .clearHeaders(),
@@ -247,7 +248,7 @@ public final class DuplexTest {
   }
 
   @Test public void duplexWith100Continue() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
 
     MockDuplexResponseBody mockDuplexResponseBody = enqueueResponseWithBody(
         new MockResponse()
@@ -285,7 +286,7 @@ public final class DuplexTest {
    * exchange at a time we break the request stream out from under that writer.
    */
   @Test public void duplexWithRedirect() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
 
     MockDuplexResponseBody mockDuplexResponseBody = enqueueResponseWithBody(
         new MockResponse()
@@ -334,7 +335,7 @@ public final class DuplexTest {
    * test makes a single call with two duplex requests!
    */
   @Test public void duplexWithAuthChallenge() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
 
     String credential = Credentials.basic("jesse", "secret");
     client = client.newBuilder()
@@ -390,7 +391,7 @@ public final class DuplexTest {
   }
 
   @Test public void fullCallTimeoutAppliesToSetup() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
 
     server.enqueue(new MockResponse()
         .setHeadersDelay(500, TimeUnit.MILLISECONDS));
@@ -412,7 +413,7 @@ public final class DuplexTest {
   }
 
   @Test public void fullCallTimeoutDoesNotApplyOnceConnected() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
 
     MockDuplexResponseBody mockDuplexResponseBody = enqueueResponseWithBody(
         new MockResponse()
@@ -449,7 +450,7 @@ public final class DuplexTest {
   }
 
   @Test public void duplexWithRewriteInterceptors() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     MockDuplexResponseBody mockDuplexResponseBody = enqueueResponseWithBody(
         new MockResponse()
             .clearHeaders(),
@@ -495,12 +496,12 @@ public final class DuplexTest {
    * Tests that use this will fail unless boot classpath is set. Ex. {@code
    * -Xbootclasspath/p:/tmp/alpn-boot-8.0.0.v20140317}
    */
-  private void enableProtocol(Protocol protocol) {
+  private void enableProtocol() {
     enableTls();
     client = client.newBuilder()
-        .protocols(Arrays.asList(protocol, Protocol.HTTP_1_1))
+        .protocols(Arrays.asList(Protocol.HTTP_2, Protocol.HTTP_1_1))
         .build();
-    server.setProtocols(client.protocols());
+    server.setProtocols(List.of(okhttp3.Protocol.HTTP_2, okhttp3.Protocol.HTTP_1_1));
   }
 
   private void enableTls() {

@@ -16,12 +16,12 @@
 
 package okhttp3.internal.http;
 
+import linktiger.http.Protocol;
 import linktiger.http.Request;
 import linktiger.http.Response;
 
 import okhttp3.Call;
 import okhttp3.HttpClient;
-import okhttp3.Protocol;
 import okhttp3.internal.Util;
 
 public final class ExternalHttp2Example {

@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import linktiger.http.Protocol;
 import linktiger.http.Request;
 import linktiger.http.RequestBody;
 import linktiger.http.Response;
@@ -243,7 +244,7 @@ public final class EventListenerTest {
 
   @Test public void secondCallEventSequence() throws IOException {
     enableTlsWithTunnel(false);
-    server.setProtocols(Arrays.asList(Protocol.HTTP_2, Protocol.HTTP_1_1));
+    server.setProtocols(Arrays.asList(okhttp3.Protocol.HTTP_2, okhttp3.Protocol.HTTP_1_1));
     server.enqueue(new MockResponse());
     server.enqueue(new MockResponse());
 
@@ -341,7 +342,7 @@ public final class EventListenerTest {
 
   @Test public void successfulEmptyH2CallEventSequence() throws IOException {
     enableTlsWithTunnel(false);
-    server.setProtocols(Arrays.asList(Protocol.HTTP_2, Protocol.HTTP_1_1));
+    server.setProtocols(Arrays.asList(okhttp3.Protocol.HTTP_2, okhttp3.Protocol.HTTP_1_1));
     server.enqueue(new MockResponse());
 
     assertSuccessfulEventOrder(matchesProtocol(Protocol.HTTP_2));
@@ -352,7 +353,7 @@ public final class EventListenerTest {
 
   @Test public void successfulEmptyHttpsCallEventSequence() throws IOException {
     enableTlsWithTunnel(false);
-    server.setProtocols(Arrays.asList(Protocol.HTTP_1_1));
+    server.setProtocols(Arrays.asList(okhttp3.Protocol.HTTP_1_1));
     server.enqueue(new MockResponse()
         .setBody("abc"));
 
@@ -364,7 +365,7 @@ public final class EventListenerTest {
 
   @Test public void successfulChunkedHttpsCallEventSequence() throws IOException {
     enableTlsWithTunnel(false);
-    server.setProtocols(Arrays.asList(Protocol.HTTP_1_1));
+    server.setProtocols(Arrays.asList(okhttp3.Protocol.HTTP_1_1));
     server.enqueue(
         new MockResponse().setBodyDelay(100, TimeUnit.MILLISECONDS).setChunkedBody("Hello!", 2));
 
@@ -376,7 +377,7 @@ public final class EventListenerTest {
 
   @Test public void successfulChunkedH2CallEventSequence() throws IOException {
     enableTlsWithTunnel(false);
-    server.setProtocols(Arrays.asList(Protocol.HTTP_2, Protocol.HTTP_1_1));
+    server.setProtocols(Arrays.asList(okhttp3.Protocol.HTTP_2, okhttp3.Protocol.HTTP_1_1));
     server.enqueue(
         new MockResponse().setBodyDelay(100, TimeUnit.MILLISECONDS).setChunkedBody("Hello!", 2));
 
@@ -872,13 +873,13 @@ public final class EventListenerTest {
 
   @Test public void responseBodyFailHttp1OverHttps() throws IOException {
     enableTlsWithTunnel(false);
-    server.setProtocols(Arrays.asList(Protocol.HTTP_1_1));
+    server.setProtocols(Arrays.asList(okhttp3.Protocol.HTTP_1_1));
     responseBodyFail(Protocol.HTTP_1_1);
   }
 
   @Test public void responseBodyFailHttp2OverHttps() throws IOException {
     enableTlsWithTunnel(false);
-    server.setProtocols(Arrays.asList(Protocol.HTTP_2, Protocol.HTTP_1_1));
+    server.setProtocols(Arrays.asList(okhttp3.Protocol.HTTP_2, okhttp3.Protocol.HTTP_1_1));
     responseBodyFail(Protocol.HTTP_2);
   }
 
@@ -970,13 +971,13 @@ public final class EventListenerTest {
 
   @Test public void requestBodyFailHttp1OverHttps() throws IOException {
     enableTlsWithTunnel(false);
-    server.setProtocols(Arrays.asList(Protocol.HTTP_1_1));
+    server.setProtocols(Arrays.asList(okhttp3.Protocol.HTTP_1_1));
     requestBodyFail();
   }
 
   @Test public void requestBodyFailHttp2OverHttps() throws IOException {
     enableTlsWithTunnel(false);
-    server.setProtocols(Arrays.asList(Protocol.HTTP_2, Protocol.HTTP_1_1));
+    server.setProtocols(Arrays.asList(okhttp3.Protocol.HTTP_2, okhttp3.Protocol.HTTP_1_1));
     requestBodyFail();
   }
 
@@ -1066,14 +1067,14 @@ public final class EventListenerTest {
 
   @Test public void requestBodySuccessHttp1OverHttps() throws IOException {
     enableTlsWithTunnel(false);
-    server.setProtocols(Arrays.asList(Protocol.HTTP_1_1));
+    server.setProtocols(Arrays.asList(okhttp3.Protocol.HTTP_1_1));
     requestBodySuccess(RequestBody.create(MediaType.get("text/plain"), "Hello"), equalTo(5L),
         equalTo(19L));
   }
 
   @Test public void requestBodySuccessHttp2OverHttps() throws IOException {
     enableTlsWithTunnel(false);
-    server.setProtocols(Arrays.asList(Protocol.HTTP_2, Protocol.HTTP_1_1));
+    server.setProtocols(Arrays.asList(okhttp3.Protocol.HTTP_2, okhttp3.Protocol.HTTP_1_1));
     requestBodySuccess(RequestBody.create(MediaType.get("text/plain"), "Hello"), equalTo(5L),
         equalTo(19L));
   }

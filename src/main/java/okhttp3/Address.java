@@ -23,6 +23,7 @@ import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
 
+import linktiger.http.Protocol;
 import linktiger.http.Url;
 
 import okhttp3.internal.Util;

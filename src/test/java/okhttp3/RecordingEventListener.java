@@ -25,6 +25,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
+import linktiger.http.Protocol;
 import linktiger.http.Request;
 import linktiger.http.Response;
 

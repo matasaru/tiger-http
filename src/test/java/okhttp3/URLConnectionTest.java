@@ -58,6 +58,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import linktiger.http.Protocol;
 import linktiger.http.Request;
 import linktiger.http.RequestBody;
 import linktiger.http.Response;
@@ -1537,7 +1538,7 @@ public final class URLConnectionTest {
   }
 
   @Test public void postBodyRetransmittedAfterAuthorizationFail_HTTP_2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     postBodyRetransmittedAfterAuthorizationFail("abc");
   }
 
@@ -1547,7 +1548,7 @@ public final class URLConnectionTest {
   }
 
   @Test public void postEmptyBodyRetransmittedAfterAuthorizationFail_HTTP_2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     postBodyRetransmittedAfterAuthorizationFail("");
   }
 
@@ -3270,18 +3271,18 @@ public final class URLConnectionTest {
   }
 
   @Test public void setsNegotiatedProtocolHeader_HTTP_2() throws Exception {
-    setsNegotiatedProtocolHeader(Protocol.HTTP_2);
+    setsNegotiatedProtocolHeader();
   }
 
-  private void setsNegotiatedProtocolHeader(Protocol protocol) throws IOException {
-    enableProtocol(protocol);
+  private void setsNegotiatedProtocolHeader() throws IOException {
+    enableProtocol();
     server.enqueue(new MockResponse()
         .setBody("A"));
     client = client.newBuilder()
-        .protocols(Arrays.asList(protocol, Protocol.HTTP_1_1))
+        .protocols(Arrays.asList(Protocol.HTTP_2, Protocol.HTTP_1_1))
         .build();
     Response response = getResponse(newRequest("/"));
-    Assertions.assertThat(response.protocol()).isEqualTo(protocol);
+    Assertions.assertThat(response.protocol()).isEqualTo(Protocol.HTTP_2);
     assertContent("A", response);
   }
 
@@ -3305,7 +3306,7 @@ public final class URLConnectionTest {
   }
 
   @Test public void zeroLengthPost_HTTP_2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     zeroLengthPost();
   }
 
@@ -3315,7 +3316,7 @@ public final class URLConnectionTest {
   }
 
   @Test public void zeroLengthPut_HTTP_2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     zeroLengthPut();
   }
 
@@ -3558,7 +3559,7 @@ public final class URLConnectionTest {
   }
 
   @Test public void streamedBodyIsRetriedOnHttp2Shutdown() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     server.enqueue(new MockResponse()
         .setSocketPolicy(SocketPolicy.DISCONNECT_AT_END)
         .setBody("abc"));
@@ -3786,16 +3787,16 @@ public final class URLConnectionTest {
    * Tests that use this will fail unless boot classpath is set. Ex. {@code
    * -Xbootclasspath/p:/tmp/alpn-boot-8.0.0.v20140317}
    */
-  private void enableProtocol(Protocol protocol) {
+  private void enableProtocol() {
     client = client.newBuilder()
         .sslSocketFactory(
             handshakeCertificates.sslSocketFactory(), handshakeCertificates.trustManager())
         .hostnameVerifier(new RecordingHostnameVerifier())
-        .protocols(Arrays.asList(protocol, Protocol.HTTP_1_1))
+        .protocols(Arrays.asList(Protocol.HTTP_2, Protocol.HTTP_1_1))
         .build();
     server.useHttps(handshakeCertificates.sslSocketFactory(), false);
     server.setProtocolNegotiationEnabled(true);
-    server.setProtocols(client.protocols());
+    server.setProtocols(Arrays.asList(okhttp3.Protocol.HTTP_2, okhttp3.Protocol.HTTP_1_1));
   }
 
   /**

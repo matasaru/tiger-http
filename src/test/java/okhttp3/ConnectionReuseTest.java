@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLException;
 
+import linktiger.http.Protocol;
 import linktiger.http.Request;
 import linktiger.http.RequestBody;
 import linktiger.http.Response;
@@ -349,22 +350,25 @@ public final class ConnectionReuseTest {
   }
 
   private void enableHttps() {
-    enableHttpsAndAlpn(Protocol.HTTP_1_1);
-  }
-
-  private void enableHttp2() {
-    enableHttpsAndAlpn(Protocol.HTTP_2, Protocol.HTTP_1_1);
-  }
-
-  private void enableHttpsAndAlpn(Protocol... protocols) {
     client = client.newBuilder()
         .sslSocketFactory(
             handshakeCertificates.sslSocketFactory(), handshakeCertificates.trustManager())
         .hostnameVerifier(new RecordingHostnameVerifier())
-        .protocols(Arrays.asList(protocols))
+        .protocols(List.of(Protocol.HTTP_1_1))
         .build();
     server.useHttps(handshakeCertificates.sslSocketFactory(), false);
-    server.setProtocols(client.protocols());
+    server.setProtocols(List.of(okhttp3.Protocol.HTTP_1_1));
+  }
+
+  private void enableHttp2() {
+    client = client.newBuilder()
+        .sslSocketFactory(
+            handshakeCertificates.sslSocketFactory(), handshakeCertificates.trustManager())
+        .hostnameVerifier(new RecordingHostnameVerifier())
+        .protocols(Arrays.asList(Protocol.HTTP_2, Protocol.HTTP_1_1))
+        .build();
+    server.useHttps(handshakeCertificates.sslSocketFactory(), false);
+    server.setProtocols(List.of(okhttp3.Protocol.HTTP_2, okhttp3.Protocol.HTTP_1_1));
   }
 
   private void assertConnectionReused(Request... requests) throws Exception {

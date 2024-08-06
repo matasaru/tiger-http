@@ -55,6 +55,7 @@ import javax.net.ssl.SSLProtocolException;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
+import linktiger.http.Protocol;
 import linktiger.http.Request;
 import linktiger.http.RequestBody;
 import linktiger.http.Response;
@@ -188,7 +189,7 @@ public final class CallTest {
   }
 
   @Test public void get_HTTP_2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     get();
   }
 
@@ -212,7 +213,7 @@ public final class CallTest {
   }
 
   @Test public void repeatedHeaderNames_HTTP_2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     repeatedHeaderNames();
   }
 
@@ -305,7 +306,7 @@ public final class CallTest {
   }
 
   @Test public void head_HTTP_2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     head();
   }
 
@@ -335,7 +336,7 @@ public final class CallTest {
   }
 
   @Test public void post_HTTP_2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     post();
   }
 
@@ -364,7 +365,7 @@ public final class CallTest {
   }
 
   @Test public void postZerolength_HTTP_2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     postZeroLength();
   }
 
@@ -378,7 +379,7 @@ public final class CallTest {
   }
 
   @Test public void postBodyRetransmittedAfterAuthorizationFail_HTTP_2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     postBodyRetransmittedAfterAuthorizationFail("abc");
   }
 
@@ -393,7 +394,7 @@ public final class CallTest {
   }
 
   @Test public void postEmptyBodyRetransmittedAfterAuthorizationFail_HTTP_2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     postBodyRetransmittedAfterAuthorizationFail("");
   }
 
@@ -507,7 +508,7 @@ public final class CallTest {
   }
 
   @Test public void delete_HTTP_2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     delete();
   }
 
@@ -554,7 +555,7 @@ public final class CallTest {
   }
 
   @Test public void put_HTTP_2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     put();
   }
 
@@ -579,7 +580,7 @@ public final class CallTest {
   }
 
   @Test public void patch_HTTP_2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     patch();
   }
 
@@ -1121,7 +1122,7 @@ public final class CallTest {
   }
 
   @Test public void recoverWhenRetryOnConnectionFailureIsTrue_HTTP2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     recoverWhenRetryOnConnectionFailureIsTrue();
   }
 
@@ -1145,7 +1146,7 @@ public final class CallTest {
   }
 
   @Test public void recoverWhenRetryOnConnectionFailureIsFalse_HTTP2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     noRecoverWhenRetryOnConnectionFailureIsFalse();
   }
 
@@ -1467,7 +1468,7 @@ public final class CallTest {
   }
 
   @Test public void postBodyRetransmittedOnFailureRecovery_HTTP2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     postBodyRetransmittedOnFailureRecovery();
   }
 
@@ -1956,7 +1957,7 @@ public final class CallTest {
   @Test public void httpWithExcessiveHeaders() throws IOException {
     String longLine = "HTTP/1.1 200 " + stringFill('O', 256 * 1024) + "K";
 
-    server.setProtocols(Collections.singletonList(Protocol.HTTP_1_1));
+    server.setProtocols(Collections.singletonList(okhttp3.Protocol.HTTP_1_1));
 
     server.enqueue(new MockResponse()
         .setStatus(longLine)
@@ -2073,7 +2074,7 @@ public final class CallTest {
 
   @Test
   public void cancelWhileRequestHeadersAreSent_HTTP_2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     cancelWhileRequestHeadersAreSent();
   }
 
@@ -2119,7 +2120,7 @@ public final class CallTest {
   }
 
   @Test public void cancelInFlightBeforeResponseReadThrowsIOE_HTTP_2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     cancelInFlightBeforeResponseReadThrowsIOE();
   }
 
@@ -2164,7 +2165,7 @@ public final class CallTest {
   }
 
   @Test public void canceledBeforeIOSignalsOnFailure_HTTP_2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     canceledBeforeIOSignalsOnFailure();
   }
 
@@ -2191,7 +2192,7 @@ public final class CallTest {
   }
 
   @Test public void canceledBeforeResponseReadSignalsOnFailure_HTTP_2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     canceledBeforeResponseReadSignalsOnFailure();
   }
 
@@ -2240,7 +2241,7 @@ public final class CallTest {
 
   @Test public void canceledAfterResponseIsDeliveredBreaksStreamButSignalsOnce_HTTP_2()
       throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     canceledAfterResponseIsDeliveredBreaksStreamButSignalsOnce();
   }
 
@@ -2424,7 +2425,7 @@ public final class CallTest {
   }
 
   @Test public void expect100ContinueEmptyRequestBody_HTTP2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     expect100ContinueEmptyRequestBody();
   }
 
@@ -2454,7 +2455,7 @@ public final class CallTest {
   }
 
   @Test public void expect100ContinueTimesOutWithoutContinue_HTTP2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     expect100ContinueTimesOutWithoutContinue();
   }
 
@@ -2476,7 +2477,7 @@ public final class CallTest {
   }
 
   @Test public void serverRespondsWithUnsolicited100Continue_HTTP2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     serverRespondsWithUnsolicited100Continue();
   }
 
@@ -2505,7 +2506,7 @@ public final class CallTest {
   }
 
   @Test public void serverRespondsWith100ContinueOnly_HTTP2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     serverRespondsWith100ContinueOnly();
   }
 
@@ -2528,7 +2529,7 @@ public final class CallTest {
   }
 
   @Test public void successfulExpectContinuePermitsConnectionReuseWithHttp2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     successfulExpectContinuePermitsConnectionReuse();
   }
 
@@ -2550,7 +2551,7 @@ public final class CallTest {
   }
 
   @Test public void unsuccessfulExpectContinuePermitsConnectionReuseWithHttp2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
 
     server.enqueue(new MockResponse());
     server.enqueue(new MockResponse());
@@ -2620,7 +2621,7 @@ public final class CallTest {
 
   /** We had a bug where failed HTTP/2 calls could break the entire connection. */
   @Test public void failingCallsDoNotInterfereWithConnection() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
 
     server.enqueue(new MockResponse().setBody("Response 1"));
     server.enqueue(new MockResponse().setBody("Response 2"));
@@ -2759,7 +2760,7 @@ public final class CallTest {
    */
   @Test public void proxyAuthenticateOnConnectWithConnectionClose() throws Exception {
     server.useHttps(handshakeCertificates.sslSocketFactory(), true);
-    server.setProtocols(Collections.singletonList(Protocol.HTTP_1_1));
+    server.setProtocols(Collections.singletonList(okhttp3.Protocol.HTTP_1_1));
     server.enqueue(new MockResponse()
         .setResponseCode(407)
         .addHeader("Proxy-Authenticate: Basic realm=\"localhost\"")
@@ -2796,7 +2797,7 @@ public final class CallTest {
 
   @Test public void tooManyProxyAuthFailuresWithConnectionClose() throws IOException {
     server.useHttps(handshakeCertificates.sslSocketFactory(), true);
-    server.setProtocols(Collections.singletonList(Protocol.HTTP_1_1));
+    server.setProtocols(Collections.singletonList(okhttp3.Protocol.HTTP_1_1));
     for (int i = 0; i < 21; i++) {
       server.enqueue(new MockResponse()
           .setResponseCode(407)
@@ -2949,7 +2950,7 @@ public final class CallTest {
   }
 
   @Test public void interceptorGetsHttp2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
 
     // Capture the protocol as it is observed by the interceptor.
     final AtomicReference<Protocol> protocolRef = new AtomicReference<>();
@@ -3119,7 +3120,7 @@ public final class CallTest {
   @Test public void ipv6HostHasSquareBraces() throws Exception {
     // Use a proxy to fake IPv6 connectivity, even if localhost doesn't have IPv6.
     server.useHttps(handshakeCertificates.sslSocketFactory(), true);
-    server.setProtocols(Collections.singletonList(Protocol.HTTP_1_1));
+    server.setProtocols(Collections.singletonList(okhttp3.Protocol.HTTP_1_1));
     server.enqueue(new MockResponse()
         .setSocketPolicy(SocketPolicy.UPGRADE_TO_SSL_AT_END)
         .clearHeaders());
@@ -3388,7 +3389,7 @@ public final class CallTest {
         .setBody("HelloBonjour")
         .setTrailers(Headers.of("trailers", "boom"));
     server.enqueue(mockResponse);
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
 
     Call call = client.newCall(new Request.Builder()
         .url(server.url("/").toString())
@@ -3428,7 +3429,7 @@ public final class CallTest {
   }
 
   @Test public void requestBodyThrowsUnrelatedToNetwork_HTTP2() throws Exception {
-    enableProtocol(Protocol.HTTP_2);
+    enableProtocol();
     requestBodyThrowsUnrelatedToNetwork();
   }
 
@@ -3514,12 +3515,12 @@ public final class CallTest {
    * Tests that use this will fail unless boot classpath is set. Ex. {@code
    * -Xbootclasspath/p:/tmp/alpn-boot-8.0.0.v20140317}
    */
-  private void enableProtocol(Protocol protocol) {
+  private void enableProtocol() {
     enableTls();
     client = client.newBuilder()
-        .protocols(Arrays.asList(protocol, Protocol.HTTP_1_1))
+        .protocols(Arrays.asList(Protocol.HTTP_2, Protocol.HTTP_1_1))
         .build();
-    server.setProtocols(client.protocols());
+    server.setProtocols(List.of(okhttp3.Protocol.HTTP_2, okhttp3.Protocol.HTTP_1_1));
   }
 
   private void enableTls() {

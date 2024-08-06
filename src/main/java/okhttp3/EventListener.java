@@ -21,6 +21,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.List;
 
+import linktiger.http.Protocol;
 import linktiger.http.Request;
 import linktiger.http.Response;
 

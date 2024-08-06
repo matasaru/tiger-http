@@ -25,7 +25,6 @@ import okhttp3.Callback;
 import okhttp3.Challenge;
 import okhttp3.Handshake;
 import okhttp3.Headers;
-import okhttp3.Protocol;
 import okhttp3.internal.connection.Exchange;
 import okhttp3.internal.http.HttpHeaders;
 import okio.Buffer;

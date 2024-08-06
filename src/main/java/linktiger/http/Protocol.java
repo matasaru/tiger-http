@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package okhttp3;
+package linktiger.http;
 
 import java.io.IOException;
+
+import okhttp3.CipherSuite;
 
 /**
  * Protocols that OkHttp implements for <a
