@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package okhttp3;
+package linktiger.http;
 
 import java.io.IOException;
 import java.net.CookieHandler;
@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import linktiger.http.Url;
 
 import static okhttp3.internal.Util.delimiterOffset;
 import static okhttp3.internal.Util.trimSubstring;

@@ -40,7 +40,6 @@ import okhttp3.Call;
 import okhttp3.CertificatePinner;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
-import okhttp3.CookieJar;
 import okhttp3.Dispatcher;
 import okhttp3.Dns;
 import okhttp3.EventListener;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package okhttp3;
+package linktiger.http;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -22,8 +22,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-import linktiger.http.Url;
-
+import okhttp3.Headers;
 import okhttp3.internal.Util;
 import okhttp3.internal.http.HttpDate;
 import org.junit.Test;

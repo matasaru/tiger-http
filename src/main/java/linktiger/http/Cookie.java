@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package okhttp3;
+package linktiger.http;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -25,8 +25,7 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import linktiger.http.Url;
-
+import okhttp3.Headers;
 import okhttp3.internal.Util;
 import okhttp3.internal.http.HttpDate;
 import okhttp3.internal.publicsuffix.PublicSuffixDatabase;

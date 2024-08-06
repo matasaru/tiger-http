@@ -22,6 +22,8 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 
+import linktiger.http.Cookie;
+import linktiger.http.CookieJar;
 import linktiger.http.Url;
 
 import static org.assertj.core.api.Assertions.assertThat;

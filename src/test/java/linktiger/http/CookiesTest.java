@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package okhttp3;
+package linktiger.http;
 
 import java.io.IOException;
 import java.net.CookieHandler;
@@ -29,12 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import linktiger.http.HttpClient;
-import linktiger.http.HttpClientTestRule;
-import linktiger.http.Request;
-import linktiger.http.Response;
-import linktiger.http.Url;
-
+import okhttp3.Call;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;

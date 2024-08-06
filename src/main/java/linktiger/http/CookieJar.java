@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package okhttp3;
+package linktiger.http;
 
 import java.util.Collections;
 import java.util.List;
-
-import linktiger.http.Url;
 
 /**
  * Provides <strong>policy</strong> and <strong>persistence</strong> for HTTP cookies.
