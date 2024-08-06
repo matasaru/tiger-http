@@ -15,8 +15,9 @@
  */
 package okhttp3.internal.http;
 
+import linktiger.http.ResponseBody;
+
 import okhttp3.MediaType;
-import okhttp3.ResponseBody;
 import okio.BufferedSource;
 
 public final class RealResponseBody extends ResponseBody {

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import linktiger.http.Request;
+import linktiger.http.Response;
 
 import okhttp3.internal.Internal;
 import okhttp3.internal.Util;

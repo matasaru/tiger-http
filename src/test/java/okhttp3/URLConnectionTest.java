@@ -60,6 +60,7 @@ import javax.net.ssl.X509TrustManager;
 
 import linktiger.http.Request;
 import linktiger.http.RequestBody;
+import linktiger.http.Response;
 import linktiger.http.Url;
 
 import okhttp3.internal.Internal;

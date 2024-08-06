@@ -29,10 +29,10 @@ import javax.net.ssl.X509TrustManager;
 import javax.security.auth.x500.X500Principal;
 
 import linktiger.http.Request;
+import linktiger.http.Response;
 
 import okhttp3.Call;
 import okhttp3.HttpClient;
-import okhttp3.Response;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.tls.HandshakeCertificates;

@@ -30,6 +30,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import linktiger.http.Request;
 import linktiger.http.RequestBody;
+import linktiger.http.Response;
+import linktiger.http.ResponseBody;
 import linktiger.http.Url;
 
 import okhttp3.mockwebserver.MockResponse;

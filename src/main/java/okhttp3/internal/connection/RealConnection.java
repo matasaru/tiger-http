@@ -30,13 +30,14 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
-import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLParameters;
+import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
 import linktiger.http.Request;
+import linktiger.http.Response;
 import linktiger.http.Url;
 
 import okhttp3.Address;
@@ -49,7 +50,6 @@ import okhttp3.Handshake;
 import okhttp3.HttpClient;
 import okhttp3.Interceptor;
 import okhttp3.Protocol;
-import okhttp3.Response;
 import okhttp3.Route;
 import okhttp3.internal.Internal;
 import okhttp3.internal.Util;

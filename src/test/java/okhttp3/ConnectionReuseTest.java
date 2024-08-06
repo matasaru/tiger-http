@@ -23,6 +23,8 @@ import javax.net.ssl.SSLException;
 
 import linktiger.http.Request;
 import linktiger.http.RequestBody;
+import linktiger.http.Response;
+import linktiger.http.ResponseBody;
 
 import okhttp3.internal.Util;
 import okhttp3.mockwebserver.MockResponse;

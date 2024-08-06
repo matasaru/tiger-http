@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 import okhttp3.MediaType;
-import okhttp3.ResponseBody;
 import okhttp3.internal.Util;
 import okio.BufferedSink;
 import okio.ByteString;

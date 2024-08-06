@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package okhttp3;
+package linktiger.http;
 
 import java.io.IOException;
 
-import linktiger.http.Request;
-
+import okhttp3.Protocol;
 import okio.Buffer;
 import okio.BufferedSource;
 import okio.Okio;

@@ -15,6 +15,8 @@
  */
 package okhttp3;
 
+import linktiger.http.ResponseBody;
+
 import okio.BufferedSource;
 
 public class ForwardingResponseBody extends ResponseBody {

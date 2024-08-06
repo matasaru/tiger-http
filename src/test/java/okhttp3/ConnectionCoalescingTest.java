@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.net.ssl.HostnameVerifier;
 
 import linktiger.http.Request;
+import linktiger.http.Response;
 import linktiger.http.Url;
 
 import okhttp3.mockwebserver.MockResponse;

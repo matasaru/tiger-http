@@ -21,13 +21,13 @@ import java.util.List;
 
 import linktiger.http.Request;
 import linktiger.http.RequestBody;
+import linktiger.http.Response;
 
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
-import okhttp3.Response;
 import okhttp3.internal.Version;
 import okio.GzipSource;
 import okio.Okio;

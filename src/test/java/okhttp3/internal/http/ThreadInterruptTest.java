@@ -25,6 +25,7 @@ import javax.net.SocketFactory;
 
 import linktiger.http.Request;
 import linktiger.http.RequestBody;
+import linktiger.http.Response;
 
 import okhttp3.Call;
 import okhttp3.DelegatingServerSocketFactory;
@@ -32,7 +33,6 @@ import okhttp3.DelegatingSocketFactory;
 import okhttp3.HttpClient;
 import okhttp3.HttpClientTestRule;
 import okhttp3.MediaType;
-import okhttp3.Response;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okio.Buffer;

@@ -24,6 +24,7 @@ import java.net.Proxy;
 import java.util.List;
 
 import linktiger.http.Request;
+import linktiger.http.Response;
 import linktiger.http.Url;
 
 /**

@@ -25,6 +25,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
 import linktiger.http.Request;
+import linktiger.http.Response;
+import linktiger.http.ResponseBody;
 
 import okhttp3.internal.NamedRunnable;
 import okhttp3.internal.connection.ConnectInterceptor;

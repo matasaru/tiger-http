@@ -19,6 +19,7 @@ import java.io.IOException;
 
 import linktiger.http.Request;
 import linktiger.http.RequestBody;
+import linktiger.http.Response;
 
 import okio.Buffer;
 import okio.BufferedSink;

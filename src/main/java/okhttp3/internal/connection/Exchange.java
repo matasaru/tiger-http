@@ -19,12 +19,12 @@ import java.io.IOException;
 import java.net.ProtocolException;
 
 import linktiger.http.Request;
+import linktiger.http.Response;
+import linktiger.http.ResponseBody;
 
 import okhttp3.Call;
 import okhttp3.EventListener;
 import okhttp3.Headers;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
 import okhttp3.internal.Internal;
 import okhttp3.internal.http.ExchangeCodec;
 import okhttp3.internal.http.RealResponseBody;

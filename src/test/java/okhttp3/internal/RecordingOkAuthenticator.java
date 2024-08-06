@@ -20,10 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import linktiger.http.Request;
+import linktiger.http.Response;
 
 import okhttp3.Authenticator;
 import okhttp3.Challenge;
-import okhttp3.Response;
 import okhttp3.Route;
 
 public final class RecordingOkAuthenticator implements Authenticator {

@@ -13,15 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package okhttp3;
+package linktiger.http;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import linktiger.http.Request;
-
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Challenge;
+import okhttp3.Handshake;
+import okhttp3.Headers;
+import okhttp3.Protocol;
 import okhttp3.internal.connection.Exchange;
 import okhttp3.internal.http.HttpHeaders;
 import okio.Buffer;
@@ -252,6 +256,10 @@ public final class Response implements Closeable {
     return receivedResponseAtMillis;
   }
 
+  public Exchange exchange() {
+    return exchange;
+  }
+
   /**
    * Closes the response body. Equivalent to {@code body().close()}.
    *
@@ -318,6 +326,10 @@ public final class Response implements Closeable {
     public Builder protocol(Protocol protocol) {
       this.protocol = protocol;
       return this;
+    }
+
+    public int code() {
+      return code;
     }
 
     public Builder code(int code) {
@@ -408,7 +420,7 @@ public final class Response implements Closeable {
       return this;
     }
 
-    void initExchange(Exchange deferredTrailers) {
+    public void initExchange(Exchange deferredTrailers) {
       this.exchange = deferredTrailers;
     }
 

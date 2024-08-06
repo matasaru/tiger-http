@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import linktiger.http.Request;
+import linktiger.http.Response;
 
 /**
  * Observes, modifies, and potentially short-circuits requests going out and the corresponding

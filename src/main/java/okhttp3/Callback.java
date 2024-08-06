@@ -17,6 +17,9 @@ package okhttp3;
 
 import java.io.IOException;
 
+import linktiger.http.Response;
+import linktiger.http.ResponseBody;
+
 public interface Callback {
   /**
    * Called when the request could not be executed due to cancellation, a connectivity problem or

@@ -20,11 +20,11 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import linktiger.http.Request;
+import linktiger.http.Response;
 
 import okhttp3.Call;
 import okhttp3.Connection;
 import okhttp3.Interceptor;
-import okhttp3.Response;
 import okhttp3.internal.connection.Exchange;
 import okhttp3.internal.connection.Transmitter;
 

@@ -35,6 +35,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import linktiger.http.Request;
+import linktiger.http.Response;
 
 import okhttp3.internal.Internal;
 import okhttp3.internal.Util;
@@ -139,7 +140,7 @@ public class HttpClient {
       }
 
       @Override public int code(Response.Builder responseBuilder) {
-        return responseBuilder.code;
+        return responseBuilder.code();
       }
 
       @Override
@@ -153,7 +154,7 @@ public class HttpClient {
       }
 
       @Override public Exchange exchange(Response response) {
-        return response.exchange;
+        return response.exchange();
       }
     };
   }

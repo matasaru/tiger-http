@@ -29,6 +29,8 @@ import java.util.concurrent.TimeUnit;
 
 import linktiger.http.Request;
 import linktiger.http.RequestBody;
+import linktiger.http.Response;
+import linktiger.http.ResponseBody;
 
 import okhttp3.RecordingEventListener.CallEnd;
 import okhttp3.RecordingEventListener.CallFailed;
@@ -188,7 +190,7 @@ public final class EventListenerTest {
 
     Response response = call.execute();
     try {
-      response.body.string();
+      response.body().string();
       fail();
     } catch (IOException expected) {
       assertThat(expected.getMessage(), equalTo("unexpected end of stream"));
@@ -332,7 +334,7 @@ public final class EventListenerTest {
       }
 
       @Override public boolean matches(Object o) {
-        return ((Response)o).protocol == protocol;
+        return ((Response)o).protocol() == protocol;
       }
     };
   }
@@ -901,7 +903,7 @@ public final class EventListenerTest {
     }
     Assertions.assertThat(response.protocol()).isEqualTo(expectedProtocol);
     try {
-      response.body.string();
+      response.body().string();
       fail();
     } catch (IOException expected) {
     }

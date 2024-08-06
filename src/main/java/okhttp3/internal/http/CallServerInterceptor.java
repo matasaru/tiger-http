@@ -19,9 +19,9 @@ import java.io.IOException;
 import java.net.ProtocolException;
 
 import linktiger.http.Request;
+import linktiger.http.Response;
 
 import okhttp3.Interceptor;
-import okhttp3.Response;
 import okhttp3.internal.connection.Exchange;
 import okio.BufferedSink;
 import okio.Okio;

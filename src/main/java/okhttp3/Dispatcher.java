@@ -25,6 +25,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import linktiger.http.Response;
+
 import okhttp3.Call.AsyncCall;
 import okhttp3.internal.Util;
 
