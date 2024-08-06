@@ -55,6 +55,8 @@ import javax.net.ssl.SSLProtocolException;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
+import linktiger.http.HttpClient;
+import linktiger.http.HttpClientTestRule;
 import linktiger.http.MediaType;
 import linktiger.http.Protocol;
 import linktiger.http.Request;

@@ -23,6 +23,7 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 
+import linktiger.http.HttpClient;
 import linktiger.http.Request;
 import linktiger.http.Response;
 import linktiger.http.Url;

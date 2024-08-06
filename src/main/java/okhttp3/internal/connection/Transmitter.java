@@ -24,6 +24,7 @@ import java.util.logging.Level;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
 
+import linktiger.http.HttpClient;
 import linktiger.http.Request;
 import linktiger.http.Url;
 
@@ -32,7 +33,6 @@ import okhttp3.Call;
 import okhttp3.CertificatePinner;
 import okhttp3.Connection;
 import okhttp3.EventListener;
-import okhttp3.HttpClient;
 import okhttp3.Interceptor;
 import okhttp3.internal.Internal;
 import okhttp3.internal.http.ExchangeCodec;

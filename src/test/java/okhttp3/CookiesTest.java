@@ -29,6 +29,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import linktiger.http.HttpClient;
+import linktiger.http.HttpClientTestRule;
 import linktiger.http.Request;
 import linktiger.http.Response;
 import linktiger.http.Url;

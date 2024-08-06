@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package okhttp3;
+package linktiger.http;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,13 +58,24 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import linktiger.http.MediaType;
-import linktiger.http.Protocol;
-import linktiger.http.Request;
-import linktiger.http.RequestBody;
-import linktiger.http.Response;
-import linktiger.http.Url;
-
+import okhttp3.Call;
+import okhttp3.Challenge;
+import okhttp3.ConnectionPool;
+import okhttp3.ConnectionSpec;
+import okhttp3.Cookie;
+import okhttp3.CookieJar;
+import okhttp3.Credentials;
+import okhttp3.DelegatingServerSocketFactory;
+import okhttp3.DelegatingSocketFactory;
+import okhttp3.FakeDns;
+import okhttp3.FakeProxySelector;
+import okhttp3.FallbackTestClientSocketFactory;
+import okhttp3.ForwardingRequestBody;
+import okhttp3.Headers;
+import okhttp3.JavaNetAuthenticator;
+import okhttp3.JavaNetCookieJar;
+import okhttp3.RecordingHostnameVerifier;
+import okhttp3.TlsVersion;
 import okhttp3.internal.Internal;
 import okhttp3.internal.RecordingAuthenticator;
 import okhttp3.internal.RecordingOkAuthenticator;

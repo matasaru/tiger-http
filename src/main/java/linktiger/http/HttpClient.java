@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package okhttp3;
+package linktiger.http;
 
 import java.net.Proxy;
 import java.net.ProxySelector;
@@ -34,10 +34,18 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import linktiger.http.Protocol;
-import linktiger.http.Request;
-import linktiger.http.Response;
-
+import okhttp3.Address;
+import okhttp3.Authenticator;
+import okhttp3.Call;
+import okhttp3.CertificatePinner;
+import okhttp3.ConnectionPool;
+import okhttp3.ConnectionSpec;
+import okhttp3.CookieJar;
+import okhttp3.Dispatcher;
+import okhttp3.Dns;
+import okhttp3.EventListener;
+import okhttp3.Headers;
+import okhttp3.Interceptor;
 import okhttp3.internal.Internal;
 import okhttp3.internal.Util;
 import okhttp3.internal.connection.Exchange;
@@ -133,7 +141,7 @@ public class HttpClient {
       }
 
       @Override public RealConnectionPool realConnectionPool(ConnectionPool connectionPool) {
-        return connectionPool.delegate;
+        return connectionPool.delegate();
       }
 
       @Override public boolean equalsNonHost(Address a, Address b) {

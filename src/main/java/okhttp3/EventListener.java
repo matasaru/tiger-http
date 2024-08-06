@@ -21,6 +21,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.List;
 
+import linktiger.http.HttpClient;
 import linktiger.http.Protocol;
 import linktiger.http.Request;
 import linktiger.http.Response;
@@ -56,7 +57,7 @@ public abstract class EventListener {
   public static final EventListener NONE = new EventListener() {
   };
 
-  static EventListener.Factory factory(EventListener listener) {
+  public static EventListener.Factory factory(EventListener listener) {
     return call -> listener;
   }
 

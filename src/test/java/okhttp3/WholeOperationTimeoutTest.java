@@ -22,6 +22,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import linktiger.http.HttpClient;
+import linktiger.http.HttpClientTestRule;
 import linktiger.http.MediaType;
 import linktiger.http.Request;
 import linktiger.http.RequestBody;

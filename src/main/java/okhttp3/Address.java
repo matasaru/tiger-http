@@ -174,7 +174,7 @@ public final class Address {
     return result;
   }
 
-  boolean equalsNonHost(Address that) {
+  public boolean equalsNonHost(Address that) {
     return this.dns.equals(that.dns)
         && this.proxyAuthenticator.equals(that.proxyAuthenticator)
         && this.protocols.equals(that.protocols)

@@ -32,6 +32,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import linktiger.http.HttpClient;
+import linktiger.http.HttpClientTestRule;
 import linktiger.http.MediaType;
 import linktiger.http.Protocol;
 import linktiger.http.Request;
@@ -45,8 +47,6 @@ import okhttp3.Cookie;
 import okhttp3.Credentials;
 import okhttp3.EventListener;
 import okhttp3.Headers;
-import okhttp3.HttpClient;
-import okhttp3.HttpClientTestRule;
 import okhttp3.Interceptor;
 import okhttp3.RecordingCookieJar;
 import okhttp3.RecordingHostnameVerifier;

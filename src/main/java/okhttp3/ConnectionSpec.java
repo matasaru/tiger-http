@@ -157,7 +157,7 @@ public final class ConnectionSpec {
   }
 
   /** Applies this spec to {@code sslSocket}. */
-  void apply(SSLSocket sslSocket, boolean isFallback) {
+  public void apply(SSLSocket sslSocket, boolean isFallback) {
     ConnectionSpec specToApply = supportedSpec(sslSocket, isFallback);
 
     if (specToApply.tlsVersions != null) {

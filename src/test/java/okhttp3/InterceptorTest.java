@@ -28,6 +28,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import linktiger.http.HttpClient;
+import linktiger.http.HttpClientTestRule;
 import linktiger.http.MediaType;
 import linktiger.http.Protocol;
 import linktiger.http.Request;

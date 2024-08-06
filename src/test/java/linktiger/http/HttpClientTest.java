@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package okhttp3;
+package linktiger.http;
 
 import java.net.CookieHandler;
 import java.net.CookieManager;
@@ -23,10 +23,8 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLSocketFactory;
 
-import linktiger.http.Protocol;
-import linktiger.http.Request;
-import linktiger.http.Response;
-
+import okhttp3.Interceptor;
+import okhttp3.TestUtil;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.After;

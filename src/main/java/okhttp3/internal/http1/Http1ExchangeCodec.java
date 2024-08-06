@@ -20,12 +20,12 @@ import java.io.IOException;
 import java.net.ProtocolException;
 import java.util.concurrent.TimeUnit;
 
+import linktiger.http.HttpClient;
 import linktiger.http.Request;
 import linktiger.http.Response;
 import linktiger.http.Url;
 
 import okhttp3.Headers;
-import okhttp3.HttpClient;
 import okhttp3.internal.Internal;
 import okhttp3.internal.Util;
 import okhttp3.internal.connection.RealConnection;

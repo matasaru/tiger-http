@@ -36,6 +36,7 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
+import linktiger.http.HttpClient;
 import linktiger.http.Protocol;
 import linktiger.http.Request;
 import linktiger.http.Response;
@@ -48,7 +49,6 @@ import okhttp3.Connection;
 import okhttp3.ConnectionSpec;
 import okhttp3.EventListener;
 import okhttp3.Handshake;
-import okhttp3.HttpClient;
 import okhttp3.Interceptor;
 import okhttp3.Route;
 import okhttp3.internal.Internal;

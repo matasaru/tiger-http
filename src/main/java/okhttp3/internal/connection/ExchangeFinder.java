@@ -18,10 +18,12 @@ package okhttp3.internal.connection;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
+
+import linktiger.http.HttpClient;
+
 import okhttp3.Address;
 import okhttp3.Call;
 import okhttp3.EventListener;
-import okhttp3.HttpClient;
 import okhttp3.Interceptor;
 import okhttp3.Route;
 import okhttp3.internal.Util;

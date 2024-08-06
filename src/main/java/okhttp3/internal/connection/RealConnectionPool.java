@@ -29,8 +29,10 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
+
+import linktiger.http.HttpClient;
+
 import okhttp3.Address;
-import okhttp3.HttpClient;
 import okhttp3.Route;
 import okhttp3.internal.Util;
 import okhttp3.internal.connection.Transmitter.TransmitterReference;

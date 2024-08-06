@@ -24,6 +24,7 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
+import linktiger.http.HttpClient;
 import linktiger.http.Request;
 import linktiger.http.Response;
 import linktiger.http.ResponseBody;
@@ -63,7 +64,7 @@ public class Call implements Cloneable {
     this.originalRequest = originalRequest;
   }
 
-  static Call newCall(HttpClient client, Request originalRequest) {
+  public static Call newCall(HttpClient client, Request originalRequest) {
     // Safely publish the Call instance to the EventListener.
     Call call = new Call(client, originalRequest);
     call.transmitter = new Transmitter(client, call);

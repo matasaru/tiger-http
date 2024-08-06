@@ -23,6 +23,8 @@ import java.util.concurrent.TimeUnit;
 import javax.net.ServerSocketFactory;
 import javax.net.SocketFactory;
 
+import linktiger.http.HttpClient;
+import linktiger.http.HttpClientTestRule;
 import linktiger.http.MediaType;
 import linktiger.http.Request;
 import linktiger.http.RequestBody;
@@ -31,8 +33,6 @@ import linktiger.http.Response;
 import okhttp3.Call;
 import okhttp3.DelegatingServerSocketFactory;
 import okhttp3.DelegatingSocketFactory;
-import okhttp3.HttpClient;
-import okhttp3.HttpClientTestRule;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okio.Buffer;

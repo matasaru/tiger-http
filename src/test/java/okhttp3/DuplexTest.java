@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import linktiger.http.HttpClient;
+import linktiger.http.HttpClientTestRule;
 import linktiger.http.Protocol;
 import linktiger.http.Request;
 import linktiger.http.Response;

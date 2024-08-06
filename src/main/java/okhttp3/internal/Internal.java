@@ -17,13 +17,13 @@ package okhttp3.internal;
 
 import javax.net.ssl.SSLSocket;
 
+import linktiger.http.HttpClient;
 import linktiger.http.Response;
 
 import okhttp3.Address;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
 import okhttp3.Headers;
-import okhttp3.HttpClient;
 import okhttp3.internal.connection.Exchange;
 import okhttp3.internal.connection.RealConnectionPool;
 

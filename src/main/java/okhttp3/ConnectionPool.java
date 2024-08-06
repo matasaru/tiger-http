@@ -54,4 +54,8 @@ public final class ConnectionPool {
   public void evictAll() {
     delegate.evictAll();
   }
+
+  public RealConnectionPool delegate() {
+    return delegate;
+  }
 }
