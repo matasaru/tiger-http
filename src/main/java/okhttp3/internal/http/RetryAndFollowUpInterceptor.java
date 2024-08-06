@@ -24,13 +24,15 @@ import java.net.SocketTimeoutException;
 import java.security.cert.CertificateException;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLPeerUnverifiedException;
+
+import linktiger.http.Url;
+
 import okhttp3.HttpClient;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.Route;
-import okhttp3.Url;
 import okhttp3.internal.Internal;
 import okhttp3.internal.connection.Exchange;
 import okhttp3.internal.connection.RouteException;

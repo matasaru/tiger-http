@@ -18,6 +18,8 @@ package okhttp3;
 import java.util.Collections;
 import java.util.List;
 
+import linktiger.http.Url;
+
 /**
  * Provides <strong>policy</strong> and <strong>persistence</strong> for HTTP cookies.
  *

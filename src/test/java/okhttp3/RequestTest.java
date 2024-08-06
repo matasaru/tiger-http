@@ -20,6 +20,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.util.UUID;
+
+import linktiger.http.Url;
+
 import okio.Buffer;
 import org.junit.Test;
 

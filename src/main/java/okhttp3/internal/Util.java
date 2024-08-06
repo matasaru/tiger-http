@@ -44,10 +44,12 @@ import java.util.regex.Pattern;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
+
+import linktiger.http.Url;
+
 import okhttp3.Headers;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
-import okhttp3.Url;
 import okhttp3.internal.http2.Header;
 import okio.Buffer;
 import okio.BufferedSource;

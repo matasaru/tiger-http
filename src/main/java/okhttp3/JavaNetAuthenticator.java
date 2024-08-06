@@ -23,6 +23,8 @@ import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.util.List;
 
+import linktiger.http.Url;
+
 /**
  * Adapts {@link java.net.Authenticator} to {@link Authenticator}. Configure OkHttp to use {@link
  * java.net.Authenticator} with {@link HttpClient.Builder#authenticator} or {@link

@@ -23,12 +23,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import linktiger.http.Url;
+
 import okhttp3.Challenge;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.Headers;
 import okhttp3.Response;
-import okhttp3.Url;
 import okio.Buffer;
 import okio.ByteString;
 

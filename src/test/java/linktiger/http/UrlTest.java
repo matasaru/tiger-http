@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package okhttp3;
+package linktiger.http;
 
 import java.net.URI;
 import java.net.URL;
@@ -21,8 +21,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import okhttp3.UrlComponentEncodingTester.Component;
-import okhttp3.UrlComponentEncodingTester.Encoding;
+
+import linktiger.http.UrlComponentEncodingTester.Component;
+import linktiger.http.UrlComponentEncodingTester.Encoding;
+
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
