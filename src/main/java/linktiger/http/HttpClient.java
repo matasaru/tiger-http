@@ -19,8 +19,10 @@ import java.net.Proxy;
 import java.net.ProxySelector;
 import java.net.Socket;
 import java.security.GeneralSecurityException;
+import java.security.KeyStore;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -32,6 +34,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 import byebye.Util;
@@ -219,7 +222,7 @@ public class HttpClient {
       this.sslSocketFactory = builder.sslSocketFactory;
       this.certificateChainCleaner = builder.certificateChainCleaner;
     } else {
-      X509TrustManager trustManager = Util.platformTrustManager();
+      X509TrustManager trustManager = platformTrustManager();
       this.sslSocketFactory = newSslSocketFactory(trustManager);
       this.certificateChainCleaner = CertificateChainCleaner.get(trustManager);
     }
@@ -253,6 +256,22 @@ public class HttpClient {
       SSLContext sslContext = SSLContext.getInstance("TLS");
       sslContext.init(null, new TrustManager[] { trustManager }, null);
       return sslContext.getSocketFactory();
+    } catch (GeneralSecurityException e) {
+      throw new AssertionError("No System TLS", e); // The system has no TLS. Just give up.
+    }
+  }
+
+  private static X509TrustManager platformTrustManager() {
+    try {
+      TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(
+          TrustManagerFactory.getDefaultAlgorithm());
+      trustManagerFactory.init((KeyStore) null);
+      TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
+      if (trustManagers.length != 1 || !(trustManagers[0] instanceof X509TrustManager)) {
+        throw new IllegalStateException("Unexpected default trust managers:"
+            + Arrays.toString(trustManagers));
+      }
+      return (X509TrustManager) trustManagers[0];
     } catch (GeneralSecurityException e) {
       throw new AssertionError("No System TLS", e); // The system has no TLS. Just give up.
     }
