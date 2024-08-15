@@ -30,7 +30,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import byebye.Util;
-import okhttp3.internal.Internal;
 import okhttp3.internal.http.HttpDate;
 import okhttp3.internal.http2.Header;
 
@@ -270,7 +269,7 @@ public final class Headers {
   public static Headers of(List<Header> headerBlock) {
     Builder builder = new Builder();
     for (Header header : headerBlock) {
-      Internal.instance.addLenient(builder, header.name.utf8(), header.value.utf8());
+      builder.addLenient(header.name.utf8(), header.value.utf8());
     }
     return builder.build();
   }
