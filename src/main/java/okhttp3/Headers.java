@@ -30,7 +30,9 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import byebye.Util;
+import okhttp3.internal.Internal;
 import okhttp3.internal.http.HttpDate;
+import okhttp3.internal.http2.Header;
 
 /**
  * The header fields of a single HTTP message. Values are uninterpreted strings; use {@code Request}
@@ -263,6 +265,14 @@ public final class Headers {
     }
 
     return new Headers(namesAndValues);
+  }
+
+  public static Headers toHeaders(List<Header> headerBlock) {
+    Builder builder = new Builder();
+    for (Header header : headerBlock) {
+      Internal.instance.addLenient(builder, header.name.utf8(), header.value.utf8());
+    }
+    return builder.build();
   }
 
   static void checkName(String name) {

@@ -720,7 +720,7 @@ public final class Http2Connection implements Closeable {
           if (streamId % 2 == nextStreamId % 2) return;
 
           // Create a stream.
-          Headers headers = Util.toHeaders(headerBlock);
+          Headers headers = Headers.toHeaders(headerBlock);
           final Http2Stream newStream = new Http2Stream(streamId, Http2Connection.this,
               false, inFinished, headers);
           lastGoodStreamId = streamId;
@@ -744,7 +744,7 @@ public final class Http2Connection implements Closeable {
       }
 
       // Update an existing stream.
-      stream.receiveHeaders(Util.toHeaders(headerBlock), inFinished);
+      stream.receiveHeaders(Headers.toHeaders(headerBlock), inFinished);
     }
 
     @Override public void rstStream(int streamId, ErrorCode errorCode) {
