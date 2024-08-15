@@ -176,7 +176,7 @@ public final class Http1ExchangeCodec implements ExchangeCodec {
     if (state != STATE_CLOSED) {
       throw new IllegalStateException("too early; can't read the trailers yet");
     }
-    return trailers != null ? trailers : Util.EMPTY_HEADERS;
+    return trailers != null ? trailers : Headers.EMPTY;
   }
 
   /** Returns true if this connection is closed. */

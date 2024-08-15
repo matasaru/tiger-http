@@ -170,7 +170,7 @@ public final class Http2Stream {
     if (!source.finished || !source.receiveBuffer.exhausted() || !source.readBuffer.exhausted()) {
       throw new IllegalStateException("too early; can't read the trailers yet");
     }
-    return source.trailers != null ? source.trailers : Util.EMPTY_HEADERS;
+    return source.trailers != null ? source.trailers : Headers.EMPTY;
   }
 
   /**

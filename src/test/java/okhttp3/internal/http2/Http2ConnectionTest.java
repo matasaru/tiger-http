@@ -45,7 +45,6 @@ import org.junit.rules.TestRule;
 import org.junit.rules.Timeout;
 
 import static byebye.Util.EMPTY_BYTE_ARRAY;
-import static byebye.Util.EMPTY_HEADERS;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static okhttp3.TestUtil.headerEntries;
 import static okhttp3.TestUtil.repeat;
@@ -571,7 +570,7 @@ public final class Http2ConnectionTest {
     Http2Stream stream = connection.newStream(headerEntries("a", "artichaut"), false);
     connection.writePingAndAwaitPong();
     assertThat(stream.takeHeaders()).isEqualTo(Headers.of("headers", "bam"));
-    assertThat(stream.trailers()).isEqualTo(EMPTY_HEADERS);
+    assertThat(stream.trailers()).isEqualTo(Headers.EMPTY);
     assertThat(connection.openStreamCount()).isEqualTo(0);
 
     // verify the peer received what was expected
@@ -730,7 +729,7 @@ public final class Http2ConnectionTest {
     connection.writePingAndAwaitPong();
     assertThat(stream.takeHeaders()).isEqualTo(Headers.of("headers", "bam"));
     assertThat(source.readUtf8(5)).isEqualTo("robot");
-    assertThat(stream.trailers()).isEqualTo(EMPTY_HEADERS);
+    assertThat(stream.trailers()).isEqualTo(Headers.EMPTY);
     assertThat(connection.openStreamCount()).isEqualTo(0);
 
     // verify the peer received what was expected

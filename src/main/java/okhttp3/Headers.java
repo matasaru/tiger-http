@@ -49,6 +49,9 @@ import okhttp3.internal.http.HttpDate;
  * <p>Instances of this class are immutable. Use {@link Builder} to create instances.
  */
 public final class Headers {
+
+  public static final Headers EMPTY = of();
+
   private final String[] namesAndValues;
 
   Headers(Builder builder) {

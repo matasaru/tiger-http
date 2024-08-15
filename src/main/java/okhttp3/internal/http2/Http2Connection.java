@@ -695,7 +695,7 @@ public final class Http2Connection implements Closeable {
       }
       dataStream.receiveData(source, length);
       if (inFinished) {
-        dataStream.receiveHeaders(Util.EMPTY_HEADERS, true);
+        dataStream.receiveHeaders(Headers.EMPTY, true);
       }
     }
 

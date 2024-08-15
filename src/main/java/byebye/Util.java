@@ -64,7 +64,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 /** Junk drawer of utility methods. */
 public final class Util {
   public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
-  public static final Headers EMPTY_HEADERS = Headers.of();
 
   public static final ResponseBody EMPTY_RESPONSE = ResponseBody.create(null, EMPTY_BYTE_ARRAY);
   public static final RequestBody EMPTY_REQUEST = RequestBody.create(null, EMPTY_BYTE_ARRAY);

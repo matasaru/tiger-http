@@ -28,7 +28,6 @@ import linktiger.http.Protocol;
 import linktiger.http.Request;
 import linktiger.http.Response;
 
-import byebye.Util;
 import okhttp3.internal.Internal;
 import okhttp3.internal.http.HttpHeaders;
 import okhttp3.internal.http2.Header;
@@ -814,7 +813,7 @@ public final class HeadersTest {
   }
 
   @Test public void byteCount() {
-    assertThat(Util.EMPTY_HEADERS.byteCount()).isEqualTo(0L);
+    assertThat(Headers.EMPTY.byteCount()).isEqualTo(0L);
     assertThat(new Headers.Builder()
         .add("abc", "def")
         .build()
