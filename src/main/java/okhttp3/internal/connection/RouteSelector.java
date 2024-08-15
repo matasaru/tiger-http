@@ -29,11 +29,11 @@ import java.util.NoSuchElementException;
 
 import linktiger.http.Url;
 
+import byebye.Util;
 import okhttp3.Address;
 import okhttp3.Call;
 import okhttp3.EventListener;
 import okhttp3.Route;
-import okhttp3.internal.Util;
 
 /**
  * Selects routes to connect to an origin server. Each connection requires a choice of proxy server,

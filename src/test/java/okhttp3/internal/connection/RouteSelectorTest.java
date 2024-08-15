@@ -33,13 +33,13 @@ import javax.net.ssl.SSLSocketFactory;
 
 import linktiger.http.Protocol;
 
+import byebye.Util;
 import okhttp3.Address;
 import okhttp3.Authenticator;
 import okhttp3.ConnectionSpec;
 import okhttp3.EventListener;
 import okhttp3.FakeDns;
 import okhttp3.Route;
-import okhttp3.internal.Util;
 import okhttp3.internal.http.RecordingProxySelector;
 import okhttp3.tls.HandshakeCertificates;
 import org.junit.Before;

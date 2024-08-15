@@ -25,8 +25,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static okhttp3.internal.Util.delimiterOffset;
-import static okhttp3.internal.Util.trimSubstring;
+import static byebye.Util.delimiterOffset;
+import static byebye.Util.trimSubstring;
 
 /** A cookie jar that delegates to a {@link CookieHandler}. */
 public final class JavaNetCookieJar implements CookieJar {

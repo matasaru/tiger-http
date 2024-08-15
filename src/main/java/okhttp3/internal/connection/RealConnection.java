@@ -42,6 +42,7 @@ import linktiger.http.Request;
 import linktiger.http.Response;
 import linktiger.http.Url;
 
+import byebye.Util;
 import okhttp3.Address;
 import okhttp3.Call;
 import okhttp3.CertificatePinner;
@@ -52,7 +53,6 @@ import okhttp3.Handshake;
 import okhttp3.Interceptor;
 import okhttp3.Route;
 import okhttp3.internal.Internal;
-import okhttp3.internal.Util;
 import okhttp3.internal.Version;
 import okhttp3.internal.http.ExchangeCodec;
 import okhttp3.internal.http1.Http1ExchangeCodec;
@@ -67,10 +67,10 @@ import okio.BufferedSink;
 import okio.BufferedSource;
 import okio.Okio;
 
+import static byebye.Util.closeQuietly;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static java.net.HttpURLConnection.HTTP_PROXY_AUTH;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static okhttp3.internal.Util.closeQuietly;
 
 public final class RealConnection extends Http2Connection.Listener implements Connection {
 

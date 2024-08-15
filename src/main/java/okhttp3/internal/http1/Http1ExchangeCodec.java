@@ -25,9 +25,9 @@ import linktiger.http.Request;
 import linktiger.http.Response;
 import linktiger.http.Url;
 
+import byebye.Util;
 import okhttp3.Headers;
 import okhttp3.internal.Internal;
-import okhttp3.internal.Util;
 import okhttp3.internal.connection.RealConnection;
 import okhttp3.internal.http.ExchangeCodec;
 import okhttp3.internal.http.HttpHeaders;
@@ -41,8 +41,8 @@ import okio.Sink;
 import okio.Source;
 import okio.Timeout;
 
+import static byebye.Util.checkOffsetAndCount;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static okhttp3.internal.Util.checkOffsetAndCount;
 import static okhttp3.internal.http.StatusLine.HTTP_CONTINUE;
 
 /**

@@ -24,7 +24,8 @@ import java.util.Collections;
 import java.util.List;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
-import okhttp3.internal.Util;
+
+import byebye.Util;
 
 /**
  * A record of a TLS handshake. For HTTPS clients, the client is <i>local</i> and the remote server

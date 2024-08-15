@@ -19,7 +19,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import okhttp3.internal.Util;
+
+import byebye.Util;
 import okio.Buffer;
 import okio.BufferedSink;
 import okio.BufferedSource;

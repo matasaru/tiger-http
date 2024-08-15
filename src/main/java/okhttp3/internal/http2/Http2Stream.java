@@ -22,8 +22,9 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
+
+import byebye.Util;
 import okhttp3.Headers;
-import okhttp3.internal.Util;
 import okio.AsyncTimeout;
 import okio.Buffer;
 import okio.BufferedSource;

@@ -38,9 +38,9 @@ import java.util.logging.Level;
 
 import linktiger.http.HttpClient;
 
+import byebye.Util;
 import okhttp3.Headers;
 import okhttp3.internal.NamedRunnable;
-import okhttp3.internal.Util;
 import okio.Buffer;
 import okio.BufferedSink;
 import okio.BufferedSource;

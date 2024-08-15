@@ -22,8 +22,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import byebye.Util;
 import okhttp3.Headers;
-import okhttp3.internal.Util;
 import okhttp3.internal.http.HttpDate;
 import org.junit.Test;
 

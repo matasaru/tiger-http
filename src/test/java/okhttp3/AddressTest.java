@@ -21,7 +21,7 @@ import javax.net.SocketFactory;
 
 import linktiger.http.Protocol;
 
-import okhttp3.internal.Util;
+import byebye.Util;
 import okhttp3.internal.http.RecordingProxySelector;
 import org.junit.Test;
 

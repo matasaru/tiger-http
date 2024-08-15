@@ -25,17 +25,17 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import byebye.Util;
 import okhttp3.Headers;
-import okhttp3.internal.Util;
 import okhttp3.internal.http.HttpDate;
 import okhttp3.internal.publicsuffix.PublicSuffixDatabase;
 
-import static okhttp3.internal.Util.UTC;
-import static okhttp3.internal.Util.canonicalizeHost;
-import static okhttp3.internal.Util.delimiterOffset;
-import static okhttp3.internal.Util.indexOfControlOrNonAscii;
-import static okhttp3.internal.Util.trimSubstring;
-import static okhttp3.internal.Util.verifyAsIpAddress;
+import static byebye.Util.UTC;
+import static byebye.Util.canonicalizeHost;
+import static byebye.Util.delimiterOffset;
+import static byebye.Util.indexOfControlOrNonAscii;
+import static byebye.Util.trimSubstring;
+import static byebye.Util.verifyAsIpAddress;
 
 /**
  * An <a href="http://tools.ietf.org/html/rfc6265">RFC 6265</a> Cookie.

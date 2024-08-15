@@ -19,7 +19,8 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import okhttp3.internal.Util;
+
+import byebye.Util;
 import okio.Buffer;
 import okio.BufferedSource;
 

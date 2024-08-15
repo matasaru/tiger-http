@@ -32,7 +32,7 @@ import okhttp3.internal.Version;
 import okio.GzipSource;
 import okio.Okio;
 
-import static okhttp3.internal.Util.hostHeader;
+import static byebye.Util.hostHeader;
 
 /**
  * Bridges from application code to network code. First it builds a network request from a user

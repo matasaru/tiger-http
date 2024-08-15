@@ -31,7 +31,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Logger;
-import okhttp3.internal.Util;
+
+import byebye.Util;
 import okio.Buffer;
 import okio.BufferedSource;
 import okio.ByteString;

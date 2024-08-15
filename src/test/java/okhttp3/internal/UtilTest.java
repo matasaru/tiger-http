@@ -18,6 +18,8 @@ package okhttp3.internal;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import byebye.Util;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

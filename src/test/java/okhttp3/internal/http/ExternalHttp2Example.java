@@ -21,8 +21,8 @@ import linktiger.http.Protocol;
 import linktiger.http.Request;
 import linktiger.http.Response;
 
+import byebye.Util;
 import okhttp3.Call;
-import okhttp3.internal.Util;
 
 public final class ExternalHttp2Example {
   public static void main(String[] args) throws Exception {

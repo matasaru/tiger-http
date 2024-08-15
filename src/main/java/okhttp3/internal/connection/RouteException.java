@@ -17,7 +17,7 @@ package okhttp3.internal.connection;
 
 import java.io.IOException;
 
-import static okhttp3.internal.Util.addSuppressedIfPossible;
+import static byebye.Util.addSuppressedIfPossible;
 
 /**
  * An exception thrown to indicate a problem connecting via a single Route. Multiple attempts may

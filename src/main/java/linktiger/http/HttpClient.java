@@ -34,6 +34,7 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import byebye.Util;
 import okhttp3.Address;
 import okhttp3.Authenticator;
 import okhttp3.Call;
@@ -46,7 +47,6 @@ import okhttp3.EventListener;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.internal.Internal;
-import okhttp3.internal.Util;
 import okhttp3.internal.connection.Exchange;
 import okhttp3.internal.connection.RealConnectionPool;
 import okhttp3.internal.proxy.NullProxySelector;
@@ -55,7 +55,7 @@ import okhttp3.internal.tls.OkHostnameVerifier;
 import okio.Sink;
 import okio.Source;
 
-import static okhttp3.internal.Util.checkDuration;
+import static byebye.Util.checkDuration;
 
 /**
  * Factory for {@linkplain Call calls}, which can be used to send HTTP requests and read their

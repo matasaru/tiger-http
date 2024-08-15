@@ -41,6 +41,7 @@ import linktiger.http.Request;
 import linktiger.http.RequestBody;
 import linktiger.http.Response;
 
+import byebye.Util;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Connection;
@@ -54,7 +55,6 @@ import okhttp3.TestLogHandler;
 import okhttp3.TestUtil;
 import okhttp3.internal.DoubleInetAddressDns;
 import okhttp3.internal.RecordingOkAuthenticator;
-import okhttp3.internal.Util;
 import okhttp3.internal.connection.RealConnection;
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;

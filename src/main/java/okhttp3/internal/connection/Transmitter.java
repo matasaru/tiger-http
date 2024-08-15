@@ -39,9 +39,9 @@ import okhttp3.internal.http.ExchangeCodec;
 import okio.AsyncTimeout;
 import okio.Timeout;
 
+import static byebye.Util.closeQuietly;
+import static byebye.Util.sameConnection;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static okhttp3.internal.Util.closeQuietly;
-import static okhttp3.internal.Util.sameConnection;
 
 /**
  * Bridge between OkHttp's application and network layers. This class exposes high-level application

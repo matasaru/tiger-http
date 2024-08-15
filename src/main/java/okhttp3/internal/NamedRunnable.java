@@ -15,6 +15,8 @@
  */
 package okhttp3.internal;
 
+import byebye.Util;
+
 /**
  * Runnable implementation which always sets its thread name.
  */

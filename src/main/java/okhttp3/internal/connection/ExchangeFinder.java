@@ -21,15 +21,15 @@ import java.util.List;
 
 import linktiger.http.HttpClient;
 
+import byebye.Util;
 import okhttp3.Address;
 import okhttp3.Call;
 import okhttp3.EventListener;
 import okhttp3.Interceptor;
 import okhttp3.Route;
-import okhttp3.internal.Util;
 import okhttp3.internal.http.ExchangeCodec;
 
-import static okhttp3.internal.Util.closeQuietly;
+import static byebye.Util.closeQuietly;
 
 /**
  * Attempts to find the connections for a sequence of exchanges. This uses the following strategies:

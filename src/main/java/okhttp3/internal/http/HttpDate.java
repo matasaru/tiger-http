@@ -21,7 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import static okhttp3.internal.Util.UTC;
+import static byebye.Util.UTC;
 
 /**
  * Best-effort parser for HTTP dates.

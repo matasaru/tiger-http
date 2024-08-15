@@ -22,9 +22,9 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
 
+import byebye.Util;
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.internal.Util;
 import okio.Buffer;
 import okio.BufferedSource;
 import okio.ByteString;

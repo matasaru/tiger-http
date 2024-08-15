@@ -17,7 +17,8 @@ package okhttp3.internal.publicsuffix;
 
 import java.io.IOException;
 import java.io.InputStream;
-import okhttp3.internal.Util;
+
+import byebye.Util;
 import okio.Buffer;
 import okio.BufferedSource;
 import okio.GzipSource;

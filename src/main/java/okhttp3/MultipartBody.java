@@ -23,7 +23,7 @@ import java.util.UUID;
 import linktiger.http.MediaType;
 import linktiger.http.RequestBody;
 
-import okhttp3.internal.Util;
+import byebye.Util;
 import okio.Buffer;
 import okio.BufferedSink;
 import okio.ByteString;

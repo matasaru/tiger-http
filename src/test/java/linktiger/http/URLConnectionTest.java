@@ -58,6 +58,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import byebye.Util;
 import okhttp3.Call;
 import okhttp3.Challenge;
 import okhttp3.ConnectionPool;
@@ -76,7 +77,6 @@ import okhttp3.TlsVersion;
 import okhttp3.internal.Internal;
 import okhttp3.internal.RecordingAuthenticator;
 import okhttp3.internal.RecordingOkAuthenticator;
-import okhttp3.internal.Util;
 import okhttp3.internal.Version;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;

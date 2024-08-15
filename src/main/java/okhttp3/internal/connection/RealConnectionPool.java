@@ -32,12 +32,12 @@ import java.util.logging.Level;
 
 import linktiger.http.HttpClient;
 
+import byebye.Util;
 import okhttp3.Address;
 import okhttp3.Route;
-import okhttp3.internal.Util;
 import okhttp3.internal.connection.Transmitter.TransmitterReference;
 
-import static okhttp3.internal.Util.closeQuietly;
+import static byebye.Util.closeQuietly;
 
 public final class RealConnectionPool {
   /**

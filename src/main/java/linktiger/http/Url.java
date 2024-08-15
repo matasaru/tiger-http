@@ -26,16 +26,17 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import okhttp3.internal.Util;
+
+import byebye.Util;
 import okhttp3.internal.publicsuffix.PublicSuffixDatabase;
 import okio.Buffer;
 
+import static byebye.Util.decodeHexDigit;
+import static byebye.Util.delimiterOffset;
+import static byebye.Util.skipLeadingAsciiWhitespace;
+import static byebye.Util.skipTrailingAsciiWhitespace;
+import static byebye.Util.verifyAsIpAddress;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static okhttp3.internal.Util.decodeHexDigit;
-import static okhttp3.internal.Util.delimiterOffset;
-import static okhttp3.internal.Util.skipLeadingAsciiWhitespace;
-import static okhttp3.internal.Util.skipTrailingAsciiWhitespace;
-import static okhttp3.internal.Util.verifyAsIpAddress;
 
 /**
  * A uniform resource locator (URL) with a scheme of either {@code http} or {@code https}. Use this

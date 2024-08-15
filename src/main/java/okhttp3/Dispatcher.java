@@ -28,8 +28,8 @@ import java.util.concurrent.TimeUnit;
 
 import linktiger.http.Response;
 
+import byebye.Util;
 import okhttp3.Call.AsyncCall;
-import okhttp3.internal.Util;
 
 /**
  * Policy on when async requests are executed.

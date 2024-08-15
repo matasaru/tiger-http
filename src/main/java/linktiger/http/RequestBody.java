@@ -19,7 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import okhttp3.internal.Util;
+import byebye.Util;
 import okio.BufferedSink;
 import okio.ByteString;
 import okio.Okio;

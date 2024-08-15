@@ -38,7 +38,7 @@ import okhttp3.internal.http.RealInterceptorChain;
 import okhttp3.internal.http.RetryAndFollowUpInterceptor;
 import okio.Timeout;
 
-import static okhttp3.internal.Util.closeQuietly;
+import static byebye.Util.closeQuietly;
 
 /**
  * A call is a request that has been prepared for execution. A call can be canceled. As this object

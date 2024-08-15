@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package okhttp3.internal;
+package byebye;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -50,6 +50,7 @@ import linktiger.http.ResponseBody;
 import linktiger.http.Url;
 
 import okhttp3.Headers;
+import okhttp3.internal.Internal;
 import okhttp3.internal.http2.Header;
 import okio.Buffer;
 import okio.BufferedSource;

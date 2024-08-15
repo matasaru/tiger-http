@@ -16,9 +16,10 @@
 package okhttp3.internal.http2;
 
 import java.io.IOException;
+
 import okio.ByteString;
 
-import static okhttp3.internal.Util.format;
+import static byebye.Util.format;
 
 public final class Http2 {
   static final ByteString CONNECTION_PREFACE

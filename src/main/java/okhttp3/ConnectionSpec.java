@@ -19,12 +19,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import javax.net.ssl.SSLSocket;
-import okhttp3.internal.Util;
 
-import static okhttp3.internal.Util.concat;
-import static okhttp3.internal.Util.indexOf;
-import static okhttp3.internal.Util.intersect;
-import static okhttp3.internal.Util.nonEmptyIntersection;
+import byebye.Util;
+
+import static byebye.Util.concat;
+import static byebye.Util.indexOf;
+import static byebye.Util.intersect;
+import static byebye.Util.nonEmptyIntersection;
 
 /**
  * Specifies configuration for the socket connection that HTTP traffic travels through. For {@code

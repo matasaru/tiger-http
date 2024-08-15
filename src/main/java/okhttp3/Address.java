@@ -26,7 +26,7 @@ import javax.net.ssl.SSLSocketFactory;
 import linktiger.http.Protocol;
 import linktiger.http.Url;
 
-import okhttp3.internal.Util;
+import byebye.Util;
 
 /**
  * A specification for a connection to an origin server. For simple connections, this is the

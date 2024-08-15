@@ -28,7 +28,7 @@ import okhttp3.Interceptor;
 import okhttp3.internal.connection.Exchange;
 import okhttp3.internal.connection.Transmitter;
 
-import static okhttp3.internal.Util.checkDuration;
+import static byebye.Util.checkDuration;
 
 /**
  * A concrete interceptor chain that carries the entire interceptor chain: all application

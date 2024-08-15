@@ -67,13 +67,13 @@ import linktiger.http.Response;
 import linktiger.http.ResponseBody;
 import linktiger.http.Url;
 
+import byebye.Util;
 import okhttp3.RecordingEventListener.CallEnd;
 import okhttp3.RecordingEventListener.ConnectionAcquired;
 import okhttp3.RecordingEventListener.ConnectionReleased;
 import okhttp3.RecordingEventListener.ResponseFailed;
 import okhttp3.internal.DoubleInetAddressDns;
 import okhttp3.internal.RecordingOkAuthenticator;
-import okhttp3.internal.Util;
 import okhttp3.internal.Version;
 import okhttp3.internal.http.RecordingProxySelector;
 import okhttp3.internal.io.InMemoryFileSystem;

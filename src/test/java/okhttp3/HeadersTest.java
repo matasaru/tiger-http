@@ -28,8 +28,8 @@ import linktiger.http.Protocol;
 import linktiger.http.Request;
 import linktiger.http.Response;
 
+import byebye.Util;
 import okhttp3.internal.Internal;
-import okhttp3.internal.Util;
 import okhttp3.internal.http.HttpHeaders;
 import okhttp3.internal.http2.Header;
 import okhttp3.internal.http2.Http2ExchangeCodec;

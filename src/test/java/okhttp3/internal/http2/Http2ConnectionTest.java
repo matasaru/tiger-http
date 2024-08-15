@@ -25,8 +25,9 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import byebye.Util;
 import okhttp3.Headers;
-import okhttp3.internal.Util;
 import okhttp3.internal.http2.MockHttp2Peer.InFrame;
 import okio.AsyncTimeout;
 import okio.Buffer;
@@ -43,12 +44,12 @@ import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.rules.Timeout;
 
+import static byebye.Util.EMPTY_BYTE_ARRAY;
+import static byebye.Util.EMPTY_HEADERS;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static okhttp3.TestUtil.headerEntries;
 import static okhttp3.TestUtil.repeat;
 import static okhttp3.internal.Internal.initializeInstanceForTests;
-import static okhttp3.internal.Util.EMPTY_BYTE_ARRAY;
-import static okhttp3.internal.Util.EMPTY_HEADERS;
 import static okhttp3.internal.http2.Http2Connection.AWAIT_PING;
 import static okhttp3.internal.http2.Http2Connection.DEGRADED_PING;
 import static okhttp3.internal.http2.Http2Connection.DEGRADED_PONG_TIMEOUT_NS;

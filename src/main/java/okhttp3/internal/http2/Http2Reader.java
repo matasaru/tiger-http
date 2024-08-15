@@ -20,34 +20,16 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Logger;
+
 import okio.Buffer;
 import okio.BufferedSource;
 import okio.ByteString;
 import okio.Source;
 import okio.Timeout;
 
+import static byebye.Util.format;
 import static java.util.logging.Level.FINE;
-import static okhttp3.internal.Util.format;
-import static okhttp3.internal.http2.Http2.CONNECTION_PREFACE;
-import static okhttp3.internal.http2.Http2.FLAG_ACK;
-import static okhttp3.internal.http2.Http2.FLAG_COMPRESSED;
-import static okhttp3.internal.http2.Http2.FLAG_END_HEADERS;
-import static okhttp3.internal.http2.Http2.FLAG_END_STREAM;
-import static okhttp3.internal.http2.Http2.FLAG_PADDED;
-import static okhttp3.internal.http2.Http2.FLAG_PRIORITY;
-import static okhttp3.internal.http2.Http2.INITIAL_MAX_FRAME_SIZE;
-import static okhttp3.internal.http2.Http2.TYPE_CONTINUATION;
-import static okhttp3.internal.http2.Http2.TYPE_DATA;
-import static okhttp3.internal.http2.Http2.TYPE_GOAWAY;
-import static okhttp3.internal.http2.Http2.TYPE_HEADERS;
-import static okhttp3.internal.http2.Http2.TYPE_PING;
-import static okhttp3.internal.http2.Http2.TYPE_PRIORITY;
-import static okhttp3.internal.http2.Http2.TYPE_PUSH_PROMISE;
-import static okhttp3.internal.http2.Http2.TYPE_RST_STREAM;
-import static okhttp3.internal.http2.Http2.TYPE_SETTINGS;
-import static okhttp3.internal.http2.Http2.TYPE_WINDOW_UPDATE;
-import static okhttp3.internal.http2.Http2.frameLog;
-import static okhttp3.internal.http2.Http2.ioException;
+import static okhttp3.internal.http2.Http2.*;
 import static okio.ByteString.EMPTY;
 
 /**
