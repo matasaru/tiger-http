@@ -102,6 +102,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * {@link #byteStream()}, or {@link #charStream()}.
  */
 public abstract class ResponseBody implements Closeable {
+
+  public static final ResponseBody EMPTY = ResponseBody.create(null, Util.EMPTY_BYTE_ARRAY);
+
   /** Multiple calls to {@link #charStream()} must return the same instance. */
   private Reader reader;
 

@@ -45,7 +45,6 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 import linktiger.http.RequestBody;
-import linktiger.http.ResponseBody;
 import linktiger.http.Url;
 
 import okhttp3.Headers;
@@ -65,7 +64,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public final class Util {
   public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
-  public static final ResponseBody EMPTY_RESPONSE = ResponseBody.create(null, EMPTY_BYTE_ARRAY);
   public static final RequestBody EMPTY_REQUEST = RequestBody.create(null, EMPTY_BYTE_ARRAY);
 
   /** Byte order marks. */

@@ -40,6 +40,7 @@ import linktiger.http.HttpClient;
 import linktiger.http.Protocol;
 import linktiger.http.Request;
 import linktiger.http.Response;
+import linktiger.http.ResponseBody;
 import linktiger.http.Url;
 
 import byebye.Util;
@@ -447,7 +448,7 @@ public final class RealConnection extends Http2Connection.Listener implements Co
         .protocol(Protocol.HTTP_1_1)
         .code(HttpURLConnection.HTTP_PROXY_AUTH)
         .message("Preemptive Authenticate")
-        .body(Util.EMPTY_RESPONSE)
+        .body(ResponseBody.EMPTY)
         .sentRequestAtMillis(-1L)
         .receivedResponseAtMillis(-1L)
         .header("Proxy-Authenticate", "OkHttp-Preemptive")
