@@ -216,7 +216,7 @@ public final class Request {
     }
 
     public Builder delete() {
-      return delete(Util.EMPTY_REQUEST);
+      return delete(RequestBody.EMPTY);
     }
 
     public Builder put(RequestBody body) {

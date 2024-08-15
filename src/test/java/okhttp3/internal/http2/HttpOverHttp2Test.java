@@ -1018,7 +1018,7 @@ public final class HttpOverHttp2Test {
 
     Call call = client.newCall(new Request.Builder()
         .url(server.url("/").toString())
-        .method("DELETE", Util.EMPTY_REQUEST)
+        .method("DELETE", RequestBody.EMPTY)
         .build());
     Response response = call.execute();
     Assertions.assertThat(response.body().string()).isEqualTo("ABC");

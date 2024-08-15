@@ -28,6 +28,9 @@ import okio.Source;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public abstract class RequestBody {
+
+  public static final RequestBody EMPTY = RequestBody.create(null, Util.EMPTY_BYTE_ARRAY);
+
   /** Returns the Content-Type header for this body. */
   public abstract MediaType contentType();
 
