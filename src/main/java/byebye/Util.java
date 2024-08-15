@@ -26,7 +26,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
-import java.security.AccessControlException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.util.ArrayList;
@@ -653,20 +652,6 @@ public final class Util {
       result.add(new Header(headers.name(i), headers.value(i)));
     }
     return result;
-  }
-
-  /**
-   * Returns the system property, or defaultValue if the system property is null or
-   * cannot be read (e.g. because of security policy restrictions).
-   */
-  public static String getSystemProperty(String key, String defaultValue) {
-    String value;
-    try {
-      value = System.getProperty(key);
-    } catch (AccessControlException ex) {
-      return defaultValue;
-    }
-    return value != null ? value : defaultValue;
   }
 
   /** Returns true if an HTTP request for {@code a} and {@code b} can reuse a connection. */
