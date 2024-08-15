@@ -267,7 +267,7 @@ public final class Headers {
     return new Headers(namesAndValues);
   }
 
-  public static Headers toHeaders(List<Header> headerBlock) {
+  public static Headers of(List<Header> headerBlock) {
     Builder builder = new Builder();
     for (Header header : headerBlock) {
       Internal.instance.addLenient(builder, header.name.utf8(), header.value.utf8());
