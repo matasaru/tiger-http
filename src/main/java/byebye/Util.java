@@ -39,8 +39,6 @@ import java.util.regex.Pattern;
 
 import linktiger.http.Url;
 
-import okhttp3.Headers;
-import okhttp3.internal.http2.Header;
 import okio.Buffer;
 import okio.BufferedSource;
 import okio.ByteString;
@@ -584,14 +582,6 @@ public final class Util {
       }
     }
     return result.readUtf8();
-  }
-
-  public static List<Header> toHeaderBlock(Headers headers) {
-    List<Header> result = new ArrayList<>();
-    for (int i = 0; i < headers.size(); i++) {
-      result.add(new Header(headers.name(i), headers.value(i)));
-    }
-    return result;
   }
 
   /** Returns true if an HTTP request for {@code a} and {@code b} can reuse a connection. */
