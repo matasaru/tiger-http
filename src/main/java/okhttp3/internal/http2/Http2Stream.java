@@ -615,7 +615,7 @@ public final class Http2Stream {
           while (sendBuffer.size() > 0) {
             emitFrame(false);
           }
-          connection.writeHeaders(id, true, Headers.toHeaderBlock(trailers));
+          connection.writeHeaders(id, true, Headers.toList(trailers));
         } else if (hasData) {
           while (sendBuffer.size() > 0) {
             emitFrame(true);

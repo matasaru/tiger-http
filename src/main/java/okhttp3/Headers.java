@@ -204,7 +204,7 @@ public final class Headers {
     return result;
   }
 
-  public static List<Header> toHeaderBlock(Headers headers) {
+  public static List<Header> toList(Headers headers) {
     List<Header> result = new ArrayList<>();
     for (int i = 0; i < headers.size(); i++) {
       result.add(new Header(headers.name(i), headers.value(i)));
