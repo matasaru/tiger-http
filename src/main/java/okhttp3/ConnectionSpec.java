@@ -23,7 +23,6 @@ import javax.net.ssl.SSLSocket;
 import byebye.Util;
 
 import static byebye.Util.concat;
-import static byebye.Util.indexOf;
 import static byebye.Util.intersect;
 import static byebye.Util.nonEmptyIntersection;
 
@@ -184,8 +183,13 @@ public final class ConnectionSpec {
     // In accordance with https://tools.ietf.org/html/draft-ietf-tls-downgrade-scsv-00
     // the SCSV cipher is added to signal that a protocol fallback has taken place.
     String[] supportedCipherSuites = sslSocket.getSupportedCipherSuites();
-    int indexOfFallbackScsv = indexOf(
-        CipherSuite.ORDER_BY_NAME, supportedCipherSuites, "TLS_FALLBACK_SCSV");
+    int indexOfFallbackScsv = -1;
+    for (int i = 0, size = supportedCipherSuites.length; i < size; i++) {
+      if (CipherSuite.ORDER_BY_NAME.compare(supportedCipherSuites[i], "TLS_FALLBACK_SCSV") == 0) {
+        indexOfFallbackScsv = i;
+        break;
+      }
+    }
     if (isFallback && indexOfFallbackScsv != -1) {
       cipherSuitesIntersection = concat(
           cipherSuitesIntersection, supportedCipherSuites[indexOfFallbackScsv]);

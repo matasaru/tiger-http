@@ -181,13 +181,6 @@ public final class Util {
         : host;
   }
 
-  public static int indexOf(Comparator<String> comparator, String[] array, String value) {
-    for (int i = 0, size = array.length; i < size; i++) {
-      if (comparator.compare(array[i], value) == 0) return i;
-    }
-    return -1;
-  }
-
   public static String[] concat(String[] array, String value) {
     String[] result = new String[array.length + 1];
     System.arraycopy(array, 0, result, 0, array.length);
