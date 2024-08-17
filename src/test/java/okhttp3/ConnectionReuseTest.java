@@ -30,7 +30,6 @@ import linktiger.http.RequestBody;
 import linktiger.http.Response;
 import linktiger.http.ResponseBody;
 
-import byebye.Util;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.SocketPolicy;
@@ -348,7 +347,7 @@ public final class ConnectionReuseTest {
     assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
 
     for (Response response : responsesNotClosed) {
-      Util.closeQuietly(response);
+      response.close();
     }
   }
 

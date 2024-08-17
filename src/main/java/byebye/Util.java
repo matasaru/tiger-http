@@ -15,13 +15,10 @@
  */
 package byebye;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.IDN;
 import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -89,51 +86,6 @@ public final class Util {
   public static void checkOffsetAndCount(long arrayLength, long offset, long count) {
     if ((offset | count) < 0 || offset > arrayLength || arrayLength - offset < count) {
       throw new ArrayIndexOutOfBoundsException();
-    }
-  }
-
-  /**
-   * Closes {@code closeable}, ignoring any checked exceptions. Does nothing if {@code closeable} is
-   * null.
-   */
-  public static void closeQuietly(Closeable closeable) {
-    if (closeable != null) {
-      try {
-        closeable.close();
-      } catch (RuntimeException rethrown) {
-        throw rethrown;
-      } catch (Exception ignored) {
-      }
-    }
-  }
-
-  /**
-   * Closes {@code socket}, ignoring any checked exceptions. Does nothing if {@code socket} is
-   * null.
-   */
-  public static void closeQuietly(Socket socket) {
-    if (socket != null) {
-      try {
-        socket.close();
-      } catch (AssertionError | RuntimeException e) {
-        throw e;
-      } catch (Exception ignored) {
-      }
-    }
-  }
-
-  /**
-   * Closes {@code serverSocket}, ignoring any checked exceptions. Does nothing if {@code
-   * serverSocket} is null.
-   */
-  public static void closeQuietly(ServerSocket serverSocket) {
-    if (serverSocket != null) {
-      try {
-        serverSocket.close();
-      } catch (RuntimeException rethrown) {
-        throw rethrown;
-      } catch (Exception ignored) {
-      }
     }
   }
 

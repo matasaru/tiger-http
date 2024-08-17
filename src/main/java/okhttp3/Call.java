@@ -38,8 +38,6 @@ import okhttp3.internal.http.RealInterceptorChain;
 import okhttp3.internal.http.RetryAndFollowUpInterceptor;
 import okio.Timeout;
 
-import static byebye.Util.closeQuietly;
-
 /**
  * A call is a request that has been prepared for execution. A call can be canceled. As this object
  * represents a single request/response pair (stream), it cannot be executed twice.
@@ -287,7 +285,7 @@ public class Call implements Cloneable {
     try {
       Response response = chain.proceed(originalRequest);
       if (transmitter.isCanceled()) {
-        closeQuietly(response);
+        response.close();
         throw new IOException("Canceled");
       }
       return response;

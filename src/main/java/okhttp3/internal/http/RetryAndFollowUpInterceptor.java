@@ -39,7 +39,6 @@ import okhttp3.internal.connection.RouteException;
 import okhttp3.internal.connection.Transmitter;
 import okhttp3.internal.http2.ConnectionShutdownException;
 
-import static byebye.Util.closeQuietly;
 import static byebye.Util.sameConnection;
 import static java.net.HttpURLConnection.HTTP_CLIENT_TIMEOUT;
 import static java.net.HttpURLConnection.HTTP_MOVED_PERM;
@@ -131,7 +130,10 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
         return response;
       }
 
-      closeQuietly(response.body());
+      if (response.body() != null) {
+        response.body().close();
+      }
+
       if (transmitter.hasExchange()) {
         exchange.detachWithViolence();
       }

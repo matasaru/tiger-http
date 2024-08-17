@@ -37,8 +37,6 @@ import okhttp3.Address;
 import okhttp3.Route;
 import okhttp3.internal.connection.Transmitter.TransmitterReference;
 
-import static byebye.Util.closeQuietly;
-
 public final class RealConnectionPool {
   /**
    * Background threads are used to cleanup expired connections. There will be at most a single
@@ -153,7 +151,10 @@ public final class RealConnectionPool {
     }
 
     for (RealConnection connection : evictedConnections) {
-      closeQuietly(connection.socket());
+      try {
+        connection.socket().close();
+      } catch (IOException _) {
+      }
     }
   }
 
@@ -209,7 +210,12 @@ public final class RealConnectionPool {
       }
     }
 
-    closeQuietly(longestIdleConnection.socket());
+    if (longestIdleConnection != null && longestIdleConnection.socket() != null) {
+      try {
+        longestIdleConnection.socket().close();
+      } catch (IOException _) {
+      }
+    }
 
     // Cleanup again immediately.
     return 0;

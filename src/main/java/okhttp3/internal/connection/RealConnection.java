@@ -67,7 +67,6 @@ import okio.BufferedSink;
 import okio.BufferedSource;
 import okio.Okio;
 
-import static byebye.Util.closeQuietly;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static java.net.HttpURLConnection.HTTP_PROXY_AUTH;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -181,8 +180,18 @@ public final class RealConnection extends Http2Connection.Listener implements Co
         eventListener.connectEnd(call, route.socketAddress(), route.proxy(), protocol);
         break;
       } catch (IOException e) {
-        closeQuietly(socket);
-        closeQuietly(rawSocket);
+        if (socket != null) {
+          try {
+            socket.close();
+          } catch (IOException _) {
+          }
+        }
+        if (rawSocket != null) {
+          try {
+            rawSocket.close();
+          } catch (IOException _) {
+          }
+        }
         socket = null;
         rawSocket = null;
         source = null;
@@ -234,7 +243,12 @@ public final class RealConnection extends Http2Connection.Listener implements Co
 
       // The proxy decided to close the connection after an auth challenge. We need to create a new
       // connection, but this time with the auth credentials.
-      closeQuietly(rawSocket);
+      if (rawSocket != null) {
+        try {
+          rawSocket.close();
+        } catch (IOException _) {
+        }
+      }
       rawSocket = null;
       sink = null;
       source = null;
@@ -367,8 +381,11 @@ public final class RealConnection extends Http2Connection.Listener implements Co
 
       success = true;
     } finally {
-      if (!success) {
-        closeQuietly(sslSocket);
+      if (!success && sslSocket != null) {
+        try {
+          sslSocket.close();
+        } catch (IOException _) {
+        }
       }
     }
   }
@@ -539,7 +556,10 @@ public final class RealConnection extends Http2Connection.Listener implements Co
 
   public void cancel() {
     // Close the raw socket so we don't end up doing synchronous I/O.
-    closeQuietly(rawSocket);
+    try {
+      rawSocket.close();
+    } catch (IOException _) {
+    }
   }
 
   @Override public Socket socket() {

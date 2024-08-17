@@ -38,7 +38,6 @@ import okhttp3.internal.http.ExchangeCodec;
 import okio.AsyncTimeout;
 import okio.Timeout;
 
-import static byebye.Util.closeQuietly;
 import static byebye.Util.sameConnection;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
@@ -292,7 +291,12 @@ public final class Transmitter {
       if (this.connection != null) releasedConnection = null;
       callEnd = noMoreExchanges && exchange == null;
     }
-    closeQuietly(socket);
+    if (socket != null) {
+      try {
+        socket.close();
+      } catch (IOException _) {
+      }
+    }
 
     if (releasedConnection != null) {
       eventListener.connectionReleased(call, releasedConnection);

@@ -193,7 +193,12 @@ public abstract class ResponseBody implements Closeable {
   }
 
   @Override public void close() {
-    Util.closeQuietly(source());
+    if (source() != null) {
+      try {
+        source().close();
+      } catch (IOException _) {
+      }
+    }
   }
 
   /**

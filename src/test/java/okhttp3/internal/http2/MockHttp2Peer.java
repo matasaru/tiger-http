@@ -115,7 +115,9 @@ public final class MockHttp2Peer implements Closeable {
       try {
         readAndWriteFrames();
       } catch (IOException e) {
-        Util.closeQuietly(MockHttp2Peer.this);
+        try {
+          MockHttp2Peer.this.close();
+        } catch (IOException _) {}
         logger.info(MockHttp2Peer.this + " done: " + e.getMessage());
       }
     });
@@ -182,8 +184,8 @@ public final class MockHttp2Peer implements Closeable {
 
   @Override public synchronized void close() throws IOException {
     executor.shutdown();
-    Util.closeQuietly(socket);
-    Util.closeQuietly(serverSocket);
+    socket.close();
+    serverSocket.close();
   }
 
   @Override public String toString() {

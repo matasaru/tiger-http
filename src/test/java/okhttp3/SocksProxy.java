@@ -80,7 +80,10 @@ public final class SocksProxy {
           logger.log(Level.WARNING, name + " failed unexpectedly", e);
         } finally {
           for (Socket socket : openSockets) {
-            Util.closeQuietly(socket);
+            try {
+              socket.close();
+            } catch (IOException _) {
+            }
           }
         }
       }
@@ -115,7 +118,10 @@ public final class SocksProxy {
           openSockets.add(from);
         } catch (IOException e) {
           logger.log(Level.WARNING, name + " failed", e);
-          Util.closeQuietly(from);
+          try {
+            from.close();
+          } catch (IOException _) {
+          }
         }
       }
     });

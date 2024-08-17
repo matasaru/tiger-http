@@ -29,8 +29,6 @@ import okhttp3.Interceptor;
 import okhttp3.Route;
 import okhttp3.internal.http.ExchangeCodec;
 
-import static byebye.Util.closeQuietly;
-
 /**
  * Attempts to find the connections for a sequence of exchanges. This uses the following strategies:
  *
@@ -169,7 +167,12 @@ final class ExchangeFinder {
         }
       }
     }
-    closeQuietly(toClose);
+    if (toClose != null) {
+      try {
+        toClose.close();
+      } catch (IOException _) {
+      }
+    }
 
     if (releasedConnection != null) {
       eventListener.connectionReleased(call, releasedConnection);
@@ -246,7 +249,12 @@ final class ExchangeFinder {
         transmitter.acquireConnectionNoEvents(result);
       }
     }
-    closeQuietly(socket);
+    if (socket != null) {
+      try {
+        socket.close();
+      } catch (IOException _) {
+      }
+    }
 
     eventListener.connectionAcquired(call, result);
     return result;

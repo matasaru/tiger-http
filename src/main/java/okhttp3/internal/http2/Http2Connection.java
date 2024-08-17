@@ -676,7 +676,10 @@ public final class Http2Connection implements Closeable {
         streamErrorCode = ErrorCode.PROTOCOL_ERROR;
       } finally {
         close(connectionErrorCode, streamErrorCode, errorException);
-        Util.closeQuietly(reader);
+        try {
+          reader.close();
+        } catch (IOException _) {
+        }
       }
     }
 
