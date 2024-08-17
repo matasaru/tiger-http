@@ -24,8 +24,6 @@ import javax.net.ssl.SSLSocket;
 
 import byebye.Util;
 
-import static byebye.Util.nonEmptyIntersection;
-
 /**
  * Specifies configuration for the socket connection that HTTP traffic travels through. For {@code
  * https:} URLs, this includes the TLS version and cipher suites to use when negotiating a secure
@@ -218,6 +216,26 @@ public final class ConnectionSpec {
       }
     }
     return result.toArray(new String[0]);
+  }
+
+  /**
+   * Returns true if there is an element in {@code first} that is also in {@code second}. This
+   * method terminates if any intersection is found. The sizes of both arguments are assumed to be
+   * so small, and the likelihood of an intersection so great, that it is not worth the CPU cost of
+   * sorting or the memory cost of hashing.
+   */
+  private boolean nonEmptyIntersection(Comparator<String> comparator, String[] first, String[] second) {
+    if (first == null || second == null || first.length == 0 || second.length == 0) {
+      return false;
+    }
+    for (String a : first) {
+      for (String b : second) {
+        if (comparator.compare(a, b) == 0) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   /**

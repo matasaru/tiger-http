@@ -131,27 +131,6 @@ public final class Util {
     };
   }
 
-  /**
-   * Returns true if there is an element in {@code first} that is also in {@code second}. This
-   * method terminates if any intersection is found. The sizes of both arguments are assumed to be
-   * so small, and the likelihood of an intersection so great, that it is not worth the CPU cost of
-   * sorting or the memory cost of hashing.
-   */
-  public static boolean nonEmptyIntersection(
-      Comparator<String> comparator, String[] first, String[] second) {
-    if (first == null || second == null || first.length == 0 || second.length == 0) {
-      return false;
-    }
-    for (String a : first) {
-      for (String b : second) {
-        if (comparator.compare(a, b) == 0) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
   public static String hostHeader(Url url, boolean includeDefaultPort) {
     String host = url.host().contains(":")
         ? "[" + url.host() + "]"
