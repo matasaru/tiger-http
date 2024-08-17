@@ -23,12 +23,9 @@ import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
@@ -126,13 +123,6 @@ public final class Util {
         source.timeout().deadlineNanoTime(now + originalDuration);
       }
     }
-  }
-
-  /** Returns an immutable copy of {@code map}. */
-  public static <K, V> Map<K, V> immutableMap(Map<K, V> map) {
-    return map.isEmpty()
-        ? Collections.emptyMap()
-        : Collections.unmodifiableMap(new LinkedHashMap<>(map));
   }
 
   public static ThreadFactory threadFactory(String name, boolean daemon) {

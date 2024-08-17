@@ -21,7 +21,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import byebye.Util;
 import okhttp3.Headers;
 import okhttp3.internal.http.HttpMethod;
 
@@ -41,7 +40,7 @@ public final class Request {
     this.method = builder.method;
     this.headers = builder.headers.build();
     this.body = builder.body;
-    this.tags = Util.immutableMap(builder.tags);
+    this.tags = Map.copyOf(builder.tags);
   }
 
   public Url url() {
