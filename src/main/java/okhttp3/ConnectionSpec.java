@@ -22,7 +22,6 @@ import javax.net.ssl.SSLSocket;
 
 import byebye.Util;
 
-import static byebye.Util.concat;
 import static byebye.Util.intersect;
 import static byebye.Util.nonEmptyIntersection;
 
@@ -191,8 +190,10 @@ public final class ConnectionSpec {
       }
     }
     if (isFallback && indexOfFallbackScsv != -1) {
-      cipherSuitesIntersection = concat(
-          cipherSuitesIntersection, supportedCipherSuites[indexOfFallbackScsv]);
+      String[] result = new String[cipherSuitesIntersection.length + 1];
+      System.arraycopy(cipherSuitesIntersection, 0, result, 0, cipherSuitesIntersection.length);
+      result[result.length - 1] = supportedCipherSuites[indexOfFallbackScsv];
+      cipherSuitesIntersection = result;
     }
 
     return new Builder(this)

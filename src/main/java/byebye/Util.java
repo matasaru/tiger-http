@@ -181,13 +181,6 @@ public final class Util {
         : host;
   }
 
-  public static String[] concat(String[] array, String value) {
-    String[] result = new String[array.length + 1];
-    System.arraycopy(array, 0, result, 0, array.length);
-    result[result.length - 1] = value;
-    return result;
-  }
-
   /**
    * Increments {@code pos} until {@code input[pos]} is not ASCII whitespace. Stops at {@code
    * limit}.
