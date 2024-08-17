@@ -52,7 +52,6 @@ import okhttp3.internal.Internal;
 import okhttp3.internal.connection.Exchange;
 import okhttp3.internal.connection.RealConnectionPool;
 import okhttp3.internal.proxy.NullProxySelector;
-import okhttp3.internal.tls.CertificateChainCleaner;
 import okhttp3.internal.tls.OkHostnameVerifier;
 import okio.Sink;
 import okio.Source;
@@ -180,7 +179,6 @@ public class HttpClient {
   final CookieJar cookieJar;
   final SocketFactory socketFactory;
   final SSLSocketFactory sslSocketFactory;
-  final CertificateChainCleaner certificateChainCleaner;
   final HostnameVerifier hostnameVerifier;
   final Authenticator proxyAuthenticator;
   final Authenticator authenticator;
@@ -218,11 +216,9 @@ public class HttpClient {
 
     if (builder.sslSocketFactory != null || !isTLS) {
       this.sslSocketFactory = builder.sslSocketFactory;
-      this.certificateChainCleaner = builder.certificateChainCleaner;
     } else {
       X509TrustManager trustManager = platformTrustManager();
       this.sslSocketFactory = newSslSocketFactory(trustManager);
-      this.certificateChainCleaner = CertificateChainCleaner.get(trustManager);
     }
 
     this.hostnameVerifier = builder.hostnameVerifier;
@@ -410,7 +406,6 @@ public class HttpClient {
     CookieJar cookieJar;
     SocketFactory socketFactory;
     SSLSocketFactory sslSocketFactory;
-    CertificateChainCleaner certificateChainCleaner;
     HostnameVerifier hostnameVerifier;
     Authenticator proxyAuthenticator;
     Authenticator authenticator;
@@ -463,7 +458,6 @@ public class HttpClient {
       this.cookieJar = httpClient.cookieJar;
       this.socketFactory = httpClient.socketFactory;
       this.sslSocketFactory = httpClient.sslSocketFactory;
-      this.certificateChainCleaner = httpClient.certificateChainCleaner;
       this.hostnameVerifier = httpClient.hostnameVerifier;
       this.proxyAuthenticator = httpClient.proxyAuthenticator;
       this.authenticator = httpClient.authenticator;
@@ -724,7 +718,6 @@ public class HttpClient {
       if (sslSocketFactory == null) throw new NullPointerException("sslSocketFactory == null");
       if (trustManager == null) throw new NullPointerException("trustManager == null");
       this.sslSocketFactory = sslSocketFactory;
-      this.certificateChainCleaner = CertificateChainCleaner.get(trustManager);
       return this;
     }
 
