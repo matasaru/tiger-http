@@ -15,14 +15,15 @@
  */
 package okhttp3;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import javax.net.ssl.SSLSocket;
 
 import byebye.Util;
 
-import static byebye.Util.intersect;
 import static byebye.Util.nonEmptyIntersection;
 
 /**
@@ -200,6 +201,23 @@ public final class ConnectionSpec {
         .cipherSuites(cipherSuitesIntersection)
         .tlsVersions(tlsVersionsIntersection)
         .build();
+  }
+
+  /**
+   * Returns an array containing only elements found in {@code first} and also in {@code
+   * second}. The returned elements are in the same order as in {@code first}.
+   */
+  private String[] intersect(Comparator<? super String> comparator, String[] first, String[] second) {
+    List<String> result = new ArrayList<>();
+    for (String a : first) {
+      for (String b : second) {
+        if (comparator.compare(a, b) == 0) {
+          result.add(a);
+          break;
+        }
+      }
+    }
+    return result.toArray(new String[0]);
   }
 
   /**

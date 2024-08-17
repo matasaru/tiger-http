@@ -21,10 +21,8 @@ import java.net.IDN;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.ThreadFactory;
@@ -131,24 +129,6 @@ public final class Util {
       result.setDaemon(daemon);
       return result;
     };
-  }
-
-  /**
-   * Returns an array containing only elements found in {@code first} and also in {@code
-   * second}. The returned elements are in the same order as in {@code first}.
-   */
-  public static String[] intersect(
-      Comparator<? super String> comparator, String[] first, String[] second) {
-    List<String> result = new ArrayList<>();
-    for (String a : first) {
-      for (String b : second) {
-        if (comparator.compare(a, b) == 0) {
-          result.add(a);
-          break;
-        }
-      }
-    }
-    return result.toArray(new String[result.size()]);
   }
 
   /**
