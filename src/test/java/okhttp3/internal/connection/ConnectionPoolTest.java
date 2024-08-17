@@ -208,7 +208,7 @@ public final class ConnectionPoolTest {
   }
 
   private Address newAddress(String name) {
-    return new Address(name, 1, Dns.SYSTEM, SocketFactory.getDefault(), null, null, null,
+    return new Address(name, 1, Dns.SYSTEM, SocketFactory.getDefault(), null, null,
         new RecordingOkAuthenticator("password", null), null, Collections.emptyList(),
         Collections.emptyList(), ProxySelector.getDefault());
   }

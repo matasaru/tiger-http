@@ -281,45 +281,6 @@ public final class ConnectionCoalescingTest {
     }
   }
 
-  /** Can still coalesce when pinning is used if pins match. */
-  @Test public void coalescesWhenCertificatePinsMatch() throws Exception {
-    CertificatePinner pinner = new CertificatePinner.Builder()
-        .add("san.com", "sha1/" + CertificatePinner.sha1(certificate.certificate()).base64())
-        .build();
-    client = client.newBuilder().certificatePinner(pinner).build();
-
-    server.enqueue(new MockResponse().setResponseCode(200));
-    server.enqueue(new MockResponse().setResponseCode(200));
-
-    assert200Http2Response(execute(url), server.getHostName());
-
-    Url sanUrl = url.newBuilder().host("san.com").build();
-
-    assert200Http2Response(execute(sanUrl), "san.com");
-
-    assertThat(client.connectionPool().connectionCount()).isEqualTo(1);
-  }
-
-  /** Certificate pinning used and not a match will avoid coalescing and try to connect. */
-  @Test public void skipsWhenCertificatePinningFails() throws Exception {
-    CertificatePinner pinner = new CertificatePinner.Builder()
-        .add("san.com", "sha1/afwiKY3RxoMmLkuRW1l7QsPZTJPwDS2pdDROQjXw8ig=")
-        .build();
-    client = client.newBuilder().certificatePinner(pinner).build();
-
-    server.enqueue(new MockResponse().setResponseCode(200));
-
-    assert200Http2Response(execute(url), server.getHostName());
-
-    Url sanUrl = url.newBuilder().host("san.com").build();
-
-    try {
-      execute(sanUrl);
-      fail("expected a failed attempt to connect");
-    } catch (IOException expected) {
-    }
-  }
-
   /**
    * Skips coalescing when hostname verifier is overridden since the intention of the hostname
    * verification is a black box.

@@ -46,7 +46,6 @@ import linktiger.http.Url;
 import byebye.Util;
 import okhttp3.Address;
 import okhttp3.Call;
-import okhttp3.CertificatePinner;
 import okhttp3.Connection;
 import okhttp3.ConnectionSpec;
 import okhttp3.EventListener;
@@ -343,7 +342,6 @@ public final class RealConnection extends Http2Connection.Listener implements Co
           X509Certificate cert = (X509Certificate) peerCertificates.get(0);
           throw new SSLPeerUnverifiedException(
               "Hostname " + address.url().host() + " not verified:"
-                  + "\n    certificate: " + CertificatePinner.pin(cert)
                   + "\n    DN: " + cert.getSubjectDN().getName()
                   + "\n    subjectAltNames: " + OkHostnameVerifier.allSubjectAltNames(cert));
         } else {
@@ -351,10 +349,6 @@ public final class RealConnection extends Http2Connection.Listener implements Co
               "Hostname " + address.url().host() + " not verified (no certificates)");
         }
       }
-
-      // Check that the certificate pinner is satisfied by the certificates presented.
-      address.certificatePinner().check(address.url().host(),
-          unverifiedHandshake.peerCertificates());
 
       // Success! Save the handshake and the ALPN protocol.
       socket = sslSocket;
@@ -492,13 +486,6 @@ public final class RealConnection extends Http2Connection.Listener implements Co
     // 3. This connection's server certificate's must cover the new host.
     if (address.hostnameVerifier() != OkHostnameVerifier.INSTANCE) return false;
     if (!supportsUrl(address.url())) return false;
-
-    // 4. Certificate pinning must match the host.
-    try {
-      address.certificatePinner().check(address.url().host(), handshake().peerCertificates());
-    } catch (SSLPeerUnverifiedException e) {
-      return false;
-    }
 
     return true; // The caller's address can be carried by this connection.
   }

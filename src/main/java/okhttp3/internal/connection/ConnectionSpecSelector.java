@@ -115,7 +115,6 @@ final class ConnectionSpecSelector {
       }
     }
     if (e instanceof SSLPeerUnverifiedException) {
-      // e.g. a certificate pinning error.
       return false;
     }
 

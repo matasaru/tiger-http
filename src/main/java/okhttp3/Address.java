@@ -32,8 +32,7 @@ import byebye.Util;
  * A specification for a connection to an origin server. For simple connections, this is the
  * server's hostname and port. If an explicit proxy is requested (or {@linkplain Proxy#NO_PROXY no
  * proxy} is explicitly requested), this also includes that proxy information. For secure
- * connections the address also includes the SSL socket factory, hostname verifier, and certificate
- * pinner.
+ * connections the address also includes the SSL socket factory and hostname verifier.
  *
  * <p>HTTP requests that share the same {@code Address} may also share the same {@link Connection}.
  */
@@ -48,11 +47,10 @@ public final class Address {
   final Proxy proxy;
   final SSLSocketFactory sslSocketFactory;
   final HostnameVerifier hostnameVerifier;
-  final CertificatePinner certificatePinner;
 
   public Address(String uriHost, int uriPort, Dns dns, SocketFactory socketFactory,
       SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier,
-      CertificatePinner certificatePinner, Authenticator proxyAuthenticator,
+      Authenticator proxyAuthenticator,
       Proxy proxy, List<Protocol> protocols, List<ConnectionSpec> connectionSpecs,
       ProxySelector proxySelector) {
     this.url = new Url.Builder()
@@ -84,7 +82,6 @@ public final class Address {
     this.proxy = proxy;
     this.sslSocketFactory = sslSocketFactory;
     this.hostnameVerifier = hostnameVerifier;
-    this.certificatePinner = certificatePinner;
   }
 
   /**
@@ -148,11 +145,6 @@ public final class Address {
     return hostnameVerifier;
   }
 
-  /** Returns this address's certificate pinner, or null if this is not an HTTPS address. */
-  public CertificatePinner certificatePinner() {
-    return certificatePinner;
-  }
-
   @Override public boolean equals(Object other) {
     return other instanceof Address
         && url.equals(((Address) other).url)
@@ -170,7 +162,6 @@ public final class Address {
     result = 31 * result + Objects.hashCode(proxy);
     result = 31 * result + Objects.hashCode(sslSocketFactory);
     result = 31 * result + Objects.hashCode(hostnameVerifier);
-    result = 31 * result + Objects.hashCode(certificatePinner);
     return result;
   }
 
@@ -183,7 +174,6 @@ public final class Address {
         && Objects.equals(this.proxy, that.proxy)
         && Objects.equals(this.sslSocketFactory, that.sslSocketFactory)
         && Objects.equals(this.hostnameVerifier, that.hostnameVerifier)
-        && Objects.equals(this.certificatePinner, that.certificatePinner)
         && this.url().port() == that.url().port();
   }
 

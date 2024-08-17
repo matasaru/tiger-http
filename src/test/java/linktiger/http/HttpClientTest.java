@@ -24,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLSocketFactory;
 
 import okhttp3.Interceptor;
-import okhttp3.TestUtil;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.After;
@@ -135,12 +134,6 @@ public final class HttpClientTest {
       fail();
     } catch (IllegalArgumentException expected) {
     }
-  }
-
-  @Test public void certificatePinnerEquality() {
-    HttpClient clientA = TestUtil.defaultClient();
-    HttpClient clientB = TestUtil.defaultClient();
-    assertThat(clientB.certificatePinner()).isEqualTo(clientA.certificatePinner());
   }
 
   @Test public void nullInterceptor() {

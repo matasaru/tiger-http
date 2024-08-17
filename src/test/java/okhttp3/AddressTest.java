@@ -36,31 +36,31 @@ public final class AddressTest {
   private RecordingProxySelector proxySelector = new RecordingProxySelector();
 
   @Test public void equalsAndHashcode() throws Exception {
-    Address a = new Address("square.com", 80, dns, socketFactory, null, null, null,
+    Address a = new Address("square.com", 80, dns, socketFactory, null, null,
         authenticator, null, protocols, connectionSpecs, proxySelector);
-    Address b = new Address("square.com", 80, dns, socketFactory, null, null, null,
+    Address b = new Address("square.com", 80, dns, socketFactory, null, null,
         authenticator, null, protocols, connectionSpecs, proxySelector);
     assertThat(b).isEqualTo(a);
     assertThat(b.hashCode()).isEqualTo(a.hashCode());
   }
 
   @Test public void differentProxySelectorsAreDifferent() throws Exception {
-    Address a = new Address("square.com", 80, dns, socketFactory, null, null, null,
+    Address a = new Address("square.com", 80, dns, socketFactory, null, null,
         authenticator, null, protocols, connectionSpecs, new RecordingProxySelector());
-    Address b = new Address("square.com", 80, dns, socketFactory, null, null, null,
+    Address b = new Address("square.com", 80, dns, socketFactory, null, null,
         authenticator, null, protocols, connectionSpecs, new RecordingProxySelector());
     assertThat(b).isNotEqualTo(a);
   }
 
   @Test public void addressToString() throws Exception {
-    Address address = new Address("square.com", 80, dns, socketFactory, null, null, null,
+    Address address = new Address("square.com", 80, dns, socketFactory, null, null,
         authenticator, null, protocols, connectionSpecs, proxySelector);
     assertThat(address.toString()).isEqualTo(
         "Address{square.com:80, proxySelector=RecordingProxySelector}");
   }
 
   @Test public void addressWithProxyToString() throws Exception {
-    Address address = new Address("square.com", 80, dns, socketFactory, null, null, null,
+    Address address = new Address("square.com", 80, dns, socketFactory, null, null,
         authenticator, Proxy.NO_PROXY, protocols, connectionSpecs, proxySelector);
     assertThat(address.toString()).isEqualTo(
         "Address{square.com:80, proxy=" + Proxy.NO_PROXY + "}");

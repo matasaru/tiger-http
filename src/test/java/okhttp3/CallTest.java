@@ -1376,53 +1376,6 @@ public final class CallTest {
     response.body().close();
   }
 
-  @Test public void matchingPinnedCertificate() throws Exception {
-    // TODO https://github.com/square/okhttp/issues/4703
-
-    enableTls();
-    server.enqueue(new MockResponse());
-    server.enqueue(new MockResponse());
-
-    // Make a first request without certificate pinning. Use it to collect certificates to pin.
-    Request request1 = new Request.Builder().url(server.url("/").toString()).build();
-    Response response1 = client.newCall(request1).execute();
-    CertificatePinner.Builder certificatePinnerBuilder = new CertificatePinner.Builder();
-    for (Certificate certificate : response1.handshake().peerCertificates()) {
-      certificatePinnerBuilder.add(server.getHostName(), CertificatePinner.pin(certificate));
-    }
-    response1.body().close();
-
-    // Make another request with certificate pinning. It should complete normally.
-    client = client.newBuilder()
-        .certificatePinner(certificatePinnerBuilder.build())
-        .build();
-    Request request2 = new Request.Builder().url(server.url("/").toString()).build();
-    Response response2 = client.newCall(request2).execute();
-    assertThat(response1.handshake()).isNotSameAs(response2.handshake());
-    response2.body().close();
-  }
-
-  @Test public void unmatchingPinnedCertificate() throws Exception {
-    enableTls();
-    server.enqueue(new MockResponse());
-
-    // Pin publicobject.com's cert.
-    client = client.newBuilder()
-        .certificatePinner(new CertificatePinner.Builder()
-            .add(server.getHostName(), "sha1/DmxUShsZuNiqPQsX2Oi9uv2sCnw=")
-            .build())
-        .build();
-
-    // When we pin the wrong certificate, connectivity fails.
-    Request request = new Request.Builder().url(server.url("/").toString()).build();
-    try {
-      client.newCall(request).execute();
-      fail();
-    } catch (SSLPeerUnverifiedException expected) {
-      assertThat(expected.getMessage().startsWith("Certificate pinning failure!")).isTrue();
-    }
-  }
-
   @Test public void post_Async() throws Exception {
     server.enqueue(new MockResponse().setBody("abc"));
 

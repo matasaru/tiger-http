@@ -30,7 +30,6 @@ import linktiger.http.Url;
 
 import okhttp3.Address;
 import okhttp3.Call;
-import okhttp3.CertificatePinner;
 import okhttp3.Connection;
 import okhttp3.EventListener;
 import okhttp3.Interceptor;
@@ -146,15 +145,13 @@ public final class Transmitter {
   private Address createAddress(Url url) {
     SSLSocketFactory sslSocketFactory = null;
     HostnameVerifier hostnameVerifier = null;
-    CertificatePinner certificatePinner = null;
     if (url.isHttps()) {
       sslSocketFactory = client.sslSocketFactory();
       hostnameVerifier = client.hostnameVerifier();
-      certificatePinner = client.certificatePinner();
     }
 
     return new Address(url.host(), url.port(), client.dns(), client.socketFactory(),
-        sslSocketFactory, hostnameVerifier, certificatePinner, client.proxyAuthenticator(),
+        sslSocketFactory, hostnameVerifier, client.proxyAuthenticator(),
         client.proxy(), client.protocols(), client.connectionSpecs(), client.proxySelector());
   }
 

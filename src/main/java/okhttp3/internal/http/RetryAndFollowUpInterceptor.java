@@ -197,7 +197,6 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
       }
     }
     if (e instanceof SSLPeerUnverifiedException) {
-      // e.g. a certificate pinning error.
       return false;
     }
 

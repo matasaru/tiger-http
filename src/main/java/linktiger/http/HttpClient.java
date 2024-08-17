@@ -41,7 +41,6 @@ import byebye.Util;
 import okhttp3.Address;
 import okhttp3.Authenticator;
 import okhttp3.Call;
-import okhttp3.CertificatePinner;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
 import okhttp3.Dispatcher;
@@ -183,7 +182,6 @@ public class HttpClient {
   final SSLSocketFactory sslSocketFactory;
   final CertificateChainCleaner certificateChainCleaner;
   final HostnameVerifier hostnameVerifier;
-  final CertificatePinner certificatePinner;
   final Authenticator proxyAuthenticator;
   final Authenticator authenticator;
   final ConnectionPool connectionPool;
@@ -228,8 +226,6 @@ public class HttpClient {
     }
 
     this.hostnameVerifier = builder.hostnameVerifier;
-    this.certificatePinner = builder.certificatePinner.withCertificateChainCleaner(
-        certificateChainCleaner);
     this.proxyAuthenticator = builder.proxyAuthenticator;
     this.authenticator = builder.authenticator;
     this.connectionPool = builder.connectionPool;
@@ -333,10 +329,6 @@ public class HttpClient {
     return hostnameVerifier;
   }
 
-  public CertificatePinner certificatePinner() {
-    return certificatePinner;
-  }
-
   public Authenticator authenticator() {
     return authenticator;
   }
@@ -420,7 +412,6 @@ public class HttpClient {
     SSLSocketFactory sslSocketFactory;
     CertificateChainCleaner certificateChainCleaner;
     HostnameVerifier hostnameVerifier;
-    CertificatePinner certificatePinner;
     Authenticator proxyAuthenticator;
     Authenticator authenticator;
     ConnectionPool connectionPool;
@@ -446,7 +437,6 @@ public class HttpClient {
       cookieJar = CookieJar.NO_COOKIES;
       socketFactory = SocketFactory.getDefault();
       hostnameVerifier = OkHostnameVerifier.INSTANCE;
-      certificatePinner = CertificatePinner.DEFAULT;
       proxyAuthenticator = Authenticator.NONE;
       authenticator = Authenticator.NONE;
       connectionPool = new ConnectionPool();
@@ -475,7 +465,6 @@ public class HttpClient {
       this.sslSocketFactory = httpClient.sslSocketFactory;
       this.certificateChainCleaner = httpClient.certificateChainCleaner;
       this.hostnameVerifier = httpClient.hostnameVerifier;
-      this.certificatePinner = httpClient.certificatePinner;
       this.proxyAuthenticator = httpClient.proxyAuthenticator;
       this.authenticator = httpClient.authenticator;
       this.connectionPool = httpClient.connectionPool;
@@ -748,17 +737,6 @@ public class HttpClient {
     public Builder hostnameVerifier(HostnameVerifier hostnameVerifier) {
       if (hostnameVerifier == null) throw new NullPointerException("hostnameVerifier == null");
       this.hostnameVerifier = hostnameVerifier;
-      return this;
-    }
-
-    /**
-     * Sets the certificate pinner that constrains which certificates are trusted. By default HTTPS
-     * connections rely on only the {@link #sslSocketFactory SSL socket factory} to establish trust.
-     * Pinning certificates avoids the need to trust certificate authorities.
-     */
-    public Builder certificatePinner(CertificatePinner certificatePinner) {
-      if (certificatePinner == null) throw new NullPointerException("certificatePinner == null");
-      this.certificatePinner = certificatePinner;
       return this;
     }
 
