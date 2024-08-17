@@ -27,7 +27,6 @@ import linktiger.http.Protocol;
 import linktiger.http.Request;
 import linktiger.http.Response;
 
-import byebye.Util;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.internal.Internal;
@@ -62,7 +61,7 @@ public final class Http2ExchangeCodec implements ExchangeCodec {
   private static final String UPGRADE = "upgrade";
 
   /** See http://tools.ietf.org/html/draft-ietf-httpbis-http2-09#section-8.1.3. */
-  private static final List<String> HTTP_2_SKIPPED_REQUEST_HEADERS = Util.immutableList(
+  private static final List<String> HTTP_2_SKIPPED_REQUEST_HEADERS = List.of(
       CONNECTION,
       HOST,
       KEEP_ALIVE,
@@ -75,7 +74,7 @@ public final class Http2ExchangeCodec implements ExchangeCodec {
       TARGET_PATH_UTF8,
       TARGET_SCHEME_UTF8,
       TARGET_AUTHORITY_UTF8);
-  private static final List<String> HTTP_2_SKIPPED_RESPONSE_HEADERS = Util.immutableList(
+  private static final List<String> HTTP_2_SKIPPED_RESPONSE_HEADERS = List.of(
       CONNECTION,
       HOST,
       KEEP_ALIVE,

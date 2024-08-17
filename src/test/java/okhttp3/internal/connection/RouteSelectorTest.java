@@ -33,7 +33,6 @@ import javax.net.ssl.SSLSocketFactory;
 
 import linktiger.http.Protocol;
 
-import byebye.Util;
 import okhttp3.Address;
 import okhttp3.Authenticator;
 import okhttp3.ConnectionSpec;
@@ -51,7 +50,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 public final class RouteSelectorTest {
-  public final List<ConnectionSpec> connectionSpecs = Util.immutableList(
+  public final List<ConnectionSpec> connectionSpecs = List.of(
       ConnectionSpec.MODERN_TLS,
       ConnectionSpec.COMPATIBLE_TLS,
       ConnectionSpec.CLEARTEXT);

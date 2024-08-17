@@ -25,8 +25,6 @@ import java.util.List;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
 
-import byebye.Util;
-
 /**
  * A record of a TLS handshake. For HTTPS clients, the client is <i>local</i> and the remote server
  * is its <i>peer</i>.
@@ -68,12 +66,12 @@ public final class Handshake {
       peerCertificates = null;
     }
     List<Certificate> peerCertificatesList = peerCertificates != null
-        ? Util.immutableList(peerCertificates)
+        ? List.of(peerCertificates)
         : Collections.emptyList();
 
     Certificate[] localCertificates = session.getLocalCertificates();
     List<Certificate> localCertificatesList = localCertificates != null
-        ? Util.immutableList(localCertificates)
+        ? List.of(localCertificates)
         : Collections.emptyList();
 
     return new Handshake(tlsVersion, cipherSuite, peerCertificatesList, localCertificatesList);
@@ -83,8 +81,8 @@ public final class Handshake {
       List<Certificate> peerCertificates, List<Certificate> localCertificates) {
     if (tlsVersion == null) throw new NullPointerException("tlsVersion == null");
     if (cipherSuite == null) throw new NullPointerException("cipherSuite == null");
-    return new Handshake(tlsVersion, cipherSuite, Util.immutableList(peerCertificates),
-        Util.immutableList(localCertificates));
+    return new Handshake(tlsVersion, cipherSuite, List.copyOf(peerCertificates),
+        List.copyOf(localCertificates));
   }
 
   /**

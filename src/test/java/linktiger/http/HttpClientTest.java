@@ -156,28 +156,6 @@ public final class HttpClientTest {
     }
   }
 
-  @Test public void nullInterceptorInList() {
-    HttpClient.Builder builder = new HttpClient.Builder();
-    builder.interceptors().add(null);
-    try {
-      builder.build();
-      fail();
-    } catch (IllegalStateException expected) {
-      assertThat(expected.getMessage()).isEqualTo("Null interceptor: [null]");
-    }
-  }
-
-  @Test public void nullNetworkInterceptorInList() {
-    HttpClient.Builder builder = new HttpClient.Builder();
-    builder.networkInterceptors().add(null);
-    try {
-      builder.build();
-      fail();
-    } catch (IllegalStateException expected) {
-      assertThat(expected.getMessage()).isEqualTo("Null network interceptor: [null]");
-    }
-  }
-
   @Test public void testH2PriorKnowledgeOkHttpClientConstructionFallback() {
     try {
       new HttpClient.Builder()

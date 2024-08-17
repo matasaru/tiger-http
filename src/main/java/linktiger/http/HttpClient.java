@@ -37,7 +37,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import byebye.Util;
 import okhttp3.Address;
 import okhttp3.Authenticator;
 import okhttp3.Call;
@@ -124,10 +123,10 @@ public class HttpClient {
   // TODO review the usage of this logger
   public static final Logger logger = Logger.getLogger(HttpClient.class.getName());
 
-  static final List<Protocol> DEFAULT_PROTOCOLS = Util.immutableList(
+  static final List<Protocol> DEFAULT_PROTOCOLS = List.of(
       Protocol.HTTP_2, Protocol.HTTP_1_1);
 
-  static final List<ConnectionSpec> DEFAULT_CONNECTION_SPECS = Util.immutableList(
+  static final List<ConnectionSpec> DEFAULT_CONNECTION_SPECS = List.of(
       ConnectionSpec.MODERN_TLS, ConnectionSpec.CLEARTEXT);
 
   static {
@@ -202,8 +201,8 @@ public class HttpClient {
     this.proxy = builder.proxy;
     this.protocols = builder.protocols;
     this.connectionSpecs = builder.connectionSpecs;
-    this.interceptors = Util.immutableList(builder.interceptors);
-    this.networkInterceptors = Util.immutableList(builder.networkInterceptors);
+    this.interceptors = List.copyOf(builder.interceptors);
+    this.networkInterceptors = List.copyOf(builder.networkInterceptors);
     this.eventListenerFactory = builder.eventListenerFactory;
     this.proxySelector = builder.proxySelector;
     this.cookieJar = builder.cookieJar;
@@ -234,13 +233,6 @@ public class HttpClient {
     this.readTimeout = builder.readTimeout;
     this.writeTimeout = builder.writeTimeout;
     this.pingInterval = builder.pingInterval;
-
-    if (interceptors.contains(null)) {
-      throw new IllegalStateException("Null interceptor: " + interceptors);
-    }
-    if (networkInterceptors.contains(null)) {
-      throw new IllegalStateException("Null network interceptor: " + networkInterceptors);
-    }
   }
 
   private static SSLSocketFactory newSslSocketFactory(X509TrustManager trustManager) {
@@ -875,7 +867,7 @@ public class HttpClient {
     }
 
     public Builder connectionSpecs(List<ConnectionSpec> connectionSpecs) {
-      this.connectionSpecs = Util.immutableList(connectionSpecs);
+      this.connectionSpecs = List.copyOf(connectionSpecs);
       return this;
     }
 

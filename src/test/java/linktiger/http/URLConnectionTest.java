@@ -926,7 +926,7 @@ public final class URLConnectionTest {
     client = client.newBuilder()
         .sslSocketFactory(
             handshakeCertificates.sslSocketFactory(), handshakeCertificates.trustManager())
-        .connectionSpecs(Util.immutableList(ConnectionSpec.MODERN_TLS))
+        .connectionSpecs(List.of(ConnectionSpec.MODERN_TLS))
         .hostnameVerifier(new RecordingHostnameVerifier())
         .proxy(server.toProxyAddress())
         .build();

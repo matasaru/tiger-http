@@ -29,7 +29,6 @@ import java.util.NoSuchElementException;
 
 import linktiger.http.Url;
 
-import byebye.Util;
 import okhttp3.Address;
 import okhttp3.Call;
 import okhttp3.EventListener;
@@ -116,8 +115,8 @@ final class RouteSelector {
       // Try each of the ProxySelector choices until one connection succeeds.
       List<Proxy> proxiesOrNull = address.proxySelector().select(url.uri());
       proxies = proxiesOrNull != null && !proxiesOrNull.isEmpty()
-          ? Util.immutableList(proxiesOrNull)
-          : Util.immutableList(Proxy.NO_PROXY);
+          ? List.copyOf(proxiesOrNull)
+          : List.of(Proxy.NO_PROXY);
     }
     nextProxyIndex = 0;
   }

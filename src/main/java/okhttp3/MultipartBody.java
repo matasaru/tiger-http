@@ -23,7 +23,6 @@ import java.util.UUID;
 import linktiger.http.MediaType;
 import linktiger.http.RequestBody;
 
-import byebye.Util;
 import okio.Buffer;
 import okio.BufferedSink;
 import okio.ByteString;
@@ -78,7 +77,7 @@ public final class MultipartBody extends RequestBody {
     this.boundary = boundary;
     this.originalType = type;
     this.contentType = MediaType.get(type + "; boundary=" + boundary.utf8());
-    this.parts = Util.immutableList(parts);
+    this.parts = List.copyOf(parts);
   }
 
   public MediaType type() {

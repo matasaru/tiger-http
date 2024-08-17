@@ -16,18 +16,19 @@
 
 package okhttp3.internal.http;
 
+import java.util.List;
+
 import linktiger.http.HttpClient;
 import linktiger.http.Protocol;
 import linktiger.http.Request;
 import linktiger.http.Response;
 
-import byebye.Util;
 import okhttp3.Call;
 
 public final class ExternalHttp2Example {
   public static void main(String[] args) throws Exception {
     HttpClient client = new HttpClient.Builder()
-        .protocols(Util.immutableList(Protocol.HTTP_2, Protocol.HTTP_1_1))
+        .protocols(List.of(Protocol.HTTP_2, Protocol.HTTP_1_1))
         .build();
 
     Call call = client.newCall(new Request.Builder()

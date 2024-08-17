@@ -128,22 +128,11 @@ public final class Util {
     }
   }
 
-  /** Returns an immutable copy of {@code list}. */
-  public static <T> List<T> immutableList(List<T> list) {
-    return Collections.unmodifiableList(new ArrayList<>(list));
-  }
-
   /** Returns an immutable copy of {@code map}. */
   public static <K, V> Map<K, V> immutableMap(Map<K, V> map) {
     return map.isEmpty()
         ? Collections.emptyMap()
         : Collections.unmodifiableMap(new LinkedHashMap<>(map));
-  }
-
-  /** Returns an immutable list containing {@code elements}. */
-  @SafeVarargs
-  public static <T> List<T> immutableList(T... elements) {
-    return Collections.unmodifiableList(Arrays.asList(elements.clone()));
   }
 
   public static ThreadFactory threadFactory(String name, boolean daemon) {

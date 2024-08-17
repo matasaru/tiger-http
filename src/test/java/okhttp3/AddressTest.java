@@ -31,8 +31,8 @@ public final class AddressTest {
   private Dns dns = Dns.SYSTEM;
   private SocketFactory socketFactory = SocketFactory.getDefault();
   private Authenticator authenticator = Authenticator.NONE;
-  private List<Protocol> protocols = Util.immutableList(Protocol.HTTP_1_1);
-  private List<ConnectionSpec> connectionSpecs = Util.immutableList(ConnectionSpec.MODERN_TLS);
+  private List<Protocol> protocols = List.of(Protocol.HTTP_1_1);
+  private List<ConnectionSpec> connectionSpecs = List.of(ConnectionSpec.MODERN_TLS);
   private RecordingProxySelector proxySelector = new RecordingProxySelector();
 
   @Test public void equalsAndHashcode() throws Exception {

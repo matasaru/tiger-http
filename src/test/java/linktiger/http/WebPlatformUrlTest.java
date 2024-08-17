@@ -49,8 +49,8 @@ public final class WebPlatformUrlTest {
   public WebPlatformUrlTestData testData;
 
   private static final List<String> HTTP_URL_SCHEMES
-      = Util.immutableList("http", "https");
-  private static final List<String> KNOWN_FAILURES = Util.immutableList(
+      = List.of("http", "https");
+  private static final List<String> KNOWN_FAILURES = List.of(
       "Parsing: <http://example\t.\norg> against <http://example.org/foo/bar>",
       "Parsing: <http://f:0/c> against <http://example.org/foo/bar>",
       "Parsing: <http://f:00000000000000/c> against <http://example.org/foo/bar>",

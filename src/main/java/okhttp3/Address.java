@@ -26,8 +26,6 @@ import javax.net.ssl.SSLSocketFactory;
 import linktiger.http.Protocol;
 import linktiger.http.Url;
 
-import byebye.Util;
-
 /**
  * A specification for a connection to an origin server. For simple connections, this is the
  * server's hostname and port. If an explicit proxy is requested (or {@linkplain Proxy#NO_PROXY no
@@ -71,10 +69,10 @@ public final class Address {
     this.proxyAuthenticator = proxyAuthenticator;
 
     if (protocols == null) throw new NullPointerException("protocols == null");
-    this.protocols = Util.immutableList(protocols);
+    this.protocols = List.copyOf(protocols);
 
     if (connectionSpecs == null) throw new NullPointerException("connectionSpecs == null");
-    this.connectionSpecs = Util.immutableList(connectionSpecs);
+    this.connectionSpecs = List.copyOf(connectionSpecs);
 
     if (proxySelector == null) throw new NullPointerException("proxySelector == null");
     this.proxySelector = proxySelector;
