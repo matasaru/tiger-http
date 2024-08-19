@@ -3786,7 +3786,7 @@ public final class URLConnectionTest {
     private String certificatesToString(X509Certificate[] certificates) {
       List<String> result = new ArrayList<>();
       for (X509Certificate certificate : certificates) {
-        result.add(certificate.getSubjectDN() + " " + certificate.getSerialNumber());
+        result.add(certificate.getSubjectX500Principal() + " " + certificate.getSerialNumber());
       }
       return result.toString();
     }

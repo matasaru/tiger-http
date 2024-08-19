@@ -157,7 +157,7 @@ public final class Handshake {
 
     for (Certificate cert : certificates) {
       if (cert instanceof X509Certificate) {
-        strings.add(String.valueOf(((X509Certificate) cert).getSubjectDN()));
+        strings.add(String.valueOf(((X509Certificate) cert).getSubjectX500Principal()));
       } else {
         strings.add(cert.getType());
       }

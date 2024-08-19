@@ -356,7 +356,7 @@ public final class RealConnection extends Http2Connection.Listener implements Co
           X509Certificate cert = (X509Certificate) peerCertificates.get(0);
           throw new SSLPeerUnverifiedException(
               "Hostname " + address.url().host() + " not verified:"
-                  + "\n    DN: " + cert.getSubjectDN().getName()
+                  + "\n    DN: " + cert.getSubjectX500Principal().getName()
                   + "\n    subjectAltNames: " + OkHostnameVerifier.allSubjectAltNames(cert));
         } else {
           throw new SSLPeerUnverifiedException(
