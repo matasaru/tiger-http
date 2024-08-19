@@ -22,4 +22,7 @@ import java.io.IOException;
  * frame) and an attempt is made to use the connection.
  */
 public final class ConnectionShutdownException extends IOException {
+
+    @java.io.Serial
+    private static final long serialVersionUID = -630277053815103849L;
 }
