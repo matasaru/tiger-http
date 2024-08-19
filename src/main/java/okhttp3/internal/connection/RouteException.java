@@ -22,6 +22,10 @@ import java.io.IOException;
  * have been made with alternative protocols, none of which were successful.
  */
 public final class RouteException extends RuntimeException {
+
+  @java.io.Serial
+  private static final long serialVersionUID = -4992097577545669141L;
+
   private IOException firstException;
   private IOException lastException;
 
