@@ -19,6 +19,10 @@ import java.io.IOException;
 
 /** Thrown when an HTTP/2 stream is canceled without damage to the socket that carries it. */
 public final class StreamResetException extends IOException {
+
+  @java.io.Serial
+  private static final long serialVersionUID = 6239252078381610946L;
+
   public final ErrorCode errorCode;
 
   public StreamResetException(ErrorCode errorCode) {
