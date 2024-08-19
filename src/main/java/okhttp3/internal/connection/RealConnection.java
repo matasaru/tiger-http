@@ -326,22 +326,20 @@ public final class RealConnection extends Http2Connection.Listener implements Co
 
       // Configure the socket's ciphers, TLS versions, and extensions.
       ConnectionSpec connectionSpec = connectionSpecSelector.configureSecureSocket(sslSocket);
-      if (connectionSpec.supportsTlsExtensions()) {
-        List<Protocol> protocols = address.protocols();
-        String[] names = new String[protocols.size()];
-        for (int i = 0; i < protocols.size(); i++) {
-          Protocol protocol = protocols.get(i);
-          if (protocol != Protocol.HTTP_1_0) {
-            // No HTTP/1.0 for ALPN.
-            names[i] = protocol.toString();
-          }
+      List<Protocol> protocols = address.protocols();
+      String[] names = new String[protocols.size()];
+      for (int i = 0; i < protocols.size(); i++) {
+        Protocol protocol = protocols.get(i);
+        if (protocol != Protocol.HTTP_1_0) {
+          // No HTTP/1.0 for ALPN.
+          names[i] = protocol.toString();
         }
+      }
 
         SSLParameters sslParameters = sslSocket.getSSLParameters();
         sslParameters.setApplicationProtocols(names);
 
         sslSocket.setSSLParameters(sslParameters);
-      }
 
       // Force handshake. This can throw!
       sslSocket.startHandshake();
@@ -370,13 +368,11 @@ public final class RealConnection extends Http2Connection.Listener implements Co
       sink = Okio.buffer(Okio.sink(socket));
       handshake = unverifiedHandshake;
       protocol = Protocol.HTTP_1_1;
-      if (connectionSpec.supportsTlsExtensions()) {
-        String maybeProtocol = sslSocket.getApplicationProtocol();
-        // SSLSocket.getApplicationProtocol returns "" if application protocols values will not be used.
-        // Observed if you didn't specify SSLParameters.setApplicationProtocols.
-        if (maybeProtocol != null && !maybeProtocol.isEmpty()) {
-          protocol = Protocol.get(maybeProtocol);
-        }
+      String maybeProtocol = sslSocket.getApplicationProtocol();
+      // SSLSocket.getApplicationProtocol returns "" if application protocols values will not be used.
+      // Observed if you didn't specify SSLParameters.setApplicationProtocols.
+      if (maybeProtocol != null && !maybeProtocol.isEmpty()) {
+        protocol = Protocol.get(maybeProtocol);
       }
 
       success = true;

@@ -58,27 +58,22 @@ public final class ConnectionSpecTest {
     ConnectionSpec tlsSpec = new ConnectionSpec.Builder(true)
         .cipherSuites(CipherSuite.TLS_RSA_WITH_RC4_128_MD5)
         .tlsVersions(TlsVersion.TLS_1_2)
-        .supportsTlsExtensions(true)
         .build();
     assertThat(tlsSpec.cipherSuites()).containsExactly(CipherSuite.TLS_RSA_WITH_RC4_128_MD5);
     assertThat(tlsSpec.tlsVersions()).containsExactly(TlsVersion.TLS_1_2);
-    assertThat(tlsSpec.supportsTlsExtensions()).isTrue();
   }
 
   @Test public void tlsBuilder_defaultCiphers() throws Exception {
     ConnectionSpec tlsSpec = new ConnectionSpec.Builder(true)
         .tlsVersions(TlsVersion.TLS_1_2)
-        .supportsTlsExtensions(true)
         .build();
     assertThat(tlsSpec.cipherSuites()).isNull();
     assertThat(tlsSpec.tlsVersions()).containsExactly(TlsVersion.TLS_1_2);
-    assertThat(tlsSpec.supportsTlsExtensions()).isTrue();
   }
 
   @Test public void tls_defaultCiphers_noFallbackIndicator() throws Exception {
     ConnectionSpec tlsSpec = new ConnectionSpec.Builder(true)
         .tlsVersions(TlsVersion.TLS_1_2)
-        .supportsTlsExtensions(false)
         .build();
 
     SSLSocket socket = (SSLSocket) SSLSocketFactory.getDefault().createSocket();
@@ -106,7 +101,6 @@ public final class ConnectionSpecTest {
   @Test public void tls_defaultCiphers_withFallbackIndicator() throws Exception {
     ConnectionSpec tlsSpec = new ConnectionSpec.Builder(true)
         .tlsVersions(TlsVersion.TLS_1_2)
-        .supportsTlsExtensions(false)
         .build();
 
     SSLSocket socket = (SSLSocket) SSLSocketFactory.getDefault().createSocket();
@@ -138,7 +132,6 @@ public final class ConnectionSpecTest {
     ConnectionSpec tlsSpec = new ConnectionSpec.Builder(true)
         .cipherSuites(CipherSuite.TLS_RSA_WITH_RC4_128_MD5)
         .tlsVersions(TlsVersion.TLS_1_2)
-        .supportsTlsExtensions(false)
         .build();
 
     SSLSocket socket = (SSLSocket) SSLSocketFactory.getDefault().createSocket();
@@ -176,7 +169,6 @@ public final class ConnectionSpecTest {
     ConnectionSpec tlsSpec = new ConnectionSpec.Builder(true)
         .cipherSuites(CipherSuite.TLS_RSA_WITH_RC4_128_MD5)
         .tlsVersions(TlsVersion.TLS_1_2)
-        .supportsTlsExtensions(false)
         .build();
 
     SSLSocket socket = (SSLSocket) SSLSocketFactory.getDefault().createSocket();
@@ -236,7 +228,6 @@ public final class ConnectionSpecTest {
     ConnectionSpec tlsSpec = new ConnectionSpec.Builder(true)
         .cipherSuites(CipherSuite.TLS_RSA_WITH_RC4_128_MD5)
         .tlsVersions(TlsVersion.TLS_1_2)
-        .supportsTlsExtensions(false)
         .build();
 
     SSLSocket socket = (SSLSocket) SSLSocketFactory.getDefault().createSocket();
@@ -281,8 +272,7 @@ public final class ConnectionSpecTest {
         .allEnabledCipherSuites()
         .build();
     assertThat(connectionSpec.toString()).isEqualTo(
-        ("ConnectionSpec(cipherSuites=[all enabled], tlsVersions=[all enabled], "
-        + "supportsTlsExtensions=true)"));
+        ("ConnectionSpec(cipherSuites=[all enabled], tlsVersions=[all enabled]"));
   }
 
   @Test public void simpleToString() throws Exception {
@@ -291,8 +281,7 @@ public final class ConnectionSpecTest {
         .cipherSuites(CipherSuite.TLS_RSA_WITH_RC4_128_MD5)
         .build();
     assertThat(connectionSpec.toString()).isEqualTo(
-        ("ConnectionSpec(cipherSuites=[SSL_RSA_WITH_RC4_128_MD5], tlsVersions=[TLS_1_2], "
-        + "supportsTlsExtensions=true)"));
+        ("ConnectionSpec(cipherSuites=[SSL_RSA_WITH_RC4_128_MD5], tlsVersions=[TLS_1_2]"));
   }
 
   @SafeVarargs

@@ -91,7 +91,6 @@ public final class ConnectionSpec {
   public static final ConnectionSpec RESTRICTED_TLS = new Builder(true)
       .cipherSuites(RESTRICTED_CIPHER_SUITES)
       .tlsVersions(TlsVersion.TLS_1_3, TlsVersion.TLS_1_2)
-      .supportsTlsExtensions(true)
       .build();
 
   /**
@@ -101,7 +100,6 @@ public final class ConnectionSpec {
   public static final ConnectionSpec MODERN_TLS = new Builder(true)
       .cipherSuites(APPROVED_CIPHER_SUITES)
       .tlsVersions(TlsVersion.TLS_1_3, TlsVersion.TLS_1_2)
-      .supportsTlsExtensions(true)
       .build();
 
   /**
@@ -112,14 +110,12 @@ public final class ConnectionSpec {
   public static final ConnectionSpec COMPATIBLE_TLS = new Builder(true)
       .cipherSuites(APPROVED_CIPHER_SUITES)
       .tlsVersions(TlsVersion.TLS_1_3, TlsVersion.TLS_1_2, TlsVersion.TLS_1_1, TlsVersion.TLS_1_0)
-      .supportsTlsExtensions(true)
       .build();
 
   /** Unencrypted, unauthenticated connections for {@code http:} URLs. */
   public static final ConnectionSpec CLEARTEXT = new Builder(false).build();
 
   final boolean tls;
-  final boolean supportsTlsExtensions;
   final String[] cipherSuites;
   final String[] tlsVersions;
 
@@ -127,7 +123,6 @@ public final class ConnectionSpec {
     this.tls = builder.tls;
     this.cipherSuites = builder.cipherSuites;
     this.tlsVersions = builder.tlsVersions;
-    this.supportsTlsExtensions = builder.supportsTlsExtensions;
   }
 
   public boolean isTls() {
@@ -148,10 +143,6 @@ public final class ConnectionSpec {
    */
   public List<TlsVersion> tlsVersions() {
     return tlsVersions != null ? TlsVersion.forJavaNames(tlsVersions) : null;
-  }
-
-  public boolean supportsTlsExtensions() {
-    return supportsTlsExtensions;
   }
 
   /** Applies this spec to {@code sslSocket}. */
@@ -277,7 +268,6 @@ public final class ConnectionSpec {
     if (tls) {
       if (!Arrays.equals(this.cipherSuites, that.cipherSuites)) return false;
       if (!Arrays.equals(this.tlsVersions, that.tlsVersions)) return false;
-      if (this.supportsTlsExtensions != that.supportsTlsExtensions) return false;
     }
 
     return true;
@@ -288,7 +278,6 @@ public final class ConnectionSpec {
     if (tls) {
       result = 31 * result + Arrays.hashCode(cipherSuites);
       result = 31 * result + Arrays.hashCode(tlsVersions);
-      result = 31 * result + (supportsTlsExtensions ? 0 : 1);
     }
     return result;
   }
@@ -300,16 +289,13 @@ public final class ConnectionSpec {
 
     return "ConnectionSpec("
         + "cipherSuites=" + Objects.toString(cipherSuites(), "[all enabled]")
-        + ", tlsVersions=" + Objects.toString(tlsVersions(), "[all enabled]")
-        + ", supportsTlsExtensions=" + supportsTlsExtensions
-        + ")";
+        + ", tlsVersions=" + Objects.toString(tlsVersions(), "[all enabled]");
   }
 
   public static final class Builder {
     boolean tls;
     String[] cipherSuites;
     String[] tlsVersions;
-    boolean supportsTlsExtensions;
 
     Builder(boolean tls) {
       this.tls = tls;
@@ -319,7 +305,6 @@ public final class ConnectionSpec {
       this.tls = connectionSpec.tls;
       this.cipherSuites = connectionSpec.cipherSuites;
       this.tlsVersions = connectionSpec.tlsVersions;
-      this.supportsTlsExtensions = connectionSpec.supportsTlsExtensions;
     }
 
     public Builder allEnabledCipherSuites() {
@@ -374,17 +359,6 @@ public final class ConnectionSpec {
       }
 
       this.tlsVersions = tlsVersions.clone(); // Defensive copy.
-      return this;
-    }
-
-    /**
-     * @deprecated since OkHttp 3.13 all TLS-connections are expected to support TLS extensions.
-     *     In a future release setting this to true will be unnecessary and setting it to false will
-     *     have no effect.
-     */
-    public Builder supportsTlsExtensions(boolean supportsTlsExtensions) {
-      if (!tls) throw new IllegalStateException("no TLS extensions for cleartext connections");
-      this.supportsTlsExtensions = supportsTlsExtensions;
       return this;
     }
 
