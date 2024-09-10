@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package okhttp3;
+package okhttp3.internal.http;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import linktiger.http.Request;
 import linktiger.http.Response;
+
+import okhttp3.Call;
+import okhttp3.Connection;
 
 /**
  * Observes, modifies, and potentially short-circuits requests going out and the corresponding

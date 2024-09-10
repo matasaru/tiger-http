@@ -33,7 +33,6 @@ import linktiger.http.Protocol;
 import linktiger.http.Request;
 import linktiger.http.RequestBody;
 import linktiger.http.Response;
-import linktiger.http.ResponseBody;
 
 import okhttp3.RecordingEventListener.CallEnd;
 import okhttp3.RecordingEventListener.CallFailed;
@@ -53,7 +52,6 @@ import okhttp3.RecordingEventListener.SecureConnectStart;
 import okhttp3.internal.DoubleInetAddressDns;
 import okhttp3.internal.Internal;
 import okhttp3.internal.RecordingOkAuthenticator;
-import okhttp3.logging.HttpLoggingInterceptor;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.SocketPolicy;
@@ -1074,28 +1072,6 @@ public final class EventListenerTest {
         equalTo(19L));
   }
 
-  @Test public void successfulCallEventSequenceWithListener() throws IOException {
-    server.enqueue(new MockResponse().setBody("abc"));
-
-    client = client.newBuilder()
-        .addNetworkInterceptor(new HttpLoggingInterceptor()
-            .setLevel(HttpLoggingInterceptor.Level.BODY))
-        .build();
-    Call call = client.newCall(new Request.Builder()
-        .url(server.url("/").toString())
-        .build());
-    Response response = call.execute();
-    Assertions.assertThat(response.code()).isEqualTo(200);
-    Assertions.assertThat(response.body().string()).isEqualTo("abc");
-    response.body().close();
-
-    List<String> expectedEvents = Arrays.asList("CallStart", "DnsStart", "DnsEnd",
-        "ConnectStart", "ConnectEnd", "ConnectionAcquired", "RequestHeadersStart",
-        "RequestHeadersEnd", "ResponseHeadersStart", "ResponseHeadersEnd", "ResponseBodyStart",
-        "ResponseBodyEnd", "ConnectionReleased", "CallEnd");
-    Assertions.assertThat(listener.recordedEventTypes()).isEqualTo(expectedEvents);
-  }
-
   private void requestBodySuccess(RequestBody body, Matcher<Long> requestBodyBytes,
       Matcher<Long> responseHeaderLength) throws IOException {
     server.enqueue(new MockResponse().setResponseCode(200).setBody("World!"));
@@ -1158,54 +1134,6 @@ public final class EventListenerTest {
         "ConnectionAcquired", "RequestHeadersStart", "RequestHeadersEnd", "ResponseHeadersStart",
         "ResponseHeadersEnd", "ResponseBodyStart", "ResponseBodyEnd", "ConnectionReleased",
         "CallEnd");
-    Assertions.assertThat(listener.recordedEventTypes()).isEqualTo(expectedEvents);
-  }
-
-  @Test public void applicationInterceptorProceedsMultipleTimes() throws Exception {
-    server.enqueue(new MockResponse().setBody("a"));
-    server.enqueue(new MockResponse().setBody("b"));
-
-    client = client.newBuilder()
-        .addInterceptor(chain -> {
-          try (Response a = chain.proceed(chain.request())) {
-            Assertions.assertThat(a.body().string()).isEqualTo("a");
-          }
-          return chain.proceed(chain.request());
-        })
-        .build();
-
-    Call call = client.newCall(new Request.Builder().url(server.url("/").toString()).build());
-    Response response = call.execute();
-    Assertions.assertThat(response.body().string()).isEqualTo("b");
-
-    List<String> expectedEvents = Arrays.asList("CallStart", "DnsStart", "DnsEnd",
-        "ConnectStart", "ConnectEnd", "ConnectionAcquired", "RequestHeadersStart",
-        "RequestHeadersEnd", "ResponseHeadersStart", "ResponseHeadersEnd", "ResponseBodyStart",
-        "ResponseBodyEnd", "RequestHeadersStart", "RequestHeadersEnd", "ResponseHeadersStart",
-        "ResponseHeadersEnd", "ResponseBodyStart", "ResponseBodyEnd", "ConnectionReleased",
-        "CallEnd");
-    Assertions.assertThat(listener.recordedEventTypes()).isEqualTo(expectedEvents);
-
-    Assertions.assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
-    Assertions.assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(1);
-  }
-
-  @Test public void applicationInterceptorShortCircuit() throws Exception {
-    client = client.newBuilder()
-        .addInterceptor(chain -> new Response.Builder()
-            .request(chain.request())
-            .protocol(Protocol.HTTP_1_1)
-            .code(200)
-            .message("OK")
-            .body(ResponseBody.create(null, "a"))
-            .build())
-        .build();
-
-    Call call = client.newCall(new Request.Builder().url(server.url("/").toString()).build());
-    Response response = call.execute();
-    Assertions.assertThat(response.body().string()).isEqualTo("a");
-
-    List<String> expectedEvents = Arrays.asList("CallStart", "CallEnd");
     Assertions.assertThat(listener.recordedEventTypes()).isEqualTo(expectedEvents);
   }
 

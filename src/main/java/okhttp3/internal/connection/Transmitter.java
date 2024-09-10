@@ -32,7 +32,7 @@ import okhttp3.Address;
 import okhttp3.Call;
 import okhttp3.Connection;
 import okhttp3.EventListener;
-import okhttp3.Interceptor;
+import okhttp3.internal.http.Interceptor;
 import okhttp3.internal.Internal;
 import okhttp3.internal.http.ExchangeCodec;
 import okio.AsyncTimeout;

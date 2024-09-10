@@ -28,7 +28,7 @@ import linktiger.http.Request;
 import linktiger.http.Response;
 
 import okhttp3.Headers;
-import okhttp3.Interceptor;
+import okhttp3.internal.http.Interceptor;
 import okhttp3.internal.Internal;
 import okhttp3.internal.connection.RealConnection;
 import okhttp3.internal.http.ExchangeCodec;

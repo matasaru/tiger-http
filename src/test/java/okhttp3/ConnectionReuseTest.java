@@ -15,7 +15,6 @@
  */
 package okhttp3;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -28,7 +27,6 @@ import linktiger.http.Protocol;
 import linktiger.http.Request;
 import linktiger.http.RequestBody;
 import linktiger.http.Response;
-import linktiger.http.ResponseBody;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -298,57 +296,6 @@ public final class ConnectionReuseTest {
 
     assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
     assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
-  }
-
-  /**
-   * Regression test for an edge case where closing response body in the HTTP engine doesn't release
-   * the corresponding stream allocation. This test keeps those response bodies alive and reads
-   * them after the redirect has completed. This forces a connection to not be reused where it would
-   * be otherwise.
-   *
-   * <p>This test leaks a response body by not closing it.
-   *
-   * https://github.com/square/okhttp/issues/2409
-   */
-  @Test public void connectionsAreNotReusedIfNetworkInterceptorInterferes() throws Exception {
-    List<Response> responsesNotClosed = new ArrayList<>();
-
-    client = client.newBuilder()
-        // Since this test knowingly leaks a connection, avoid using the default shared connection
-        // pool, which should remain clean for subsequent tests.
-        .connectionPool(new ConnectionPool())
-        .addNetworkInterceptor(chain -> {
-          Response response = chain.proceed(chain.request());
-          responsesNotClosed.add(response);
-          return response
-              .newBuilder()
-              .body(ResponseBody.create(null, "unrelated response body!"))
-              .build();
-        })
-        .build();
-
-    server.enqueue(new MockResponse()
-        .setResponseCode(301)
-        .addHeader("Location: /b")
-        .setBody("/a has moved!"));
-    server.enqueue(new MockResponse()
-        .setBody("/b is here"));
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .build();
-    Call call = client.newCall(request);
-    try (Response response = call.execute()) {
-      assertThat(response.body().string()).isEqualTo("unrelated response body!");
-    }
-
-    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
-    // No connection reuse.
-    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
-
-    for (Response response : responsesNotClosed) {
-      response.close();
-    }
   }
 
   private void enableHttps() {

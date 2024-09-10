@@ -22,7 +22,7 @@ import linktiger.http.Request;
 import linktiger.http.Response;
 
 import linktiger.http.HttpClient;
-import okhttp3.Interceptor;
+import okhttp3.internal.http.Interceptor;
 import okhttp3.internal.http.RealInterceptorChain;
 
 /** Opens a connection to the target server and proceeds to the next interceptor. */

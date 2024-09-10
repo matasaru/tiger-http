@@ -43,14 +43,12 @@ import byebye.Util;
 import okhttp3.Call;
 import okhttp3.Credentials;
 import okhttp3.Headers;
-import okhttp3.Interceptor;
 import okhttp3.RecordingCookieJar;
 import okhttp3.RecordingHostnameVerifier;
 import okhttp3.TestLogHandler;
 import okhttp3.TestUtil;
 import okhttp3.internal.DoubleInetAddressDns;
 import okhttp3.internal.RecordingOkAuthenticator;
-import okhttp3.internal.connection.RealConnection;
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -1141,50 +1139,6 @@ public final class HttpOverHttp2Test {
   }
 
   /**
-   * This simulates a race condition where we receive a healthy HTTP/2 connection and just prior to
-   * writing our request, we get a GOAWAY frame from the server.
-   */
-  @Test public void connectionShutdownAfterHealthCheck() throws Exception {
-    server.enqueue(new MockResponse()
-        .setSocketPolicy(SocketPolicy.DISCONNECT_AT_END)
-        .setBody("ABC"));
-    server.enqueue(new MockResponse()
-        .setBody("DEF"));
-
-    HttpClient client2 = client.newBuilder()
-        .addNetworkInterceptor(new Interceptor() {
-          boolean executedCall;
-
-          @Override public Response intercept(Chain chain) throws IOException {
-            if (!executedCall) {
-              // At this point, we have a healthy HTTP/2 connection. This call will trigger the
-              // server to send a GOAWAY frame, leaving the connection in a shutdown state.
-              executedCall = true;
-              Call call = client.newCall(new Request.Builder()
-                  .url(server.url("/").toString())
-                  .build());
-              Response response = call.execute();
-              Assertions.assertThat(response.body().string()).isEqualTo("ABC");
-              // Wait until the GOAWAY has been processed.
-              RealConnection connection = (RealConnection) chain.connection();
-              while (connection.isHealthy(false)) ;
-            }
-            return chain.proceed(chain.request());
-          }
-        })
-        .build();
-
-    Call call = client2.newCall(new Request.Builder()
-        .url(server.url("/").toString())
-        .build());
-    Response response = call.execute();
-    Assertions.assertThat(response.body().string()).isEqualTo("DEF");
-
-    Assertions.assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
-    Assertions.assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
-  }
-
-  /**
    * We don't know if the connection will support HTTP/2 until after we've connected. When multiple
    * connections are requested concurrently OkHttp will pessimistically connect multiple times, then
    * close any unnecessary connections. This test confirms that behavior works as intended.
@@ -1270,33 +1224,6 @@ public final class HttpOverHttp2Test {
     Assertions.assertThat(call1Get.getSequenceNumber()).isEqualTo(1);
 
     Assertions.assertThat(client.connectionPool().connectionCount()).isEqualTo(1);
-  }
-
-  /** https://github.com/square/okhttp/issues/3103 */
-  @Test public void domainFronting() throws Exception {
-    client = client.newBuilder()
-        .addNetworkInterceptor(new Interceptor() {
-          @Override public Response intercept(Chain chain) throws IOException {
-            Request request = chain.request().newBuilder()
-                .header("Host", "privateobject.com")
-                .build();
-            return chain.proceed(request);
-          }
-        })
-        .build();
-
-    server.enqueue(new MockResponse());
-
-    Call call = client.newCall(new Request.Builder()
-        .url(server.url("/").toString())
-        .build());
-
-    Response response = call.execute();
-    Assertions.assertThat(response.body().string()).isEqualTo("");
-
-    RecordedRequest recordedRequest = server.takeRequest();
-    Assertions.assertThat(recordedRequest.getHeader(":authority")).isEqualTo(
-        "privateobject.com");
   }
 
   private Buffer gzip(String bytes) throws IOException {

@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLSocketFactory;
 
-import okhttp3.Interceptor;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.After;
@@ -96,17 +95,6 @@ public final class HttpClientTest {
     }
   }
 
-  @Test public void clonedInterceptorsListsAreIndependent() throws Exception {
-    Interceptor interceptor = chain -> chain.proceed(chain.request());
-    HttpClient original = defaultClient();
-    original.newBuilder()
-        .addInterceptor(interceptor)
-        .addNetworkInterceptor(interceptor)
-        .build();
-    assertThat(original.interceptors().size()).isEqualTo(0);
-    assertThat(original.networkInterceptors().size()).isEqualTo(0);
-  }
-
   /**
    * When copying the client, stateful things like the connection pool are shared across all
    * clients.
@@ -131,26 +119,6 @@ public final class HttpClientTest {
       builder.protocols(Arrays.asList(Protocol.HTTP_1_0, Protocol.HTTP_1_1));
       fail();
     } catch (IllegalArgumentException expected) {
-    }
-  }
-
-  @Test public void nullInterceptor() {
-    HttpClient.Builder builder = new HttpClient.Builder();
-    try {
-      builder.addInterceptor(null);
-      fail();
-    } catch (IllegalArgumentException expected) {
-      assertThat(expected.getMessage()).isEqualTo("interceptor == null");
-    }
-  }
-
-  @Test public void nullNetworkInterceptor() {
-    HttpClient.Builder builder = new HttpClient.Builder();
-    try {
-      builder.addNetworkInterceptor(null);
-      fail();
-    } catch (IllegalArgumentException expected) {
-      assertThat(expected.getMessage()).isEqualTo("interceptor == null");
     }
   }
 

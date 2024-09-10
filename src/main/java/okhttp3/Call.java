@@ -28,6 +28,7 @@ import okhttp3.internal.connection.ConnectInterceptor;
 import okhttp3.internal.connection.Transmitter;
 import okhttp3.internal.http.BridgeInterceptor;
 import okhttp3.internal.http.CallServerInterceptor;
+import okhttp3.internal.http.Interceptor;
 import okhttp3.internal.http.RealInterceptorChain;
 import okhttp3.internal.http.RetryAndFollowUpInterceptor;
 import okio.Timeout;
@@ -165,11 +166,9 @@ public class Call implements Cloneable {
   Response getResponseWithInterceptorChain() throws IOException {
     // Build a full stack of interceptors.
     List<Interceptor> interceptors = new ArrayList<>();
-    interceptors.addAll(client.interceptors());
     interceptors.add(new RetryAndFollowUpInterceptor(client));
     interceptors.add(new BridgeInterceptor(client.cookieJar()));
     interceptors.add(new ConnectInterceptor(client));
-    interceptors.addAll(client.networkInterceptors());
     interceptors.add(new CallServerInterceptor());
 
     Interceptor.Chain chain = new RealInterceptorChain(interceptors, transmitter, null, 0,

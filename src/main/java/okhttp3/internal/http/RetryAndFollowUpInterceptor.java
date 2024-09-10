@@ -31,7 +31,6 @@ import linktiger.http.RequestBody;
 import linktiger.http.Response;
 import linktiger.http.Url;
 
-import okhttp3.Interceptor;
 import okhttp3.Route;
 import okhttp3.internal.Internal;
 import okhttp3.internal.connection.Exchange;

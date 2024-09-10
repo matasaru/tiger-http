@@ -47,7 +47,6 @@ import okhttp3.ConnectionSpec;
 import okhttp3.Dns;
 import okhttp3.EventListener;
 import okhttp3.Headers;
-import okhttp3.Interceptor;
 import okhttp3.internal.Internal;
 import okhttp3.internal.connection.Exchange;
 import okhttp3.internal.connection.RealConnectionPool;
@@ -173,8 +172,6 @@ public class HttpClient {
   final Proxy proxy;
   final List<Protocol> protocols;
   final List<ConnectionSpec> connectionSpecs;
-  final List<Interceptor> interceptors;
-  final List<Interceptor> networkInterceptors;
   final EventListener.Factory eventListenerFactory;
   final ProxySelector proxySelector;
   final CookieJar cookieJar;
@@ -202,8 +199,6 @@ public class HttpClient {
     this.proxy = builder.proxy;
     this.protocols = builder.protocols;
     this.connectionSpecs = builder.connectionSpecs;
-    this.interceptors = List.copyOf(builder.interceptors);
-    this.networkInterceptors = List.copyOf(builder.networkInterceptors);
     this.eventListenerFactory = builder.eventListenerFactory;
     this.proxySelector = builder.proxySelector;
     this.cookieJar = builder.cookieJar;
@@ -350,24 +345,6 @@ public class HttpClient {
     return connectionSpecs;
   }
 
-  /**
-   * Returns an immutable list of interceptors that observe the full span of each call: from before
-   * the connection is established (if any) until after the response source is selected (the origin
-   * server).//TODO debug and clarify the last part with the source selection and shit
-   */
-  public List<Interceptor> interceptors() {
-    return interceptors;
-  }
-
-  /**
-   * Returns an immutable list of interceptors that observe a single network request and response.
-   * These interceptors must call {@link Interceptor.Chain#proceed} exactly once: it is an error for
-   * a network interceptor to short-circuit or repeat a network request.
-   */
-  public List<Interceptor> networkInterceptors() {
-    return networkInterceptors;
-  }
-
   public EventListener.Factory eventListenerFactory() {
     return eventListenerFactory;
   }
@@ -387,8 +364,6 @@ public class HttpClient {
     Proxy proxy;
     List<Protocol> protocols;
     List<ConnectionSpec> connectionSpecs;
-    final List<Interceptor> interceptors = new ArrayList<>();
-    final List<Interceptor> networkInterceptors = new ArrayList<>();
     EventListener.Factory eventListenerFactory;
     ProxySelector proxySelector;
     CookieJar cookieJar;
@@ -437,8 +412,6 @@ public class HttpClient {
       this.proxy = httpClient.proxy;
       this.protocols = httpClient.protocols;
       this.connectionSpecs = httpClient.connectionSpecs;
-      this.interceptors.addAll(httpClient.interceptors);
-      this.networkInterceptors.addAll(httpClient.networkInterceptors);
       this.eventListenerFactory = httpClient.eventListenerFactory;
       this.proxySelector = httpClient.proxySelector;
       this.cookieJar = httpClient.cookieJar;
@@ -853,36 +826,6 @@ public class HttpClient {
 
     public Builder connectionSpecs(List<ConnectionSpec> connectionSpecs) {
       this.connectionSpecs = List.copyOf(connectionSpecs);
-      return this;
-    }
-
-    /**
-     * Returns a modifiable list of interceptors that observe the full span of each call: from
-     * before the connection is established (if any) until after the response source is selected
-     * (the origin server). // TODO same as above
-     */
-    public List<Interceptor> interceptors() {
-      return interceptors;
-    }
-
-    public Builder addInterceptor(Interceptor interceptor) {
-      if (interceptor == null) throw new IllegalArgumentException("interceptor == null");
-      interceptors.add(interceptor);
-      return this;
-    }
-
-    /**
-     * Returns a modifiable list of interceptors that observe a single network request and response.
-     * These interceptors must call {@link Interceptor.Chain#proceed} exactly once: it is an error
-     * for a network interceptor to short-circuit or repeat a network request.
-     */
-    public List<Interceptor> networkInterceptors() {
-      return networkInterceptors;
-    }
-
-    public Builder addNetworkInterceptor(Interceptor interceptor) {
-      if (interceptor == null) throw new IllegalArgumentException("interceptor == null");
-      networkInterceptors.add(interceptor);
       return this;
     }
 

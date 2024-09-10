@@ -35,9 +35,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
@@ -56,7 +54,6 @@ import linktiger.http.Protocol;
 import linktiger.http.Request;
 import linktiger.http.RequestBody;
 import linktiger.http.Response;
-import linktiger.http.ResponseBody;
 import linktiger.http.Url;
 
 import byebye.Util;
@@ -79,7 +76,6 @@ import okhttp3.tls.HeldCertificate;
 import okio.Buffer;
 import okio.BufferedSink;
 import okio.BufferedSource;
-import okio.ForwardingSource;
 import okio.GzipSink;
 import okio.Okio;
 import org.junit.After;
@@ -762,61 +758,6 @@ public final class CallTest {
     executeSynchronously(request)
         .assertCode(200)
         .assertBody("success!");
-  }
-
-  /** https://github.com/square/okhttp/issues/4875 */
-  @Test public void interceptorRecoversWhenRoutesExhausted() throws Exception {
-    server.enqueue(new MockResponse()
-        .setSocketPolicy(SocketPolicy.DISCONNECT_AT_START));
-    server.enqueue(new MockResponse());
-
-    client = client.newBuilder()
-        .addInterceptor(new Interceptor() {
-          @Override public Response intercept(Chain chain) throws IOException {
-            try {
-              chain.proceed(chain.request());
-              throw new AssertionError();
-            } catch (IOException expected) {
-              return chain.proceed(chain.request());
-            }
-          }
-        })
-        .build();
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .build();
-    executeSynchronously(request)
-        .assertCode(200);
-  }
-
-  /** https://github.com/square/okhttp/issues/4761 */
-  @Test public void interceptorCallsProceedWithoutClosingPriorResponse() throws Exception {
-    server.enqueue(new MockResponse()
-        .setBody("abc"));
-    server.enqueue(new MockResponse());
-
-    client = client.newBuilder()
-        .addInterceptor(new Interceptor() {
-          @Override public Response intercept(Chain chain) throws IOException {
-            Response response = chain.proceed(chain.request());
-            try {
-              chain.proceed(chain.request());
-              fail();
-            } catch (IllegalStateException expected) {
-              assertThat(expected).hasMessageContaining("please call response.close()");
-            }
-            return response;
-          }
-        })
-        .build();
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .build();
-    executeSynchronously(request)
-        .assertCode(200)
-        .assertBody("abc");
   }
 
   /**
@@ -1767,25 +1708,6 @@ public final class CallTest {
     cancelInFlightBeforeResponseReadThrowsIOE();
   }
 
-  @Test public void cancelWithInterceptor() throws Exception {
-    client = client.newBuilder()
-        .addInterceptor(chain -> {
-          chain.proceed(chain.request());
-          throw new AssertionError(); // We expect an exception.
-        })
-        .build();
-
-    Call call = client.newCall(new Request.Builder().url(server.url("/a").toString()).build());
-    call.cancel();
-
-    try {
-      call.execute();
-      fail();
-    } catch (IOException expected) {
-    }
-    assertThat(server.getRequestCount()).isEqualTo(0);
-  }
-
   @Test public void gzip() throws Exception {
     Buffer gzippedBody = gzip("abcabcabc");
     String bodySize = Long.toString(gzippedBody.size());
@@ -2432,25 +2354,6 @@ public final class CallTest {
     assertThat(challengeSchemes).isEqualTo(Arrays.asList("OkHttp-Preemptive", "Basic"));
   }
 
-  @Test public void interceptorGetsHttp2() throws Exception {
-    enableProtocol();
-
-    // Capture the protocol as it is observed by the interceptor.
-    final AtomicReference<Protocol> protocolRef = new AtomicReference<>();
-    Interceptor interceptor = chain -> {
-      protocolRef.set(chain.connection().protocol());
-      return chain.proceed(chain.request());
-    };
-    client = client.newBuilder()
-        .addNetworkInterceptor(interceptor)
-        .build();
-
-    // Make an HTTP/2 request and confirm that the protocol matches.
-    server.enqueue(new MockResponse());
-    executeSynchronously("/");
-    assertThat(protocolRef.get()).isEqualTo(Protocol.HTTP_2);
-  }
-
   @Test public void serverSendsInvalidResponseHeaders() throws Exception {
     server.enqueue(new MockResponse()
         .setStatus("HTP/1.1 200 OK"));
@@ -2871,35 +2774,6 @@ public final class CallTest {
   @Test public void requestBodyThrowsUnrelatedToNetwork_HTTP2() throws Exception {
     enableProtocol();
     requestBodyThrowsUnrelatedToNetwork();
-  }
-
-  /** https://github.com/square/okhttp/issues/4583 */
-  @Test public void lateCancelCallsOnFailure() throws Exception {
-    server.enqueue(new MockResponse()
-        .setBody("abc"));
-
-    AtomicBoolean closed = new AtomicBoolean();
-
-    client = client.newBuilder()
-        .addInterceptor(new Interceptor() {
-          @Override public Response intercept(Chain chain) throws IOException {
-            Response response = chain.proceed(chain.request());
-            chain.call().cancel(); // Cancel after we have the response.
-            ForwardingSource closeTrackingSource = new ForwardingSource(response.body().source()) {
-              @Override public void close() throws IOException {
-                closed.set(true);
-                super.close();
-              }
-            };
-            return response.newBuilder()
-                .body(ResponseBody.create(null, -1L, Okio.buffer(closeTrackingSource)))
-                .build();
-          }
-        })
-        .build();
-
-    executeSynchronously("/").assertFailure("Canceled");
-    assertThat(closed.get()).isTrue();
   }
 
   private void makeFailingCall() {

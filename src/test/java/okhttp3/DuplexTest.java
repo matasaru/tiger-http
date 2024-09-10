@@ -451,42 +451,6 @@ public final class DuplexTest {
     mockDuplexResponseBody.awaitSuccess();
   }
 
-  @Test public void duplexWithRewriteInterceptors() throws Exception {
-    enableProtocol();
-    MockDuplexResponseBody mockDuplexResponseBody = enqueueResponseWithBody(
-        new MockResponse()
-            .clearHeaders(),
-        new MockDuplexResponseBody()
-            .receiveRequest("REQUEST A\n")
-            .sendResponse("response B\n")
-            .exhaustRequest()
-            .exhaustResponse());
-
-    client = client.newBuilder()
-        .addInterceptor(new UppercaseRequestInterceptor())
-        .addInterceptor(new UppercaseResponseInterceptor())
-        .build();
-
-    Call call = client.newCall(new Request.Builder()
-        .url(server.url("/").toString())
-        .post(new AsyncRequestBody())
-        .build());
-
-    try (Response response = call.execute()) {
-      BufferedSink requestBody = ((AsyncRequestBody) call.request().body()).takeSink();
-      requestBody.writeUtf8("request A\n");
-      requestBody.flush();
-
-      BufferedSource responseBody = response.body().source();
-      assertThat(responseBody.readUtf8Line()).isEqualTo("RESPONSE B");
-
-      requestBody.close();
-      assertThat(responseBody.readUtf8Line()).isNull();
-    }
-
-    mockDuplexResponseBody.awaitSuccess();
-  }
-
   private MockDuplexResponseBody enqueueResponseWithBody(
       MockResponse response, MockDuplexResponseBody body) {
     MwsDuplexAccess.instance.setBody(response, body);
