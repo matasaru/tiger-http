@@ -21,9 +21,11 @@ import java.net.Socket;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.time.Duration;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -42,7 +44,6 @@ import okhttp3.Authenticator;
 import okhttp3.Call;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
-import okhttp3.Dispatcher;
 import okhttp3.Dns;
 import okhttp3.EventListener;
 import okhttp3.Headers;
@@ -167,7 +168,8 @@ public class HttpClient {
     };
   }
 
-  final Dispatcher dispatcher;
+  private final Deque<Call> runningCalls = new ArrayDeque<>();
+
   final Proxy proxy;
   final List<Protocol> protocols;
   final List<ConnectionSpec> connectionSpecs;
@@ -197,7 +199,6 @@ public class HttpClient {
   }
 
   HttpClient(Builder builder) {
-    this.dispatcher = builder.dispatcher;
     this.proxy = builder.proxy;
     this.protocols = builder.protocols;
     this.connectionSpecs = builder.connectionSpecs;
@@ -341,10 +342,6 @@ public class HttpClient {
     return retryOnConnectionFailure;
   }
 
-  public Dispatcher dispatcher() {
-    return dispatcher;
-  }
-
   public List<Protocol> protocols() {
     return protocols;
   }
@@ -387,7 +384,6 @@ public class HttpClient {
   }
 
   public static final class Builder {
-    Dispatcher dispatcher;
     Proxy proxy;
     List<Protocol> protocols;
     List<ConnectionSpec> connectionSpecs;
@@ -413,7 +409,6 @@ public class HttpClient {
     int pingInterval;
 
     public Builder() {
-      dispatcher = new Dispatcher();
       protocols = DEFAULT_PROTOCOLS;
       connectionSpecs = DEFAULT_CONNECTION_SPECS;
       eventListenerFactory = EventListener.factory(EventListener.NONE);
@@ -439,7 +434,6 @@ public class HttpClient {
     }
 
     Builder(HttpClient httpClient) {
-      this.dispatcher = httpClient.dispatcher;
       this.proxy = httpClient.proxy;
       this.protocols = httpClient.protocols;
       this.connectionSpecs = httpClient.connectionSpecs;
@@ -801,15 +795,6 @@ public class HttpClient {
     }
 
     /**
-     * Sets the dispatcher used to set policy and execute asynchronous requests. Must not be null.
-     */
-    public Builder dispatcher(Dispatcher dispatcher) {
-      if (dispatcher == null) throw new IllegalArgumentException("dispatcher == null");
-      this.dispatcher = dispatcher;
-      return this;
-    }
-
-    /**
      * Configure the protocols used by this client to communicate with remote servers. By default
      * this client will prefer the most efficient transport available, falling back to more
      * ubiquitous protocols. Applications should only call this method to avoid specific
@@ -929,6 +914,27 @@ public class HttpClient {
 
     public HttpClient build() {
       return new HttpClient(this);
+    }
+  }
+
+  /**
+   * Cancel all calls currently executing.
+   */
+  public synchronized void cancelAll() {
+    for (Call call : runningCalls) {
+      call.cancel();
+    }
+  }
+
+  /** Used by {@code Call#execute} to signal it is in-flight. */
+  public synchronized void executed(Call call) {
+    runningCalls.add(call);
+  }
+
+  /** Used by {@code Call#execute} to signal completion. */
+  public void finished(Call call) {
+    synchronized (this) {
+      if (!runningCalls.remove(call)) throw new AssertionError("Call wasn't in-flight!");
     }
   }
 }

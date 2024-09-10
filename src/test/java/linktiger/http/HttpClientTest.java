@@ -116,13 +116,11 @@ public final class HttpClientTest {
 
     // Values should be non-null.
     HttpClient a = client.newBuilder().build();
-    assertThat(a.dispatcher()).isNotNull();
     assertThat(a.connectionPool()).isNotNull();
     assertThat(a.sslSocketFactory()).isNotNull();
 
     // Multiple clients share the instances.
     HttpClient b = client.newBuilder().build();
-    assertThat(b.dispatcher()).isSameAs(a.dispatcher());
     assertThat(b.connectionPool()).isSameAs(a.connectionPool());
     assertThat(b.sslSocketFactory()).isSameAs(a.sslSocketFactory());
   }

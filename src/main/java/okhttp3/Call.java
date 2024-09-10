@@ -16,20 +16,14 @@
 package okhttp3;
 
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 
 import linktiger.http.HttpClient;
 import linktiger.http.Request;
 import linktiger.http.Response;
 import linktiger.http.ResponseBody;
 
-import okhttp3.internal.NamedRunnable;
 import okhttp3.internal.connection.ConnectInterceptor;
 import okhttp3.internal.connection.Transmitter;
 import okhttp3.internal.http.BridgeInterceptor;
@@ -111,31 +105,11 @@ public class Call implements Cloneable {
     transmitter.timeoutEnter();
     transmitter.callStart();
     try {
-      client.dispatcher().executed(this);
+      client.executed(this);
       return getResponseWithInterceptorChain();
     } finally {
-      client.dispatcher().finished(this);
+      client.finished(this);
     }
-  }
-
-  /**
-   * Schedules the request to be executed at some point in the future.
-   *
-   * <p>The {@link HttpClient#dispatcher dispatcher} defines when the request will run: usually
-   * immediately unless there are several other requests currently being executed.
-   *
-   * <p>This client will later call back {@code responseCallback} with either an HTTP response or a
-   * failure exception.
-   *
-   * @throws IllegalStateException when the call has already been executed.
-   */
-  public void enqueue(Callback responseCallback) {
-    synchronized (this) {
-      if (executed) throw new IllegalStateException("Already Executed");
-      executed = true;
-    }
-    transmitter.callStart();
-    client.dispatcher().enqueue(new AsyncCall(responseCallback));
   }
 
   /** Cancels the request, if possible. Requests that are already complete cannot be canceled. */
@@ -144,8 +118,8 @@ public class Call implements Cloneable {
   }
 
   /**
-   * Returns true if this call has been either {@linkplain #execute() executed} or {@linkplain
-   * #enqueue(Callback) enqueued}. It is an error to execute a call more than once.
+   * Returns true if this call has been {@linkplain #execute() executed}.
+   * It is an error to execute a call more than once.
    */
   public synchronized boolean isExecuted() {
     return executed;
@@ -173,85 +147,6 @@ public class Call implements Cloneable {
   @SuppressWarnings("CloneDoesntCallSuperClone") // We are a final type & this saves clearing state.
   @Override public Call clone() {
     return Call.newCall(client, originalRequest);
-  }
-
-  final class AsyncCall extends NamedRunnable {
-    private final Callback responseCallback;
-    private volatile AtomicInteger callsPerHost = new AtomicInteger(0);
-
-    AsyncCall(Callback responseCallback) {
-      super("OkHttp %s", redactedUrl());
-      this.responseCallback = responseCallback;
-    }
-
-    AtomicInteger callsPerHost() {
-      return callsPerHost;
-    }
-
-    void reuseCallsPerHostFrom(AsyncCall other) {
-      this.callsPerHost = other.callsPerHost;
-    }
-
-    String host() {
-      return originalRequest.url().host();
-    }
-
-    Request request() {
-      return originalRequest;
-    }
-
-    Call get() {
-      return Call.this;
-    }
-
-    /**
-     * Attempt to enqueue this async call on {@code executorService}. This will attempt to clean up
-     * if the executor has been shut down by reporting the call as failed.
-     */
-    void executeOn(ExecutorService executorService) {
-      assert (!Thread.holdsLock(client.dispatcher()));
-      boolean success = false;
-      try {
-        executorService.execute(this);
-        success = true;
-      } catch (RejectedExecutionException e) {
-        InterruptedIOException ioException = new InterruptedIOException("executor rejected");
-        ioException.initCause(e);
-        transmitter.noMoreExchanges(ioException);
-        responseCallback.onFailure(Call.this, ioException);
-      } finally {
-        if (!success) {
-          client.dispatcher().finished(this); // This call is no longer running!
-        }
-      }
-    }
-
-    @Override protected void execute() {
-      boolean signalledCallback = false;
-      transmitter.timeoutEnter();
-      try {
-        Response response = getResponseWithInterceptorChain();
-        signalledCallback = true;
-        responseCallback.onResponse(Call.this, response);
-      } catch (IOException e) {
-        if (signalledCallback) {
-          // Do not signal the callback twice!
-          HttpClient.logger.log(Level.INFO, "Callback failure for " + toLoggableString(), e);
-        } else {
-          responseCallback.onFailure(Call.this, e);
-        }
-      } catch (Throwable t) {
-        cancel();
-        if (!signalledCallback) {
-          IOException canceledException = new IOException("canceled due to " + t);
-          canceledException.addSuppressed(t);
-          responseCallback.onFailure(Call.this, canceledException);
-        }
-        throw t;
-      } finally {
-        client.dispatcher().finished(this);
-      }
-    }
   }
 
   /**

@@ -23,11 +23,9 @@ import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,10 +41,7 @@ import linktiger.http.Response;
 
 import byebye.Util;
 import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Connection;
 import okhttp3.Credentials;
-import okhttp3.EventListener;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.RecordingCookieJar;
@@ -757,75 +752,6 @@ public final class HttpOverHttp2Test {
     Assertions.assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
   }
 
-  @Test public void recoverFromCancelReusesConnection() throws Exception {
-    server.enqueue(new MockResponse()
-        .setBodyDelay(10, TimeUnit.SECONDS)
-        .setBody("abc"));
-    server.enqueue(new MockResponse()
-        .setBody("def"));
-
-    client = client.newBuilder()
-        .dns(new DoubleInetAddressDns())
-        .build();
-
-    callAndCancel(0);
-
-    // Make a second request to ensure the connection is reused.
-    Call call = client.newCall(new Request.Builder()
-        .url(server.url("/").toString())
-        .build());
-    Response response = call.execute();
-    Assertions.assertThat(response.body().string()).isEqualTo("def");
-    Assertions.assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(1);
-  }
-
-  @Test public void recoverFromMultipleCancelReusesConnection() throws Exception {
-    server.enqueue(new MockResponse()
-            .setBodyDelay(10, TimeUnit.SECONDS)
-            .setBody("abc"));
-    server.enqueue(new MockResponse()
-            .setBodyDelay(10, TimeUnit.SECONDS)
-            .setBody("def"));
-    server.enqueue(new MockResponse()
-            .setBody("ghi"));
-
-    client = client.newBuilder()
-            .dns(new DoubleInetAddressDns())
-            .build();
-
-    callAndCancel(0);
-    callAndCancel(1);
-
-    // Make a third request to ensure the connection is reused.
-    Call call = client.newCall(new Request.Builder()
-            .url(server.url("/").toString())
-            .build());
-    Response response = call.execute();
-    Assertions.assertThat(response.body().string()).isEqualTo("ghi");
-    Assertions.assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(2);
-  }
-
-  /** Make a call and canceling it as soon as it's accepted by the server. */
-  private void callAndCancel(int expectedSequenceNumber) throws Exception {
-    Call call = client.newCall(new Request.Builder()
-        .url(server.url("/").toString())
-        .build());
-    CountDownLatch latch = new CountDownLatch(1);
-    call.enqueue(new Callback() {
-      @Override public void onFailure(Call call1, IOException e) {
-        latch.countDown();
-      }
-
-      @Override public void onResponse(Call call1, Response response) {
-        fail();
-      }
-    });
-    Assertions.assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(
-        (long) expectedSequenceNumber);
-    call.cancel();
-    latch.await();
-  }
-
   @Test public void noRecoveryFromRefusedStreamWithRetryDisabled() throws Exception {
     noRecoveryFromErrorWithRetryDisabled(ErrorCode.REFUSED_STREAM);
   }
@@ -854,72 +780,6 @@ public final class HttpOverHttp2Test {
     } catch (StreamResetException expected) {
       Assertions.assertThat(expected.errorCode).isEqualTo(errorCode);
     }
-  }
-
-  @Test public void recoverFromConnectionNoNewStreamsOnFollowUp() throws Exception {
-    server.enqueue(new MockResponse()
-        .setResponseCode(401));
-    server.enqueue(new MockResponse()
-        .setSocketPolicy(SocketPolicy.RESET_STREAM_AT_START)
-        .setHttp2ErrorCode(ErrorCode.INTERNAL_ERROR.httpCode));
-    server.enqueue(new MockResponse()
-        .setBody("DEF"));
-    server.enqueue(new MockResponse()
-        .setResponseCode(301)
-        .addHeader("Location", "/foo"));
-    server.enqueue(new MockResponse()
-        .setBody("ABC"));
-
-    CountDownLatch latch = new CountDownLatch(1);
-    BlockingQueue<String> responses = new SynchronousQueue<>();
-    okhttp3.Authenticator authenticator = (route, response) -> {
-      responses.offer(response.body().string());
-      try {
-        latch.await();
-      } catch (InterruptedException e) {
-        throw new AssertionError();
-      }
-      return response.request();
-    };
-
-    HttpClient blockingAuthClient = client.newBuilder()
-        .authenticator(authenticator)
-        .build();
-
-    Callback callback = new Callback() {
-      @Override public void onFailure(Call call, IOException e) {
-        fail();
-      }
-
-      @Override public void onResponse(Call call, Response response) throws IOException {
-        responses.offer(response.body().string());
-      }
-    };
-
-    // Make the first request waiting until we get our auth challenge.
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .build();
-    blockingAuthClient.newCall(request).enqueue(callback);
-    String response1 = responses.take();
-    Assertions.assertThat(response1).isEqualTo("");
-    Assertions.assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
-
-    // Now make the second request which will restrict the first HTTP/2 connection from creating new
-    // streams.
-    client.newCall(request).enqueue(callback);
-    String response2 = responses.take();
-    Assertions.assertThat(response2).isEqualTo("DEF");
-    Assertions.assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(1);
-    Assertions.assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
-
-    // Let the first request proceed. It should discard the the held HTTP/2 connection and get a new
-    // one.
-    latch.countDown();
-    String response3 = responses.take();
-    Assertions.assertThat(response3).isEqualTo("ABC");
-    Assertions.assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(1);
-    Assertions.assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(2);
   }
 
   @Test public void nonAsciiResponseHeader() throws Exception {
@@ -1324,31 +1184,6 @@ public final class HttpOverHttp2Test {
     Assertions.assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
   }
 
-  @Test public void responseHeadersAfterGoaway() throws Exception {
-    server.enqueue(new MockResponse()
-        .setHeadersDelay(1, SECONDS)
-        .setBody("ABC"));
-    server.enqueue(new MockResponse()
-        .setSocketPolicy(SocketPolicy.DISCONNECT_AT_END)
-        .setBody("DEF"));
-
-    BlockingQueue<String> bodies = new SynchronousQueue<>();
-    Callback callback = new Callback() {
-      @Override public void onResponse(Call call, Response response) throws IOException {
-        bodies.add(response.body().string());
-      }
-      @Override public void onFailure(Call call, IOException e) {
-        System.out.println(e);
-      }
-    };
-    client.newCall(new Request.Builder().url(server.url("/").toString()).build()).enqueue(callback);
-    client.newCall(new Request.Builder().url(server.url("/").toString()).build()).enqueue(callback);
-
-    Assertions.assertThat(bodies.poll(2, SECONDS)).isEqualTo("DEF");
-    Assertions.assertThat(bodies.poll(2, SECONDS)).isEqualTo("ABC");
-    Assertions.assertThat(server.getRequestCount()).isEqualTo(2);
-  }
-
   /**
    * We don't know if the connection will support HTTP/2 until after we've connected. When multiple
    * connections are requested concurrently OkHttp will pessimistically connect multiple times, then
@@ -1493,40 +1328,5 @@ public final class HttpOverHttp2Test {
         throw new RuntimeException(e);
       }
     }
-  }
-
-  /** https://github.com/square/okhttp/issues/4875 */
-  @Test
-  public void shutdownAfterLateCoalescing() throws Exception {
-    CountDownLatch latch = new CountDownLatch(2);
-
-    Callback callback = new Callback() {
-      @Override public void onResponse(Call call, Response response) {
-        fail();
-      }
-
-      @Override public void onFailure(Call call, IOException e) {
-        latch.countDown();
-      }
-    };
-
-    client = client.newBuilder().eventListener(new EventListener() {
-      int callCount;
-
-      @Override public void connectionAcquired(Call call, Connection connection) {
-        try {
-          if (callCount++ == 1) {
-            server.shutdown();
-          }
-        } catch(IOException e) {
-          fail();
-        }
-      }
-    }).build();
-
-    client.newCall(new Request.Builder().url(server.url("").toString()).build()).enqueue(callback);
-    client.newCall(new Request.Builder().url(server.url("").toString()).build()).enqueue(callback);
-
-    latch.await();
   }
 }

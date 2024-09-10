@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.List;
 
 import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.Challenge;
 import okhttp3.Handshake;
 import okhttp3.Headers;
@@ -169,9 +168,8 @@ public final class Response implements Closeable {
   }
 
   /**
-   * Returns a non-null value if this response was passed to {@link Callback#onResponse} or returned
-   * from {@link Call#execute()}. Response bodies must be {@linkplain ResponseBody closed} and may
-   * be consumed only once.
+   * Returns a non-null value if this response was returned from {@link Call#execute()}.
+   * Response bodies must be {@linkplain ResponseBody closed} and may be consumed only once.
    *
    * <p>This always returns null on responses returned from {@link #networkResponse} and {@link #priorResponse()}.
    */

@@ -45,7 +45,6 @@ public final class TestUtil {
   }
 
   private static final ConnectionPool connectionPool = new ConnectionPool();
-  private static final Dispatcher dispatcher = new Dispatcher();
 
   /**
    * Returns an OkHttpClient for all tests to use as a starting point.
@@ -59,7 +58,6 @@ public final class TestUtil {
   public static HttpClient defaultClient() {
     return new HttpClient.Builder()
         .connectionPool(connectionPool)
-        .dispatcher(dispatcher)
         .dns(SINGLE_INET_ADDRESS_DNS) // Prevent unexpected fallback addresses.
         .build();
   }

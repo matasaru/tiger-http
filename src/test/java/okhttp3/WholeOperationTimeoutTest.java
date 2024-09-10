@@ -18,9 +18,7 @@ package okhttp3;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.HttpURLConnection;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 import linktiger.http.HttpClient;
 import linktiger.http.HttpClientTestRule;
@@ -87,36 +85,6 @@ public final class WholeOperationTimeoutTest {
     }
   }
 
-  @Test public void timeoutWritingRequestWithEnqueue() throws Exception {
-    server.enqueue(new MockResponse());
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .post(sleepingRequestBody(500))
-        .build();
-
-    final CountDownLatch latch = new CountDownLatch(1);
-    final AtomicReference<Throwable> exceptionRef = new AtomicReference<>();
-
-    Call call = client.newCall(request);
-    call.timeout().timeout(250, TimeUnit.MILLISECONDS);
-    call.enqueue(new Callback() {
-      @Override public void onFailure(Call call, IOException e) {
-        exceptionRef.set(e);
-        latch.countDown();
-      }
-
-      @Override public void onResponse(Call call, Response response) throws IOException {
-        response.close();
-        latch.countDown();
-      }
-    });
-
-    latch.await();
-    assertThat(call.isCanceled()).isTrue();
-    assertThat(exceptionRef.get()).isNotNull();
-  }
-
   @Test public void timeoutProcessing() throws Exception {
     server.enqueue(new MockResponse()
         .setHeadersDelay(500, TimeUnit.MILLISECONDS));
@@ -134,36 +102,6 @@ public final class WholeOperationTimeoutTest {
       assertThat(e.getMessage()).isEqualTo("timeout");
       assertThat(call.isCanceled()).isTrue();
     }
-  }
-
-  @Test public void timeoutProcessingWithEnqueue() throws Exception {
-    server.enqueue(new MockResponse()
-        .setHeadersDelay(500, TimeUnit.MILLISECONDS));
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .build();
-
-    final CountDownLatch latch = new CountDownLatch(1);
-    final AtomicReference<Throwable> exceptionRef = new AtomicReference<>();
-
-    Call call = client.newCall(request);
-    call.timeout().timeout(250, TimeUnit.MILLISECONDS);
-    call.enqueue(new Callback() {
-      @Override public void onFailure(Call call, IOException e) {
-        exceptionRef.set(e);
-        latch.countDown();
-      }
-
-      @Override public void onResponse(Call call, Response response) throws IOException {
-        response.close();
-        latch.countDown();
-      }
-    });
-
-    latch.await();
-    assertThat(call.isCanceled()).isTrue();
-    assertThat(exceptionRef.get()).isNotNull();
   }
 
   @Test public void timeoutReadingResponse() throws Exception {
@@ -185,46 +123,6 @@ public final class WholeOperationTimeoutTest {
       assertThat(e.getMessage()).isEqualTo("timeout");
       assertThat(call.isCanceled()).isTrue();
     }
-  }
-
-  @Test public void timeoutReadingResponseWithEnqueue() throws Exception {
-    server.enqueue(new MockResponse()
-        .setBody(BIG_ENOUGH_BODY));
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .build();
-
-    final CountDownLatch latch = new CountDownLatch(1);
-    final AtomicReference<Throwable> exceptionRef = new AtomicReference<>();
-
-    Call call = client.newCall(request);
-    call.timeout().timeout(250, TimeUnit.MILLISECONDS);
-    call.enqueue(new Callback() {
-      @Override public void onFailure(Call call, IOException e) {
-        latch.countDown();
-      }
-
-      @Override public void onResponse(Call call, Response response) throws IOException {
-        try {
-          Thread.sleep(500);
-        } catch (InterruptedException e) {
-          throw new AssertionError();
-        }
-        try {
-          response.body().source().readUtf8();
-          fail();
-        } catch (IOException e) {
-          exceptionRef.set(e);
-        } finally {
-          latch.countDown();
-        }
-      }
-    });
-
-    latch.await();
-    assertThat(call.isCanceled()).isTrue();
-    assertThat(exceptionRef.get()).isNotNull();
   }
 
   @Test public void singleTimeoutForAllFollowUpRequests() throws Exception {

@@ -21,10 +21,6 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -36,7 +32,6 @@ import linktiger.http.Request;
 import linktiger.http.RequestBody;
 import linktiger.http.Response;
 import linktiger.http.ResponseBody;
-import linktiger.http.Url;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -61,7 +56,6 @@ public final class InterceptorTest {
   @Rule public final HttpClientTestRule clientTestRule = new HttpClientTestRule();
 
   private HttpClient client = clientTestRule.client;
-  private RecordingCallback callback = new RecordingCallback();
 
   @Test public void applicationInterceptorsCanShortCircuitResponses() throws Exception {
     server.shutdown(); // Accept no connections.
@@ -358,34 +352,6 @@ public final class InterceptorTest {
         Arrays.asList("Android", "Bob"));
   }
 
-  @Test public void asyncApplicationInterceptors() throws Exception {
-    asyncInterceptors(false);
-  }
-
-  @Test public void asyncNetworkInterceptors() throws Exception {
-    asyncInterceptors(true);
-  }
-
-  private void asyncInterceptors(boolean network) throws Exception {
-    server.enqueue(new MockResponse());
-
-    addInterceptor(network, chain -> {
-      Response originalResponse = chain.proceed(chain.request());
-      return originalResponse.newBuilder()
-          .addHeader("OkHttp-Intercepted", "yep")
-          .build();
-    });
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .build();
-    client.newCall(request).enqueue(callback);
-
-    callback.await(request.url())
-        .assertCode(200)
-        .assertHeader("OkHttp-Intercepted", "yep");
-  }
-
   @Test public void applicationInterceptorsCanMakeMultipleRequestsToServer() throws Exception {
     server.enqueue(new MockResponse().setBody("a"));
     server.enqueue(new MockResponse().setBody("b"));
@@ -430,39 +396,6 @@ public final class InterceptorTest {
         .build();
     Response responseB = client.newCall(requestB).execute();
     assertThat(responseB.body().string()).isEqualTo("b");
-  }
-
-  /** Make sure interceptors can interact with the OkHttp client asynchronously. */
-  @Test public void interceptorMakesAnUnrelatedAsyncRequest() throws Exception {
-    server.enqueue(new MockResponse().setBody("a")); // Fetched by interceptor.
-    server.enqueue(new MockResponse().setBody("b")); // Fetched directly.
-
-    client = client.newBuilder()
-        .addInterceptor(chain -> {
-          if (chain.request().url().encodedPath().equals("/b")) {
-            Request requestA = new Request.Builder()
-                .url(server.url("/a").toString())
-                .build();
-
-            try {
-              RecordingCallback callbackA = new RecordingCallback();
-              client.newCall(requestA).enqueue(callbackA);
-              callbackA.await(requestA.url()).assertBody("a");
-            } catch (Exception e) {
-              throw new RuntimeException(e);
-            }
-          }
-
-          return chain.proceed(chain.request());
-        })
-        .build();
-
-    Request requestB = new Request.Builder()
-        .url(server.url("/b").toString())
-        .build();
-    RecordingCallback callbackB = new RecordingCallback();
-    client.newCall(requestB).enqueue(callbackB);
-    callbackB.await(requestB.url()).assertBody("b");
   }
 
   @Test public void applicationInterceptorThrowsRuntimeExceptionSynchronous() throws Exception {
@@ -519,41 +452,6 @@ public final class InterceptorTest {
         "intercepted request");
   }
 
-  @Test public void applicationInterceptorThrowsRuntimeExceptionAsynchronous() throws Exception {
-    interceptorThrowsRuntimeExceptionAsynchronous(false);
-  }
-
-  @Test public void networkInterceptorThrowsRuntimeExceptionAsynchronous() throws Exception {
-    interceptorThrowsRuntimeExceptionAsynchronous(true);
-  }
-
-  /**
-   * When an interceptor throws an unexpected exception, asynchronous calls are canceled. The
-   * exception goes to the uncaught exception handler.
-   */
-  private void interceptorThrowsRuntimeExceptionAsynchronous(boolean network) throws Exception {
-    RuntimeException boom = new RuntimeException("boom!");
-    addInterceptor(network, chain -> { throw boom; });
-
-    ExceptionCatchingExecutor executor = new ExceptionCatchingExecutor();
-    client = client.newBuilder()
-        .dispatcher(new Dispatcher(executor))
-        .build();
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .build();
-    Call call = client.newCall(request);
-    call.enqueue(callback);
-    RecordedResponse recordedResponse = callback.await(Url.get(server.url("/").toString()));
-    assertThat(recordedResponse.failure)
-        .hasMessage("canceled due to java.lang.RuntimeException: boom!");
-    assertThat(recordedResponse.failure).hasSuppressedException(boom);
-    assertThat(call.isCanceled()).isTrue();
-
-    assertThat(executor.takeException()).isEqualTo(boom);
-  }
-
   @Test public void applicationInterceptorReturnsNull() throws Exception {
     server.enqueue(new MockResponse());
 
@@ -565,10 +463,7 @@ public final class InterceptorTest {
         .addInterceptor(interceptor)
         .build();
 
-    ExceptionCatchingExecutor executor = new ExceptionCatchingExecutor();
-    client = client.newBuilder()
-        .dispatcher(new Dispatcher(executor))
-        .build();
+    client = client.newBuilder().build();
 
     Request request = new Request.Builder()
         .url(server.url("/").toString())
@@ -593,9 +488,7 @@ public final class InterceptorTest {
         .addNetworkInterceptor(interceptor)
         .build();
 
-    ExceptionCatchingExecutor executor = new ExceptionCatchingExecutor();
     client = client.newBuilder()
-        .dispatcher(new Dispatcher(executor))
         .build();
 
     Request request = new Request.Builder()
@@ -895,28 +788,5 @@ public final class InterceptorTest {
       builder.addInterceptor(interceptor);
     }
     client = builder.build();
-  }
-
-  /** Catches exceptions that are otherwise headed for the uncaught exception handler. */
-  private static class ExceptionCatchingExecutor extends ThreadPoolExecutor {
-    private final BlockingQueue<Exception> exceptions = new LinkedBlockingQueue<>();
-
-    public ExceptionCatchingExecutor() {
-      super(1, 1, 0, TimeUnit.SECONDS, new SynchronousQueue<>());
-    }
-
-    @Override public void execute(Runnable runnable) {
-      super.execute(() -> {
-        try {
-          runnable.run();
-        } catch (Exception e) {
-          exceptions.add(e);
-        }
-      });
-    }
-
-    public Exception takeException() throws Exception {
-      return exceptions.take();
-    }
   }
 }

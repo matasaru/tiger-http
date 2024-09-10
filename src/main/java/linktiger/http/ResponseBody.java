@@ -24,7 +24,6 @@ import java.nio.charset.Charset;
 
 import byebye.Util;
 import okhttp3.Call;
-import okhttp3.Callback;
 import okio.Buffer;
 import okio.BufferedSource;
 import okio.ByteString;
@@ -42,8 +41,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * and may ultimately cause the application to slow down or crash.
  *
  * <p>Both this class and {@link Response} implement {@link Closeable}. Closing a response simply
- * closes its response body. If you invoke {@link Call#execute()} or implement {@link
- * Callback#onResponse} you must close this body by calling any of the following methods:
+ * closes its response body. If you invoke {@link Call#execute()} you must close this body by calling
+ * any of the following methods:
  *
  * <ul>
  *   <li>Response.close()</li>
@@ -57,9 +56,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  *
  * <p>There is no benefit to invoking multiple {@code close()} methods for the same response body.
  *
- * <p>For synchronous calls, the easiest way to make sure a response body is closed is with a {@code
- * try} block. With this structure the compiler inserts an implicit {@code finally} clause that
- * calls {@code close()} for you.
+ * <p>The easiest way to make sure a response body is closed is with a {@code try} block.
+ * With this structure the compiler inserts an implicit {@code finally} clause that calls {@code close()} for you.
  *
  * <pre>   {@code
  *
@@ -69,23 +67,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  *   }
  * }</pre>
  *
- * You can use a similar block for asynchronous calls: <pre>   {@code
- *
- *   Call call = client.newCall(request);
- *   call.enqueue(new Callback() {
- *     public void onResponse(Call call, Response response) throws IOException {
- *       try (ResponseBody responseBody = response.body()) {
- *         ... // Use the response.
- *       }
- *     }
- *
- *     public void onFailure(Call call, IOException e) {
- *       ... // Handle the failure.
- *     }
- *   });
- * }</pre>
- *
- * These examples will not work if you're consuming the response body on another thread. In such
+ * This example will not work if you're consuming the response body on another thread. In such
  * cases the consuming thread must call {@link #close} when it has finished reading the response
  * body.
  *

@@ -24,7 +24,6 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import linktiger.http.HttpClient;
@@ -97,7 +96,6 @@ public final class EventListenerTest {
         .build();
 
     listener.forbidLock(Internal.instance.realConnectionPool(client.connectionPool()));
-    listener.forbidLock(client.dispatcher());
   }
 
   @After public void tearDown() throws Exception {
@@ -117,37 +115,6 @@ public final class EventListenerTest {
     Assertions.assertThat(response.code()).isEqualTo(200);
     Assertions.assertThat(response.body().string()).isEqualTo("abc");
     response.body().close();
-
-    List<String> expectedEvents = Arrays.asList("CallStart", "DnsStart", "DnsEnd",
-        "ConnectStart", "ConnectEnd", "ConnectionAcquired", "RequestHeadersStart",
-        "RequestHeadersEnd", "ResponseHeadersStart", "ResponseHeadersEnd", "ResponseBodyStart",
-        "ResponseBodyEnd", "ConnectionReleased", "CallEnd");
-    Assertions.assertThat(listener.recordedEventTypes()).isEqualTo(expectedEvents);
-  }
-
-  @Test public void successfulCallEventSequenceForEnqueue() throws Exception {
-    server.enqueue(new MockResponse()
-        .setBody("abc"));
-
-    Call call = client.newCall(new Request.Builder()
-        .url(server.url("/").toString())
-        .build());
-
-    final CountDownLatch completionLatch = new CountDownLatch(1);
-    Callback callback = new Callback() {
-      @Override public void onFailure(Call call, IOException e) {
-        completionLatch.countDown();
-      }
-
-      @Override public void onResponse(Call call, Response response) {
-        response.close();
-        completionLatch.countDown();
-      }
-    };
-
-    call.enqueue(callback);
-
-    completionLatch.await();
 
     List<String> expectedEvents = Arrays.asList("CallStart", "DnsStart", "DnsEnd",
         "ConnectStart", "ConnectEnd", "ConnectionAcquired", "RequestHeadersStart",

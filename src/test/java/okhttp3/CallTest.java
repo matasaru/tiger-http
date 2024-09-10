@@ -17,7 +17,6 @@ package okhttp3;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.net.CookieManager;
 import java.net.HttpCookie;
@@ -28,19 +27,13 @@ import java.net.Proxy;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.net.UnknownServiceException;
-import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -50,7 +43,6 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLHandshakeException;
-import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLProtocolException;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -120,7 +112,6 @@ public final class CallTest {
   private HttpClient client = clientTestRule.client.newBuilder()
       .eventListener(listener)
       .build();
-  private RecordingCallback callback = new RecordingCallback();
   private TestLogHandler logHandler = new TestLogHandler();
   private Logger logger = Logger.getLogger(HttpClient.class.getName());
 
@@ -652,45 +643,13 @@ public final class CallTest {
     }
 
     try {
-      call.enqueue(callback);
-      fail();
-    } catch (IllegalStateException e) {
-      assertThat(e.getMessage()).isEqualTo("Already Executed");
-    }
-
-    assertThat(server.takeRequest().getHeader("User-Agent")).isEqualTo("SyncApiTest");
-  }
-
-  @Test public void illegalToExecuteTwice_Async() throws Exception {
-    server.enqueue(new MockResponse()
-        .setBody("abc")
-        .addHeader("Content-Type: text/plain"));
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .header("User-Agent", "SyncApiTest")
-        .build();
-
-    Call call = client.newCall(request);
-    call.enqueue(callback);
-
-    try {
       call.execute();
       fail();
     } catch (IllegalStateException e) {
       assertThat(e.getMessage()).isEqualTo("Already Executed");
     }
 
-    try {
-      call.enqueue(callback);
-      fail();
-    } catch (IllegalStateException e) {
-      assertThat(e.getMessage()).isEqualTo("Already Executed");
-    }
-
     assertThat(server.takeRequest().getHeader("User-Agent")).isEqualTo("SyncApiTest");
-
-    callback.await(request.url()).assertSuccessful();
   }
 
   @Test public void legalToExecuteTwiceCloning() throws Exception {
@@ -711,71 +670,6 @@ public final class CallTest {
     assertThat("def").isEqualTo(response2.body().string());
   }
 
-  @Test public void legalToExecuteTwiceCloning_Async() throws Exception {
-    server.enqueue(new MockResponse().setBody("abc"));
-    server.enqueue(new MockResponse().setBody("def"));
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .build();
-
-    Call call = client.newCall(request);
-    call.enqueue(callback);
-
-    Call cloned = call.clone();
-    cloned.enqueue(callback);
-
-    RecordedResponse firstResponse = callback.await(request.url()).assertSuccessful();
-    RecordedResponse secondResponse = callback.await(request.url()).assertSuccessful();
-
-    Set<String> bodies = new LinkedHashSet<>();
-    bodies.add(firstResponse.getBody());
-    bodies.add(secondResponse.getBody());
-
-    assertThat(bodies.contains("abc")).isTrue();
-    assertThat(bodies.contains("def")).isTrue();
-  }
-
-  @Test public void get_Async() throws Exception {
-    server.enqueue(new MockResponse()
-        .setBody("abc")
-        .addHeader("Content-Type: text/plain"));
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .header("User-Agent", "AsyncApiTest")
-        .build();
-    client.newCall(request).enqueue(callback);
-
-    callback.await(request.url())
-        .assertCode(200)
-        .assertHeader("Content-Type", "text/plain")
-        .assertBody("abc");
-
-    assertThat(server.takeRequest().getHeader("User-Agent")).isEqualTo("AsyncApiTest");
-  }
-
-  @Test public void exceptionThrownByOnResponseIsRedactedAndLogged() throws Exception {
-    server.enqueue(new MockResponse());
-
-    Request request = new Request.Builder()
-        .url(server.url("/secret").toString())
-        .build();
-
-    client.newCall(request).enqueue(new Callback() {
-      @Override public void onFailure(Call call, IOException e) {
-        fail();
-      }
-
-      @Override public void onResponse(Call call, Response response) throws IOException {
-        throw new IOException("a");
-      }
-    });
-
-    assertThat(logHandler.take()).isEqualTo(
-        ("INFO: Callback failure for call to " + server.url("/") + "..."));
-  }
-
   @Test public void connectionPooling() throws Exception {
     server.enqueue(new MockResponse().setBody("abc"));
     server.enqueue(new MockResponse().setBody("def"));
@@ -788,53 +682,6 @@ public final class CallTest {
     assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
     assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(1);
     assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(2);
-  }
-
-  @Test public void connectionPooling_Async() throws Exception {
-    server.enqueue(new MockResponse().setBody("abc"));
-    server.enqueue(new MockResponse().setBody("def"));
-    server.enqueue(new MockResponse().setBody("ghi"));
-
-    client.newCall(new Request.Builder().url(server.url("/a").toString()).build()).enqueue(callback);
-    callback.await(Url.get(server.url("/a").toString())).assertBody("abc");
-
-    client.newCall(new Request.Builder().url(server.url("/b").toString()).build()).enqueue(callback);
-    callback.await(Url.get(server.url("/b").toString())).assertBody("def");
-
-    client.newCall(new Request.Builder().url(server.url("/c").toString()).build()).enqueue(callback);
-    callback.await(Url.get(server.url("/c").toString())).assertBody("ghi");
-
-    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
-    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(1);
-    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(2);
-  }
-
-  @Test public void connectionReuseWhenResponseBodyConsumed_Async() throws Exception {
-    server.enqueue(new MockResponse().setBody("abc"));
-    server.enqueue(new MockResponse().setBody("def"));
-
-    Request request = new Request.Builder().url(server.url("/a").toString()).build();
-    client.newCall(request).enqueue(new Callback() {
-      @Override public void onFailure(Call call, IOException e) {
-        throw new AssertionError();
-      }
-
-      @Override public void onResponse(Call call, Response response) throws IOException {
-        InputStream bytes = response.body().byteStream();
-        assertThat(bytes.read()).isEqualTo('a');
-        assertThat(bytes.read()).isEqualTo('b');
-        assertThat(bytes.read()).isEqualTo('c');
-
-        // This request will share a connection with 'A' cause it's all done.
-        client.newCall(new Request.Builder().url(server.url("/b").toString()).build()).enqueue(callback);
-      }
-    });
-
-    callback.await(Url.get(server.url("/b").toString())).assertCode(200).assertBody("def");
-    // New connection.
-    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
-    // Connection reuse!
-    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(1);
   }
 
   @Test public void timeoutsUpdatedOnReusedConnections() throws Exception {
@@ -999,17 +846,6 @@ public final class CallTest {
         .assertBody("success!");
   }
 
-  /** https://github.com/square/okhttp/issues/1801 */
-  @Test public void asyncCallEngineInitialized() throws Exception {
-    HttpClient c = clientTestRule.client.newBuilder()
-        .addInterceptor(chain -> { throw new IOException(); })
-        .build();
-    Request request = new Request.Builder().url(server.url("/").toString()).build();
-    c.newCall(request).enqueue(callback);
-    RecordedResponse response = callback.await(request.url());
-    assertThat(response.request).isEqualTo(request);
-  }
-
   @Test public void reusedSinksGetIndependentTimeoutInstances() throws Exception {
     server.enqueue(new MockResponse());
     server.enqueue(new MockResponse());
@@ -1085,20 +921,6 @@ public final class CallTest {
         .addHeader("Content-Type: text/plain"));
 
     executeSynchronously("/").assertHandshake();
-  }
-
-  @Test public void tls_Async() throws Exception {
-    enableTls();
-    server.enqueue(new MockResponse()
-        .setBody("abc")
-        .addHeader("Content-Type: text/plain"));
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .build();
-    client.newCall(request).enqueue(callback);
-
-    callback.await(request.url()).assertHandshake();
   }
 
   @Test public void recoverWhenRetryOnConnectionFailureIsTrue() throws Exception {
@@ -1216,27 +1038,6 @@ public final class CallTest {
     assertThat(Arrays.asList(firstSocket.getEnabledCipherSuites()).contains(tlsFallbackScsv)).isFalse();
     SSLSocket secondSocket = clientSockets.get(1);
     assertThat(Arrays.asList(secondSocket.getEnabledCipherSuites()).contains(tlsFallbackScsv)).isTrue();
-  }
-
-  @Test public void recoverFromTlsHandshakeFailure_Async() throws Exception {
-    server.useHttps(handshakeCertificates.sslSocketFactory(), false);
-    server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.FAIL_HANDSHAKE));
-    server.enqueue(new MockResponse().setBody("abc"));
-
-    client = client.newBuilder()
-        .hostnameVerifier(new RecordingHostnameVerifier())
-        // Attempt RESTRICTED_TLS then fall back to MODERN_TLS.
-        .connectionSpecs(Arrays.asList(ConnectionSpec.RESTRICTED_TLS, ConnectionSpec.MODERN_TLS))
-        .sslSocketFactory(
-            suppressTlsFallbackClientSocketFactory(), handshakeCertificates.trustManager())
-        .build();
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .build();
-    client.newCall(request).enqueue(callback);
-
-    callback.await(request.url()).assertBody("abc");
   }
 
   @Test public void noRecoveryFromTlsHandshakeFailureWhenTlsFallbackIsDisabled() throws Exception {
@@ -1374,26 +1175,6 @@ public final class CallTest {
     Response response = client.newCall(request).execute();
     assertThat(response.code()).isEqualTo(301);
     response.body().close();
-  }
-
-  @Test public void post_Async() throws Exception {
-    server.enqueue(new MockResponse().setBody("abc"));
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .post(RequestBody.create(MediaType.get("text/plain"), "def"))
-        .build();
-    client.newCall(request).enqueue(callback);
-
-    callback.await(request.url())
-        .assertCode(200)
-        .assertBody("abc");
-
-    RecordedRequest recordedRequest = server.takeRequest();
-    assertThat(recordedRequest.getBody().readUtf8()).isEqualTo("def");
-    assertThat(recordedRequest.getHeader("Content-Length")).isEqualTo("3");
-    assertThat(recordedRequest.getHeader("Content-Type")).isEqualTo(
-        "text/plain; charset=utf-8");
   }
 
   @Test public void postBodyRetransmittedOnFailureRecovery() throws Exception {
@@ -1801,40 +1582,6 @@ public final class CallTest {
     assertThat(redirectRequest.getPath()).isEqualTo("/b");
   }
 
-  @Test public void redirect_Async() throws Exception {
-    server.enqueue(new MockResponse()
-        .setResponseCode(301)
-        .addHeader("Location: /b")
-        .addHeader("Test", "Redirect from /a to /b")
-        .setBody("/a has moved!"));
-    server.enqueue(new MockResponse()
-        .setResponseCode(302)
-        .addHeader("Location: /c")
-        .addHeader("Test", "Redirect from /b to /c")
-        .setBody("/b has moved!"));
-    server.enqueue(new MockResponse().setBody("C"));
-
-    Request request = new Request.Builder().url(server.url("/a").toString()).build();
-    client.newCall(request).enqueue(callback);
-
-    callback.await(Url.get(server.url("/a").toString()))
-        .assertCode(200)
-        .assertBody("C")
-        .priorResponse()
-        .assertCode(302)
-        .assertHeader("Test", "Redirect from /b to /c")
-        .priorResponse()
-        .assertCode(301)
-        .assertHeader("Test", "Redirect from /a to /b");
-
-    // New connection.
-    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
-    // Connection reused.
-    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(1);
-    // Connection reused again!
-    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(2);
-  }
-
   @Test public void follow20Redirects() throws Exception {
     for (int i = 0; i < 20; i++) {
       server.enqueue(new MockResponse()
@@ -1845,22 +1592,6 @@ public final class CallTest {
     server.enqueue(new MockResponse().setBody("Success!"));
 
     executeSynchronously("/0")
-        .assertCode(200)
-        .assertBody("Success!");
-  }
-
-  @Test public void follow20Redirects_Async() throws Exception {
-    for (int i = 0; i < 20; i++) {
-      server.enqueue(new MockResponse()
-          .setResponseCode(301)
-          .addHeader("Location: /" + (i + 1))
-          .setBody("Redirecting to /" + (i + 1)));
-    }
-    server.enqueue(new MockResponse().setBody("Success!"));
-
-    Request request = new Request.Builder().url(server.url("/0").toString()).build();
-    client.newCall(request).enqueue(callback);
-    callback.await(Url.get(server.url("/0").toString()))
         .assertCode(200)
         .assertBody("Success!");
   }
@@ -1879,19 +1610,6 @@ public final class CallTest {
     } catch (IOException expected) {
       assertThat(expected.getMessage()).isEqualTo("Too many follow-up requests: 21");
     }
-  }
-
-  @Test public void doesNotFollow21Redirects_Async() throws Exception {
-    for (int i = 0; i < 21; i++) {
-      server.enqueue(new MockResponse()
-          .setResponseCode(301)
-          .addHeader("Location: /" + (i + 1))
-          .setBody("Redirecting to /" + (i + 1)));
-    }
-
-    Request request = new Request.Builder().url(server.url("/0").toString()).build();
-    client.newCall(request).enqueue(callback);
-    callback.await(Url.get(server.url("/0").toString())).assertFailure("Too many follow-up requests: 21");
   }
 
   @Test public void http204WithBodyDisallowed() throws IOException {
@@ -1973,39 +1691,6 @@ public final class CallTest {
         (float) cancelDelayMillis, offset(100f));
   }
 
-  @Test public void cancelImmediatelyAfterEnqueue() throws Exception {
-    server.enqueue(new MockResponse());
-    final CountDownLatch latch = new CountDownLatch(1);
-    client = client.newBuilder()
-        .addNetworkInterceptor(chain -> {
-          try {
-            latch.await();
-          } catch (InterruptedException e) {
-            throw new AssertionError(e);
-          }
-          return chain.proceed(chain.request());
-        })
-        .build();
-
-    Call call = client.newCall(new Request.Builder()
-        .url(server.url("/a").toString())
-        .build());
-    call.enqueue(callback);
-    call.cancel();
-    latch.countDown();
-
-    callback.await(Url.get(server.url("/a").toString())).assertFailure("Canceled", "Socket closed");
-  }
-
-  @Test public void cancelAll() throws Exception {
-    Call call = client.newCall(new Request.Builder()
-        .url(server.url("/").toString())
-        .build());
-    call.enqueue(callback);
-    client.dispatcher().cancelAll();
-    callback.await(Url.get(server.url("/").toString())).assertFailure("Canceled", "Socket closed");
-  }
-
   @Test
   public void cancelWhileRequestHeadersAreSent() throws Exception {
     server.enqueue(new MockResponse().setBody("A"));
@@ -2080,127 +1765,6 @@ public final class CallTest {
   @Test public void cancelInFlightBeforeResponseReadThrowsIOE_HTTP_2() throws Exception {
     enableProtocol();
     cancelInFlightBeforeResponseReadThrowsIOE();
-  }
-
-  /**
-   * This test puts a request in front of one that is to be canceled, so that it is canceled before
-   * I/O takes place.
-   */
-  @Test public void canceledBeforeIOSignalsOnFailure() throws Exception {
-    // Force requests to be executed serially.
-    okhttp3.Dispatcher dispatcher = new okhttp3.Dispatcher(client.dispatcher().executorService());
-    dispatcher.setMaxRequests(1);
-    client = client.newBuilder()
-        .dispatcher(dispatcher)
-        .build();
-
-    Request requestA = new Request.Builder().url(server.url("/a").toString()).build();
-    Request requestB = new Request.Builder().url(server.url("/b").toString()).build();
-    final Call callA = client.newCall(requestA);
-    final Call callB = client.newCall(requestB);
-
-    server.setDispatcher(new Dispatcher() {
-      char nextResponse = 'A';
-
-      @Override public MockResponse dispatch(RecordedRequest request) {
-        callB.cancel();
-        return new MockResponse().setBody(Character.toString(nextResponse++));
-      }
-    });
-
-    callA.enqueue(callback);
-    callB.enqueue(callback);
-    assertThat(server.takeRequest().getPath()).isEqualTo("/a");
-
-    callback.await(requestA.url()).assertBody("A");
-    // At this point we know the callback is ready, and that it will receive a cancel failure.
-    callback.await(requestB.url()).assertFailure("Canceled", "Socket closed");
-  }
-
-  @Test public void canceledBeforeIOSignalsOnFailure_HTTPS() throws Exception {
-    enableTls();
-    canceledBeforeIOSignalsOnFailure();
-  }
-
-  @Test public void canceledBeforeIOSignalsOnFailure_HTTP_2() throws Exception {
-    enableProtocol();
-    canceledBeforeIOSignalsOnFailure();
-  }
-
-  @Test public void canceledBeforeResponseReadSignalsOnFailure() throws Exception {
-    Request requestA = new Request.Builder().url(server.url("/a").toString()).build();
-    final Call call = client.newCall(requestA);
-    server.setDispatcher(new Dispatcher() {
-      @Override public MockResponse dispatch(RecordedRequest request) {
-        call.cancel();
-        return new MockResponse().setBody("A");
-      }
-    });
-
-    call.enqueue(callback);
-    assertThat(server.takeRequest().getPath()).isEqualTo("/a");
-
-    callback.await(requestA.url()).assertFailure("Canceled", "stream was reset: CANCEL",
-        "Socket closed");
-  }
-
-  @Test public void canceledBeforeResponseReadSignalsOnFailure_HTTPS() throws Exception {
-    enableTls();
-    canceledBeforeResponseReadSignalsOnFailure();
-  }
-
-  @Test public void canceledBeforeResponseReadSignalsOnFailure_HTTP_2() throws Exception {
-    enableProtocol();
-    canceledBeforeResponseReadSignalsOnFailure();
-  }
-
-  /**
-   * There's a race condition where the cancel may apply after the stream has already been
-   * processed.
-   */
-  @Test public void canceledAfterResponseIsDeliveredBreaksStreamButSignalsOnce() throws Exception {
-    server.enqueue(new MockResponse().setBody("A"));
-
-    final CountDownLatch latch = new CountDownLatch(1);
-    final AtomicReference<String> bodyRef = new AtomicReference<>();
-    final AtomicBoolean failureRef = new AtomicBoolean();
-
-    Request request = new Request.Builder().url(server.url("/a").toString()).build();
-    final Call call = client.newCall(request);
-    call.enqueue(new Callback() {
-      @Override public void onFailure(Call call, IOException e) {
-        failureRef.set(true);
-        latch.countDown();
-      }
-
-      @Override public void onResponse(Call call, Response response) throws IOException {
-        call.cancel();
-        try {
-          bodyRef.set(response.body().string());
-        } catch (IOException e) { // It is ok if this broke the stream.
-          bodyRef.set("A");
-          throw e; // We expect to not loop into onFailure in this case.
-        } finally {
-          latch.countDown();
-        }
-      }
-    });
-
-    latch.await();
-    assertThat(bodyRef.get()).isEqualTo("A");
-    assertThat(failureRef.get()).isFalse();
-  }
-
-  @Test public void canceledAfterResponseIsDeliveredBreaksStreamButSignalsOnce_HTTPS()
-      throws Exception {
-    enableTls();
-    canceledAfterResponseIsDeliveredBreaksStreamButSignalsOnce();
-  }
-
-  @Test public void canceledAfterResponseIsDeliveredBreaksStreamButSignalsOnce_HTTP_2()
-      throws Exception {
-    enableProtocol();
-    canceledAfterResponseIsDeliveredBreaksStreamButSignalsOnce();
   }
 
   @Test public void cancelWithInterceptor() throws Exception {
@@ -2285,45 +1849,6 @@ public final class CallTest {
     // The request did not offer gzip support.
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getHeader("Accept-Encoding")).isNull();
-  }
-
-  @Test public void asyncResponseCanBeConsumedLater() throws Exception {
-    server.enqueue(new MockResponse().setBody("abc"));
-    server.enqueue(new MockResponse().setBody("def"));
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .header("User-Agent", "SyncApiTest")
-        .build();
-
-    final BlockingQueue<Response> responseRef = new SynchronousQueue<>();
-    client.newCall(request).enqueue(new Callback() {
-      @Override public void onFailure(Call call, IOException e) {
-        throw new AssertionError();
-      }
-
-      @Override public void onResponse(Call call, Response response) throws IOException {
-        try {
-          responseRef.put(response);
-        } catch (InterruptedException e) {
-          throw new AssertionError();
-        }
-      }
-    });
-
-    Response response = responseRef.take();
-    assertThat(response.code()).isEqualTo(200);
-    assertThat(response.body().string()).isEqualTo("abc");
-
-    // Make another request just to confirm that that connection can be reused...
-    executeSynchronously("/").assertBody("def");
-    // New connection.
-    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
-    // Connection reused.
-    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(1);
-
-    // ... even before we close the response body!
-    response.body().close();
   }
 
   @Test public void userAgentIsIncludedByDefault() throws Exception {
@@ -3161,49 +2686,6 @@ public final class CallTest {
             + " Did you forget to close a response body?")).isTrue();
       assertThat(message.contains("okhttp3.Call.execute(")).isTrue();
       assertThat(message.contains("okhttp3.CallTest.leakedResponseBodyLogsStackTrace(")).isTrue();
-    } finally {
-      logger.setLevel(original);
-    }
-  }
-
-  @Test public void asyncLeakedResponseBodyLogsStackTrace() throws Exception {
-    server.enqueue(new MockResponse()
-        .setBody("This gets leaked."));
-
-    client = clientTestRule.client.newBuilder()
-        .connectionPool(new ConnectionPool(0, 10, TimeUnit.MILLISECONDS))
-        .build();
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .build();
-
-    Level original = logger.getLevel();
-    logger.setLevel(Level.FINE);
-    logHandler.setFormatter(new SimpleFormatter());
-    try {
-      final CountDownLatch latch = new CountDownLatch(1);
-      client.newCall(request).enqueue(new Callback() {
-        @Override public void onFailure(Call call, IOException e) {
-          fail();
-        }
-
-        @Override public void onResponse(Call call, Response response) throws IOException {
-          // Ignore the response so it gets leaked then GC'd.
-          latch.countDown();
-        }
-      });
-      latch.await();
-      // There's some flakiness when triggering a GC for objects in a separate thread. Adding a
-      // small delay appears to ensure the objects will get GC'd.
-      Thread.sleep(200);
-      awaitGarbageCollection();
-
-      String message = logHandler.take();
-      assertThat(message.contains("A connection to " + server.url("/") + " was leaked."
-            + " Did you forget to close a response body?")).isTrue();
-      assertThat(message.contains("okhttp3.Call.enqueue(")).isTrue();
-      assertThat(message.contains("okhttp3.CallTest.asyncLeakedResponseBodyLogsStackTrace(")).isTrue();
     } finally {
       logger.setLevel(original);
     }
