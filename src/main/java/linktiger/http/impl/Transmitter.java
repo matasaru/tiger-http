@@ -48,7 +48,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  */
 public final class Transmitter {
   private final HttpClient client;
-  private final RealConnectionPool connectionPool;
+  private final ConnectionPool connectionPool;
   private final Call call;
   private final EventListener eventListener;
   private final AsyncTimeout timeout = new AsyncTimeout() {
@@ -73,7 +73,7 @@ public final class Transmitter {
 
   public Transmitter(HttpClient client, Call call) {
     this.client = client;
-    this.connectionPool = client.connectionPool().delegate();
+    this.connectionPool = client.connectionPool();
     this.call = call;
     this.eventListener = client.eventListenerFactory().create(call);
     this.timeout.timeout(client.callTimeoutMillis(), MILLISECONDS);

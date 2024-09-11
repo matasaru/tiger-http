@@ -117,7 +117,7 @@ public final class Connection extends Http2Connection.Listener {
 
   private static final int MAX_TUNNEL_ATTEMPTS = 21;
 
-  public final RealConnectionPool connectionPool;
+  public final ConnectionPool connectionPool;
   private final Route route;
 
   // The fields below are initialized by connect() and never reassigned.
@@ -165,7 +165,7 @@ public final class Connection extends Http2Connection.Listener {
   /** Nanotime timestamp when {@code allocations.size()} reached zero. */
   long idleAtNanos = Long.MAX_VALUE;
 
-  public Connection(RealConnectionPool connectionPool, Route route) {
+  public Connection(ConnectionPool connectionPool, Route route) {
     this.connectionPool = connectionPool;
     this.route = route;
   }
@@ -179,7 +179,7 @@ public final class Connection extends Http2Connection.Listener {
   }
 
   static Connection testConnection(
-      RealConnectionPool connectionPool, Route route, Socket socket, long idleAtNanos) {
+      ConnectionPool connectionPool, Route route, Socket socket, long idleAtNanos) {
     Connection result = new Connection(connectionPool, route);
     result.socket = socket;
     result.idleAtNanos = idleAtNanos;

@@ -85,7 +85,7 @@ public final class EventListenerTest {
         .eventListener(listener)
         .build();
 
-    listener.forbidLock(client.connectionPool().delegate());
+    listener.forbidLock(client.connectionPool());
   }
 
   @After public void tearDown() throws Exception {

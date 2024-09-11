@@ -51,7 +51,7 @@ import byebye.Util;
 final class ExchangeFinder {
   private final Transmitter transmitter;
   private final Address address;
-  private final RealConnectionPool connectionPool;
+  private final ConnectionPool connectionPool;
   private final Call call;
   private final EventListener eventListener;
 
@@ -63,7 +63,7 @@ final class ExchangeFinder {
   private boolean hasStreamFailure;
   private Route nextRouteToTry;
 
-  ExchangeFinder(Transmitter transmitter, RealConnectionPool connectionPool,
+  ExchangeFinder(Transmitter transmitter, ConnectionPool connectionPool,
       Address address, Call call, EventListener eventListener) {
     this.transmitter = transmitter;
     this.connectionPool = connectionPool;

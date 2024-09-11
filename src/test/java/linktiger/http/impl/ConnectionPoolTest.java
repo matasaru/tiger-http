@@ -44,7 +44,7 @@ public final class ConnectionPoolTest {
   private final Route routeC1 = newRoute(addressC);
 
   @Test public void connectionsEvictedWhenIdleLongEnough() throws Exception {
-    RealConnectionPool pool = new RealConnectionPool(Integer.MAX_VALUE, 100L, TimeUnit.NANOSECONDS);
+    ConnectionPool pool = new ConnectionPool(Integer.MAX_VALUE, 100L, TimeUnit.NANOSECONDS);
     pool.cleanupRunning = true; // Prevent the cleanup runnable from being started.
 
     Connection c1 = newConnection(pool, routeA1, 50L);
@@ -76,14 +76,13 @@ public final class ConnectionPoolTest {
   }
 
   @Test public void inUseConnectionsNotEvicted() throws Exception {
-    ConnectionPool poolApi = new ConnectionPool(Integer.MAX_VALUE, 100L, TimeUnit.NANOSECONDS);
-    RealConnectionPool pool = poolApi.delegate();
+    ConnectionPool pool = new ConnectionPool(Integer.MAX_VALUE, 100L, TimeUnit.NANOSECONDS);
     pool.cleanupRunning = true; // Prevent the cleanup runnable from being started.
 
     Connection c1 = newConnection(pool, routeA1, 50L);
     synchronized (pool) {
       HttpClient client = new HttpClient.Builder()
-          .connectionPool(poolApi)
+          .connectionPool(pool)
           .build();
       Call call = client.newCall(newRequest(addressA));
       Transmitter transmitter = new Transmitter(client, call);
@@ -108,7 +107,7 @@ public final class ConnectionPoolTest {
   }
 
   @Test public void cleanupPrioritizesEarliestEviction() throws Exception {
-    RealConnectionPool pool = new RealConnectionPool(Integer.MAX_VALUE, 100L, TimeUnit.NANOSECONDS);
+    ConnectionPool pool = new ConnectionPool(Integer.MAX_VALUE, 100L, TimeUnit.NANOSECONDS);
     pool.cleanupRunning = true; // Prevent the cleanup runnable from being started.
 
     Connection c1 = newConnection(pool, routeA1, 75L);
@@ -140,7 +139,7 @@ public final class ConnectionPoolTest {
   }
 
   @Test public void oldestConnectionsEvictedIfIdleLimitExceeded() throws Exception {
-    RealConnectionPool pool = new RealConnectionPool(2, 100L, TimeUnit.NANOSECONDS);
+    ConnectionPool pool = new ConnectionPool(2, 100L, TimeUnit.NANOSECONDS);
     pool.cleanupRunning = true; // Prevent the cleanup runnable from being started.
 
     Connection c1 = newConnection(pool, routeA1, 50L);
@@ -164,12 +163,11 @@ public final class ConnectionPoolTest {
   }
 
   @Test public void leakedAllocation() throws Exception {
-    ConnectionPool poolApi = new ConnectionPool(Integer.MAX_VALUE, 100L, TimeUnit.NANOSECONDS);
-    RealConnectionPool pool = poolApi.delegate();
+    ConnectionPool pool = new ConnectionPool(Integer.MAX_VALUE, 100L, TimeUnit.NANOSECONDS);
     pool.cleanupRunning = true; // Prevent the cleanup runnable from being started.
 
     Connection c1 = newConnection(pool, routeA1, 0L);
-    allocateAndLeakAllocation(poolApi, c1);
+    allocateAndLeakAllocation(pool, c1);
 
     TestUtil.awaitGarbageCollection();
     assertThat(pool.cleanup(100L)).isEqualTo(0L);
@@ -181,7 +179,7 @@ public final class ConnectionPoolTest {
 
   /** Use a helper method so there's no hidden reference remaining on the stack. */
   private void allocateAndLeakAllocation(ConnectionPool pool, Connection connection) {
-    synchronized (pool.delegate()) {
+    synchronized (pool) {
       HttpClient client = new HttpClient.Builder()
           .connectionPool(pool)
           .build();
@@ -192,7 +190,7 @@ public final class ConnectionPoolTest {
     }
   }
 
-  private Connection newConnection(RealConnectionPool pool, Route route, long idleAtNanos) {
+  private Connection newConnection(ConnectionPool pool, Route route, long idleAtNanos) {
     Connection result = Connection.testConnection(pool, route, new Socket(), idleAtNanos);
     synchronized (pool) {
       pool.put(result);
