@@ -28,7 +28,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import linktiger.http.Headers;
 import linktiger.http.TestUtil;
-import linktiger.http.impl.Internal;
 import linktiger.http.impl.http2.MockHttp2Peer.InFrame;
 
 import byebye.Util;
@@ -41,7 +40,6 @@ import okio.Sink;
 import okio.Source;
 import okio.Utf8;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
@@ -58,10 +56,6 @@ public final class Http2ConnectionTest {
   private final MockHttp2Peer peer = new MockHttp2Peer();
 
   @Rule public final TestRule timeout = new Timeout(5_000, TimeUnit.MILLISECONDS);
-
-  @Before public void setup() {
-    Internal.initializeInstanceForTests();
-  }
 
   @After public void tearDown() throws Exception {
     peer.close();

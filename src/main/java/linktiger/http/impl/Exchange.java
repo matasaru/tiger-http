@@ -110,7 +110,7 @@ public final class Exchange {
     try {
       Response.Builder result = codec.readResponseHeaders(expectContinue);
       if (result != null) {
-        Internal.instance.initExchange(result, this);
+        result.initExchange(this);
       }
       return result;
     } catch (IOException e) {

@@ -244,7 +244,7 @@ public final class Http1ExchangeCodec implements ExchangeCodec {
     Headers.Builder headers = new Headers.Builder();
     // parse the result headers until the first blank line
     for (String line; (line = readHeaderLine()).length() != 0; ) {
-      Internal.instance.addLenient(headers, line);
+      headers.addLenient(line);
     }
     return headers.build();
   }

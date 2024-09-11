@@ -30,7 +30,6 @@ import linktiger.http.Response;
 import linktiger.http.impl.ExchangeCodec;
 import linktiger.http.impl.HttpHeaders;
 import linktiger.http.impl.Interceptor;
-import linktiger.http.impl.Internal;
 import linktiger.http.impl.RealConnection;
 import linktiger.http.impl.RequestLine;
 import linktiger.http.impl.StatusLine;
@@ -125,7 +124,7 @@ public final class Http2ExchangeCodec implements ExchangeCodec {
   @Override public Response.Builder readResponseHeaders(boolean expectContinue) throws IOException {
     Headers headers = stream.takeHeaders();
     Response.Builder responseBuilder = readHttp2HeadersList(headers, protocol);
-    if (expectContinue && Internal.instance.code(responseBuilder) == StatusLine.HTTP_CONTINUE) {
+    if (expectContinue && responseBuilder.code() == StatusLine.HTTP_CONTINUE) {
       return null;
     }
     return responseBuilder;
@@ -164,7 +163,7 @@ public final class Http2ExchangeCodec implements ExchangeCodec {
       if (name.equals(Header.RESPONSE_STATUS_UTF8)) {
         statusLine = StatusLine.parse("HTTP/1.1 " + value);
       } else if (!HTTP_2_SKIPPED_RESPONSE_HEADERS.contains(name)) {
-        Internal.instance.addLenient(headersBuilder, name, value);
+        headersBuilder.addLenient(name, value);
       }
     }
     if (statusLine == null) throw new ProtocolException("Expected ':status' header not present");

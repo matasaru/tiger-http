@@ -33,17 +33,13 @@ import java.util.logging.Logger;
 import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import linktiger.http.impl.Exchange;
-import linktiger.http.impl.Internal;
 import linktiger.http.impl.NullProxySelector;
 import linktiger.http.impl.OkHostnameVerifier;
-import linktiger.http.impl.RealConnectionPool;
 
 import okio.Sink;
 import okio.Source;
@@ -121,44 +117,6 @@ public class HttpClient {
 
   static final List<ConnectionSpec> DEFAULT_CONNECTION_SPECS = List.of(
       ConnectionSpec.MODERN_TLS, ConnectionSpec.CLEARTEXT);
-
-  static {
-    Internal.instance = new Internal() {
-      @Override public void addLenient(Headers.Builder builder, String line) {
-        builder.addLenient(line);
-      }
-
-      @Override public void addLenient(Headers.Builder builder, String name, String value) {
-        builder.addLenient(name, value);
-      }
-
-      @Override public RealConnectionPool realConnectionPool(ConnectionPool connectionPool) {
-        return connectionPool.delegate();
-      }
-
-      @Override public boolean equalsNonHost(Address a, Address b) {
-        return a.equalsNonHost(b);
-      }
-
-      @Override public int code(Response.Builder responseBuilder) {
-        return responseBuilder.code();
-      }
-
-      @Override
-      public void apply(ConnectionSpec tlsConfiguration, SSLSocket sslSocket, boolean isFallback) {
-        tlsConfiguration.apply(sslSocket, isFallback);
-      }
-
-      @Override public void initExchange(
-          Response.Builder responseBuilder, Exchange exchange) {
-        responseBuilder.initExchange(exchange);
-      }
-
-      @Override public Exchange exchange(Response response) {
-        return response.exchange();
-      }
-    };
-  }
 
   private final Deque<Call> runningCalls = new ArrayDeque<>();
 

@@ -42,7 +42,6 @@ import linktiger.http.RecordingEventListener.ResponseHeadersEnd;
 import linktiger.http.RecordingEventListener.SecureConnectEnd;
 import linktiger.http.RecordingEventListener.SecureConnectStart;
 import linktiger.http.impl.DoubleInetAddressDns;
-import linktiger.http.impl.Internal;
 import linktiger.http.impl.RecordingOkAuthenticator;
 
 import okhttp3.mockwebserver.MockResponse;
@@ -86,7 +85,7 @@ public final class EventListenerTest {
         .eventListener(listener)
         .build();
 
-    listener.forbidLock(Internal.instance.realConnectionPool(client.connectionPool()));
+    listener.forbidLock(client.connectionPool().delegate());
   }
 
   @After public void tearDown() throws Exception {

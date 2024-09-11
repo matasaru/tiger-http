@@ -74,7 +74,7 @@ public final class Transmitter {
 
   public Transmitter(HttpClient client, Call call) {
     this.client = client;
-    this.connectionPool = Internal.instance.realConnectionPool(client.connectionPool());
+    this.connectionPool = client.connectionPool().delegate();
     this.call = call;
     this.eventListener = client.eventListenerFactory().create(call);
     this.timeout.timeout(client.callTimeoutMillis(), MILLISECONDS);

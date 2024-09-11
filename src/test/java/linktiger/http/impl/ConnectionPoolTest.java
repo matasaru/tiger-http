@@ -44,10 +44,6 @@ public final class ConnectionPoolTest {
   private final Address addressC = newAddress("c");
   private final Route routeC1 = newRoute(addressC);
 
-  static {
-    Internal.initializeInstanceForTests();
-  }
-
   @Test public void connectionsEvictedWhenIdleLongEnough() throws Exception {
     RealConnectionPool pool = new RealConnectionPool(Integer.MAX_VALUE, 100L, TimeUnit.NANOSECONDS);
     pool.cleanupRunning = true; // Prevent the cleanup runnable from being started.
@@ -82,7 +78,7 @@ public final class ConnectionPoolTest {
 
   @Test public void inUseConnectionsNotEvicted() throws Exception {
     ConnectionPool poolApi = new ConnectionPool(Integer.MAX_VALUE, 100L, TimeUnit.NANOSECONDS);
-    RealConnectionPool pool = Internal.instance.realConnectionPool(poolApi);
+    RealConnectionPool pool = poolApi.delegate();
     pool.cleanupRunning = true; // Prevent the cleanup runnable from being started.
 
     RealConnection c1 = newConnection(pool, routeA1, 50L);
@@ -170,7 +166,7 @@ public final class ConnectionPoolTest {
 
   @Test public void leakedAllocation() throws Exception {
     ConnectionPool poolApi = new ConnectionPool(Integer.MAX_VALUE, 100L, TimeUnit.NANOSECONDS);
-    RealConnectionPool pool = Internal.instance.realConnectionPool(poolApi);
+    RealConnectionPool pool = poolApi.delegate();
     pool.cleanupRunning = true; // Prevent the cleanup runnable from being started.
 
     RealConnection c1 = newConnection(pool, routeA1, 0L);
@@ -186,7 +182,7 @@ public final class ConnectionPoolTest {
 
   /** Use a helper method so there's no hidden reference remaining on the stack. */
   private void allocateAndLeakAllocation(ConnectionPool pool, RealConnection connection) {
-    synchronized (Internal.instance.realConnectionPool(pool)) {
+    synchronized (pool.delegate()) {
       HttpClient client = new HttpClient.Builder()
           .connectionPool(pool)
           .build();

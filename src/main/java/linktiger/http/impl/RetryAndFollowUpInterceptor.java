@@ -106,7 +106,7 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
             .build();
       }
 
-      Exchange exchange = Internal.instance.exchange(response);
+      Exchange exchange = response.exchange();
       Route route = exchange != null ? exchange.connection().route() : null;
       Request followUp = followUpRequest(response, route);
 

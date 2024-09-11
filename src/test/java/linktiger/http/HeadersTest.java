@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 
 import linktiger.http.impl.HttpHeaders;
-import linktiger.http.impl.Internal;
 import linktiger.http.impl.http2.Header;
 import linktiger.http.impl.http2.Http2ExchangeCodec;
 
@@ -41,10 +40,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 public final class HeadersTest {
-  static {
-    Internal.initializeInstanceForTests();
-  }
-
   @Test public void readNameValueBlockDropsForbiddenHeadersHttp2() throws IOException {
     Headers headerBlock = Headers.of(
         ":status", "200 OK",

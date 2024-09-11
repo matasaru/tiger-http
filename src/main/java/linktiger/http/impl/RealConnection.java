@@ -472,7 +472,7 @@ public final class RealConnection extends Http2Connection.Listener implements Co
     if (transmitters.size() >= allocationLimit || noNewExchanges) return false;
 
     // If the non-host fields of the address don't overlap, we're done.
-    if (!Internal.instance.equalsNonHost(this.route.address(), address)) return false;
+    if (!this.route.address().equalsNonHost(address)) return false;
 
     // If the host exactly matches, we're done: this connection can carry the address.
     if (address.url().host().equals(this.route().address().url().host())) {
