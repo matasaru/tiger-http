@@ -15,12 +15,11 @@
  */
 package linktiger.http;
 
-import okhttp3.TestUtil;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
-import static okhttp3.TestUtil.defaultClient;
+import static linktiger.http.TestUtil.defaultClient;
 
 public class HttpClientTestRule implements TestRule {
   public HttpClient client = defaultClient();

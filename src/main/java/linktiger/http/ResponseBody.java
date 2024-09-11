@@ -23,7 +23,6 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 
 import byebye.Util;
-import okhttp3.Call;
 import okio.Buffer;
 import okio.BufferedSource;
 import okio.ByteString;

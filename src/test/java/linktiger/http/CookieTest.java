@@ -22,9 +22,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import linktiger.http.impl.HttpDate;
+
 import byebye.Util;
-import okhttp3.Headers;
-import okhttp3.internal.http.HttpDate;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

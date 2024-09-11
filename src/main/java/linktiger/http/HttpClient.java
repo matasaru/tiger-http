@@ -39,19 +39,12 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import okhttp3.Address;
-import okhttp3.Authenticator;
-import okhttp3.Call;
-import okhttp3.ConnectionPool;
-import okhttp3.ConnectionSpec;
-import okhttp3.Dns;
-import okhttp3.EventListener;
-import okhttp3.Headers;
-import okhttp3.internal.Internal;
-import okhttp3.internal.connection.Exchange;
-import okhttp3.internal.connection.RealConnectionPool;
-import okhttp3.internal.proxy.NullProxySelector;
-import okhttp3.internal.tls.OkHostnameVerifier;
+import linktiger.http.impl.Exchange;
+import linktiger.http.impl.Internal;
+import linktiger.http.impl.NullProxySelector;
+import linktiger.http.impl.OkHostnameVerifier;
+import linktiger.http.impl.RealConnectionPool;
+
 import okio.Sink;
 import okio.Source;
 

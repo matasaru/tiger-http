@@ -29,7 +29,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static okhttp3.TestUtil.defaultClient;
+import static linktiger.http.TestUtil.defaultClient;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 

@@ -20,12 +20,10 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import okhttp3.Call;
-import okhttp3.Challenge;
-import okhttp3.Handshake;
-import okhttp3.Headers;
-import okhttp3.internal.connection.Exchange;
-import okhttp3.internal.http.HttpHeaders;
+import linktiger.http.impl.Exchange;
+import linktiger.http.impl.HttpHeaders;
+import linktiger.http.impl.StatusLine;
+
 import okio.Buffer;
 import okio.BufferedSource;
 
@@ -35,8 +33,6 @@ import static java.net.HttpURLConnection.HTTP_MULT_CHOICE;
 import static java.net.HttpURLConnection.HTTP_PROXY_AUTH;
 import static java.net.HttpURLConnection.HTTP_SEE_OTHER;
 import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
-import static okhttp3.internal.http.StatusLine.HTTP_PERM_REDIRECT;
-import static okhttp3.internal.http.StatusLine.HTTP_TEMP_REDIRECT;
 
 /**
  * An HTTP response. Instances of this class are not immutable: the response body is a one-shot
@@ -184,8 +180,8 @@ public final class Response implements Closeable {
   /** Returns true if this response redirects to another resource. */
   public boolean isRedirect() {
     switch (code) {
-      case HTTP_PERM_REDIRECT:
-      case HTTP_TEMP_REDIRECT:
+      case StatusLine.HTTP_PERM_REDIRECT:
+      case StatusLine.HTTP_TEMP_REDIRECT:
       case HTTP_MULT_CHOICE:
       case HTTP_MOVED_PERM:
       case HTTP_MOVED_TEMP:

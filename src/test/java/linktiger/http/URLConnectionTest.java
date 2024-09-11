@@ -58,26 +58,13 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import linktiger.http.impl.RecordingAuthenticator;
+import linktiger.http.impl.RecordingOkAuthenticator;
+import linktiger.http.impl.StatusLine;
+import linktiger.http.impl.Version;
+
 import byebye.Util;
-import okhttp3.Call;
-import okhttp3.Challenge;
-import okhttp3.ConnectionPool;
-import okhttp3.ConnectionSpec;
-import okhttp3.Credentials;
-import okhttp3.DelegatingServerSocketFactory;
-import okhttp3.DelegatingSocketFactory;
-import okhttp3.FakeDns;
-import okhttp3.FakeProxySelector;
-import okhttp3.FallbackTestClientSocketFactory;
-import okhttp3.ForwardingRequestBody;
-import okhttp3.Headers;
-import okhttp3.JavaNetAuthenticator;
-import okhttp3.RecordingHostnameVerifier;
-import okhttp3.TlsVersion;
 import okhttp3.internal.Internal;
-import okhttp3.internal.RecordingAuthenticator;
-import okhttp3.internal.RecordingOkAuthenticator;
-import okhttp3.internal.Version;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -102,8 +89,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Locale.US;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
-import static okhttp3.internal.http.StatusLine.HTTP_PERM_REDIRECT;
-import static okhttp3.internal.http.StatusLine.HTTP_TEMP_REDIRECT;
 import static okhttp3.mockwebserver.SocketPolicy.DISCONNECT_AFTER_REQUEST;
 import static okhttp3.mockwebserver.SocketPolicy.DISCONNECT_AT_END;
 import static okhttp3.mockwebserver.SocketPolicy.DISCONNECT_AT_START;
@@ -602,8 +587,8 @@ public final class URLConnectionTest {
 
     RecordedRequest fallbackRequest = server.takeRequest();
     Assertions.assertThat(fallbackRequest.getRequestLine()).isEqualTo("GET /foo HTTP/1.1");
-    assertThat(fallbackRequest.getTlsVersion(),
-        either(equalTo(TlsVersion.TLS_1_2)).or(equalTo(TlsVersion.TLS_1_3)));
+    assertThat(fallbackRequest.getTlsVersion().toString(),
+        either(equalTo(TlsVersion.TLS_1_2.toString())).or(equalTo(TlsVersion.TLS_1_3.toString())));
   }
 
   @Test public void connectViaHttpsWithSSLFallbackFailuresRecorded() {
@@ -655,9 +640,9 @@ public final class URLConnectionTest {
 
     assertContent("def", getResponse(newRequest("/")));
 
-    Set<TlsVersion> tlsVersions =
-        EnumSet.of(TlsVersion.TLS_1_0, TlsVersion.TLS_1_2,
-            TlsVersion.TLS_1_3); // v1.2 on OpenJDK 8.
+    Set<okhttp3.TlsVersion> tlsVersions =
+        EnumSet.of(okhttp3.TlsVersion.TLS_1_0, okhttp3.TlsVersion.TLS_1_2,
+                okhttp3.TlsVersion.TLS_1_3); // v1.2 on OpenJDK 8.
 
     RecordedRequest request1 = server.takeRequest();
     Assertions.assertThat(tlsVersions.contains(request1.getTlsVersion())).isTrue();
@@ -2339,7 +2324,7 @@ public final class URLConnectionTest {
 
   private void testRedirect(boolean temporary, String method) throws Exception {
     MockResponse response1 = new MockResponse()
-        .setResponseCode(temporary ? HTTP_TEMP_REDIRECT : HTTP_PERM_REDIRECT)
+        .setResponseCode(temporary ? StatusLine.HTTP_TEMP_REDIRECT : StatusLine.HTTP_PERM_REDIRECT)
         .addHeader("Location: /page2");
     if (!method.equals("HEAD")) {
       response1.setBody("This page has moved!");
@@ -3093,8 +3078,8 @@ public final class URLConnectionTest {
   }
 
   @Test public void emptyResponseHeaderNameIsLenient() throws Exception {
-    Headers.Builder headers = new Headers.Builder();
-    Internal.instance.addLenient(headers, ":A");
+    okhttp3.Headers.Builder headers = new okhttp3.Headers.Builder();
+    okhttp3.internal.Internal.instance.addLenient(headers, ":A");
     server.enqueue(new MockResponse()
         .setHeaders(headers.build())
         .setBody("body"));
@@ -3138,14 +3123,13 @@ public final class URLConnectionTest {
   }
 
   @Test public void responseHeaderParsingIsLenient() throws Exception {
-    Headers headers = new Headers.Builder()
-        .add("Content-Length", "0")
-        .addLenient("a\tb: c\u007fd")
-        .addLenient(": ef")
-        .addLenient("\ud83c\udf69: \u2615\ufe0f")
-        .build();
+    okhttp3.Headers.Builder headers = new okhttp3.Headers.Builder();
+    headers.add("Content-Length", "0");
+    Internal.instance.addLenient(headers, "a\tb: c\u007fd");
+    Internal.instance.addLenient(headers, ": ef");
+    Internal.instance.addLenient(headers, "\ud83c\udf69: \u2615\ufe0f");
     server.enqueue(new MockResponse()
-        .setHeaders(headers));
+        .setHeaders(headers.build()));
 
     Response response = getResponse(newRequest("/"));
     Assertions.assertThat(response.code()).isEqualTo(200);

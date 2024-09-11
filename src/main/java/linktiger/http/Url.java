@@ -27,8 +27,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import linktiger.http.impl.PublicSuffixDatabase;
+
 import byebye.Util;
-import okhttp3.internal.publicsuffix.PublicSuffixDatabase;
 import okio.Buffer;
 
 import static byebye.Util.decodeHexDigit;

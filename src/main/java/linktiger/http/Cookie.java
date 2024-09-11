@@ -25,10 +25,10 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import linktiger.http.impl.HttpDate;
+import linktiger.http.impl.PublicSuffixDatabase;
+
 import byebye.Util;
-import okhttp3.Headers;
-import okhttp3.internal.http.HttpDate;
-import okhttp3.internal.publicsuffix.PublicSuffixDatabase;
 
 import static byebye.Util.UTC;
 import static byebye.Util.canonicalizeHost;

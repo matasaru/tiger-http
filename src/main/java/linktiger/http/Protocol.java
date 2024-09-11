@@ -17,8 +17,6 @@ package linktiger.http;
 
 import java.io.IOException;
 
-import okhttp3.CipherSuite;
-
 /**
  * Protocols that OkHttp implements for <a
  * href="http://tools.ietf.org/html/draft-ietf-tls-applayerprotoneg">ALPN</a> selection.

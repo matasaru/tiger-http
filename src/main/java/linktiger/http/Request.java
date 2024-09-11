@@ -21,8 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import okhttp3.Headers;
-import okhttp3.internal.http.HttpMethod;
+import linktiger.http.impl.HttpMethod;
 
 /**
  * An HTTP request. Instances of this class are immutable if their {@link #body} is null or itself
