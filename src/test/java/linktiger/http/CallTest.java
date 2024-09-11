@@ -49,6 +49,7 @@ import linktiger.http.RecordingEventListener.CallEnd;
 import linktiger.http.RecordingEventListener.ConnectionAcquired;
 import linktiger.http.RecordingEventListener.ConnectionReleased;
 import linktiger.http.RecordingEventListener.ResponseFailed;
+import linktiger.http.impl.ConnectionPool;
 import linktiger.http.impl.DoubleInetAddressDns;
 import linktiger.http.impl.RecordingOkAuthenticator;
 import linktiger.http.impl.RecordingProxySelector;

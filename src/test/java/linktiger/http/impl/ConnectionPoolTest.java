@@ -25,7 +25,6 @@ import javax.net.SocketFactory;
 
 import linktiger.http.Address;
 import linktiger.http.Call;
-import linktiger.http.ConnectionPool;
 import linktiger.http.Dns;
 import linktiger.http.HttpClient;
 import linktiger.http.Request;

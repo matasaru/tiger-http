@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import linktiger.http.impl.ConnectionPool;
 import linktiger.http.impl.http2.Header;
 
 import static org.assertj.core.api.Assertions.assertThat;

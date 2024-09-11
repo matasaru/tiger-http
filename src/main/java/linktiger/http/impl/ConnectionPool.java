@@ -14,11 +14,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package linktiger.http;
+package linktiger.http.impl;
 
 import java.util.concurrent.TimeUnit;
 
-import linktiger.http.impl.RealConnectionPool;
+import linktiger.http.Address;
 
 /**
  * Manages reuse of HTTP and HTTP/2 connections for reduced network latency. HTTP requests that

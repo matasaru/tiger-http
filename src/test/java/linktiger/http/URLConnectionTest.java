@@ -58,6 +58,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import linktiger.http.impl.ConnectionPool;
 import linktiger.http.impl.RecordingAuthenticator;
 import linktiger.http.impl.RecordingOkAuthenticator;
 import linktiger.http.impl.StatusLine;

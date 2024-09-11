@@ -22,6 +22,7 @@ import java.net.Proxy;
 import java.util.List;
 
 import linktiger.http.impl.Connection;
+import linktiger.http.impl.ConnectionPool;
 
 /**
  * Listener for metrics events. Extend this class to monitor the quantity, size, and duration of

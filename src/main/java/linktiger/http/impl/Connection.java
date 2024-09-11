@@ -38,7 +38,6 @@ import javax.net.ssl.SSLSocketFactory;
 
 import linktiger.http.Address;
 import linktiger.http.Call;
-import linktiger.http.ConnectionPool;
 import linktiger.http.ConnectionSpec;
 import linktiger.http.EventListener;
 import linktiger.http.Handshake;
