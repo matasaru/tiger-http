@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import linktiger.http.Call;
-import linktiger.http.Connection;
 import linktiger.http.Request;
 import linktiger.http.Response;
 
@@ -59,7 +58,7 @@ public final class RealInterceptorChain implements Interceptor.Chain {
     this.writeTimeout = writeTimeout;
   }
 
-  @Override public Connection connection() {
+  @Override public RealConnection connection() {
     return exchange != null ? exchange.connection() : null;
   }
 

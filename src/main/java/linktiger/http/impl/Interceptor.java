@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import linktiger.http.Call;
-import linktiger.http.Connection;
 import linktiger.http.Request;
 import linktiger.http.Response;
 
@@ -40,7 +39,7 @@ public interface Interceptor {
      * Returns the connection the request will be executed on. This is only available in the chains
      * of network interceptors; for application interceptors this is always null.
      */
-    Connection connection();
+    RealConnection connection();
 
     Call call();
 

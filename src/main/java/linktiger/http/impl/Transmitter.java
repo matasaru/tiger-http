@@ -26,7 +26,6 @@ import javax.net.ssl.SSLSocketFactory;
 
 import linktiger.http.Address;
 import linktiger.http.Call;
-import linktiger.http.Connection;
 import linktiger.http.EventListener;
 import linktiger.http.HttpClient;
 import linktiger.http.Request;
@@ -275,7 +274,7 @@ public final class Transmitter {
    */
   private IOException maybeReleaseConnection(IOException e, boolean force) {
     Socket socket;
-    Connection releasedConnection;
+    RealConnection releasedConnection;
     boolean callEnd;
     synchronized (connectionPool) {
       if (force && exchange != null) {
