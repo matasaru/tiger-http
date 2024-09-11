@@ -25,8 +25,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static byebye.Util.delimiterOffset;
-import static byebye.Util.trimSubstring;
+import linktiger.http.impl.Util;
 
 /** A cookie jar that delegates to a {@link CookieHandler}. */
 public final class JavaNetCookieJar implements CookieJar {
@@ -87,14 +86,14 @@ public final class JavaNetCookieJar implements CookieJar {
   private List<Cookie> decodeHeaderAsJavaNetCookies(Url url, String header) {
     List<Cookie> result = new ArrayList<>();
     for (int pos = 0, limit = header.length(), pairEnd; pos < limit; pos = pairEnd + 1) {
-      pairEnd = delimiterOffset(header, pos, limit, ";,");
-      int equalsSign = delimiterOffset(header, pos, pairEnd, '=');
-      String name = trimSubstring(header, pos, equalsSign);
+      pairEnd = Util.delimiterOffset(header, pos, limit, ";,");
+      int equalsSign = Util.delimiterOffset(header, pos, pairEnd, '=');
+      String name = Util.trimSubstring(header, pos, equalsSign);
       if (name.startsWith("$")) continue;
 
       // We have either name=value or just a name.
       String value = equalsSign < pairEnd
-          ? trimSubstring(header, equalsSign + 1, pairEnd)
+          ? Util.trimSubstring(header, equalsSign + 1, pairEnd)
           : "";
 
       // If the value is "quoted", drop the quotes.

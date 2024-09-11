@@ -23,8 +23,6 @@ import linktiger.http.Call;
 import linktiger.http.Request;
 import linktiger.http.Response;
 
-import static byebye.Util.checkDuration;
-
 /**
  * A concrete interceptor chain that carries the entire interceptor chain: all application
  * interceptors, the OkHttp core, all network interceptors, and finally the network caller.
@@ -67,7 +65,7 @@ public final class RealInterceptorChain implements Interceptor.Chain {
   }
 
   @Override public Interceptor.Chain withConnectTimeout(int timeout, TimeUnit unit) {
-    int millis = checkDuration("timeout", timeout, unit);
+    int millis = Util.checkDuration("timeout", timeout, unit);
     return new RealInterceptorChain(interceptors, transmitter, exchange, index, request, call,
         millis, readTimeout, writeTimeout);
   }
@@ -77,7 +75,7 @@ public final class RealInterceptorChain implements Interceptor.Chain {
   }
 
   @Override public Interceptor.Chain withReadTimeout(int timeout, TimeUnit unit) {
-    int millis = checkDuration("timeout", timeout, unit);
+    int millis = Util.checkDuration("timeout", timeout, unit);
     return new RealInterceptorChain(interceptors, transmitter, exchange, index, request, call,
         connectTimeout, millis, writeTimeout);
   }
@@ -87,7 +85,7 @@ public final class RealInterceptorChain implements Interceptor.Chain {
   }
 
   @Override public Interceptor.Chain withWriteTimeout(int timeout, TimeUnit unit) {
-    int millis = checkDuration("timeout", timeout, unit);
+    int millis = Util.checkDuration("timeout", timeout, unit);
     return new RealInterceptorChain(interceptors, transmitter, exchange, index, request, call,
         connectTimeout, readTimeout, millis);
   }

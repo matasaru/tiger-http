@@ -15,8 +15,6 @@
  */
 package linktiger.http.impl;
 
-import byebye.Util;
-
 /**
  * Runnable implementation which always sets its thread name.
  */

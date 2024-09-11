@@ -20,10 +20,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.logging.Logger;
 
+import linktiger.http.impl.Util;
+
 import okio.Buffer;
 import okio.BufferedSink;
 
-import static byebye.Util.format;
 import static java.util.logging.Level.FINE;
 
 /** Writes HTTP/2 transport frames. */
@@ -50,7 +51,7 @@ final class Http2Writer implements Closeable {
     if (closed) throw new IOException("closed");
     if (!client) return; // Nothing to write; servers don't send connection headers!
     if (logger.isLoggable(FINE)) {
-      logger.fine(format(">> CONNECTION %s", Http2.CONNECTION_PREFACE.hex()));
+      logger.fine(Util.format(">> CONNECTION %s", Http2.CONNECTION_PREFACE.hex()));
     }
     sink.write(Http2.CONNECTION_PREFACE.toByteArray());
     sink.flush();

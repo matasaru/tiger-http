@@ -25,8 +25,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import byebye.Util;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 public final class RecordingProxySelector extends ProxySelector {

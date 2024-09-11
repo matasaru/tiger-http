@@ -32,7 +32,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Logger;
 
-import byebye.Util;
+import linktiger.http.impl.Util;
+
 import okio.Buffer;
 import okio.BufferedSource;
 import okio.ByteString;

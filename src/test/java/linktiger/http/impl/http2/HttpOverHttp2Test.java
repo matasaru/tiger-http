@@ -46,8 +46,8 @@ import linktiger.http.TestLogHandler;
 import linktiger.http.TestUtil;
 import linktiger.http.impl.DoubleInetAddressDns;
 import linktiger.http.impl.RecordingOkAuthenticator;
+import linktiger.http.impl.Util;
 
-import byebye.Util;
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;

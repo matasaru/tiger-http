@@ -26,7 +26,6 @@ import javax.security.auth.x500.X500Principal;
 
 import linktiger.http.FakeSSLSession;
 
-import byebye.Util;
 import org.junit.Ignore;
 import org.junit.Test;
 

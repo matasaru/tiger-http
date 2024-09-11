@@ -18,7 +18,6 @@ package linktiger.http.impl;
 import java.io.IOException;
 import java.io.InputStream;
 
-import byebye.Util;
 import okio.Buffer;
 import okio.BufferedSource;
 import okio.GzipSource;

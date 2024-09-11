@@ -28,8 +28,6 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 
-import static byebye.Util.verifyAsIpAddress;
-
 /**
  * A HostnameVerifier consistent with <a href="http://www.ietf.org/rfc/rfc2818.txt">RFC 2818</a>.
  */
@@ -53,7 +51,7 @@ public final class OkHostnameVerifier implements HostnameVerifier {
   }
 
   public boolean verify(String host, X509Certificate certificate) {
-    return verifyAsIpAddress(host)
+    return Util.verifyAsIpAddress(host)
         ? verifyIpAddress(host, certificate)
         : verifyHostname(host, certificate);
   }

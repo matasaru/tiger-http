@@ -53,10 +53,10 @@ import linktiger.http.impl.ConnectionPool;
 import linktiger.http.impl.DoubleInetAddressDns;
 import linktiger.http.impl.RecordingOkAuthenticator;
 import linktiger.http.impl.RecordingProxySelector;
+import linktiger.http.impl.Util;
 import linktiger.http.impl.Version;
 import linktiger.http.impl.io.InMemoryFileSystem;
 
-import byebye.Util;
 import okhttp3.internal.Internal;
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;

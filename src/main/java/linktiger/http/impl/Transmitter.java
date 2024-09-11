@@ -34,7 +34,6 @@ import linktiger.http.Url;
 import okio.AsyncTimeout;
 import okio.Timeout;
 
-import static byebye.Util.sameConnection;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
@@ -121,7 +120,7 @@ public final class Transmitter {
    */
   public void prepareToConnect(Request request) {
     if (this.request != null) {
-      if (sameConnection(this.request.url(), request.url()) && exchangeFinder.hasRouteToTry()) {
+      if (Util.sameConnection(this.request.url(), request.url()) && exchangeFinder.hasRouteToTry()) {
         return; // Already ready.
       }
       if (exchange != null) throw new IllegalStateException();

@@ -30,8 +30,6 @@ import linktiger.http.Response;
 import okio.GzipSource;
 import okio.Okio;
 
-import static byebye.Util.hostHeader;
-
 /**
  * Bridges from application code to network code. First it builds a network request from a user
  * request. Then it proceeds to call the network. Finally it builds a user response from the network
@@ -66,7 +64,7 @@ public final class BridgeInterceptor implements Interceptor {
     }
 
     if (userRequest.header("Host") == null) {
-      requestBuilder.header("Host", hostHeader(userRequest.url(), false));
+      requestBuilder.header("Host", Util.hostHeader(userRequest.url(), false));
     }
 
     if (userRequest.header("Connection") == null) {

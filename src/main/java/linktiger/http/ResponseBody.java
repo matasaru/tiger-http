@@ -22,7 +22,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
 
-import byebye.Util;
+import linktiger.http.impl.Util;
 import okio.Buffer;
 import okio.BufferedSource;
 import okio.ByteString;

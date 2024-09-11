@@ -25,8 +25,6 @@ import linktiger.http.EventListener;
 import linktiger.http.HttpClient;
 import linktiger.http.Route;
 
-import byebye.Util;
-
 /**
  * Attempts to find the connections for a sequence of exchanges. This uses the following strategies:
  *

@@ -17,9 +17,9 @@ package linktiger.http.impl.http2;
 
 import java.io.IOException;
 
-import okio.ByteString;
+import linktiger.http.impl.Util;
 
-import static byebye.Util.format;
+import okio.ByteString;
 
 public final class Http2 {
   static final ByteString CONNECTION_PREFACE
@@ -70,7 +70,7 @@ public final class Http2 {
   static final String[] BINARY = new String[256];
   static {
     for (int i = 0; i < BINARY.length; i++) {
-      BINARY[i] = format("%8s", Integer.toBinaryString(i)).replace(' ', '0');
+      BINARY[i] = Util.format("%8s", Integer.toBinaryString(i)).replace(' ', '0');
     }
 
     FLAGS[FLAG_NONE] = "";
@@ -107,11 +107,11 @@ public final class Http2 {
   }
 
   static IllegalArgumentException illegalArgument(String message, Object... args) {
-    throw new IllegalArgumentException(format(message, args));
+    throw new IllegalArgumentException(Util.format(message, args));
   }
 
   static IOException ioException(String message, Object... args) throws IOException {
-    throw new IOException(format(message, args));
+    throw new IOException(Util.format(message, args));
   }
 
   /**
@@ -133,9 +133,9 @@ public final class Http2 {
    * </pre>
    */
   static String frameLog(boolean inbound, int streamId, int length, byte type, byte flags) {
-    String formattedType = type < FRAME_NAMES.length ? FRAME_NAMES[type] : format("0x%02x", type);
+    String formattedType = type < FRAME_NAMES.length ? FRAME_NAMES[type] : Util.format("0x%02x", type);
     String formattedFlags = formatFlags(type, flags);
-    return format("%s 0x%08x %5d %-13s %s", inbound ? "<<" : ">>", streamId, length,
+    return Util.format("%s 0x%08x %5d %-13s %s", inbound ? "<<" : ">>", streamId, length,
         formattedType, formattedFlags);
   }
 

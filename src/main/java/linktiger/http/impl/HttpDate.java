@@ -21,8 +21,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import static byebye.Util.UTC;
-
 /**
  * Best-effort parser for HTTP dates.
  */
@@ -40,7 +38,7 @@ public final class HttpDate {
           // Date format specified by RFC 7231 section 7.1.1.1.
           DateFormat rfc1123 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
           rfc1123.setLenient(false);
-          rfc1123.setTimeZone(UTC);
+          rfc1123.setTimeZone(Util.UTC);
           return rfc1123;
         }
       };
@@ -91,7 +89,7 @@ public final class HttpDate {
           format = new SimpleDateFormat(BROWSER_COMPATIBLE_DATE_FORMAT_STRINGS[i], Locale.US);
           // Set the timezone to use when interpreting formats that don't have a timezone. GMT is
           // specified by RFC 7231.
-          format.setTimeZone(UTC);
+          format.setTimeZone(Util.UTC);
           BROWSER_COMPATIBLE_DATE_FORMATS[i] = format;
         }
         position.setIndex(0);

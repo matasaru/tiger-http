@@ -34,8 +34,6 @@ import linktiger.http.Address;
 import linktiger.http.HttpClient;
 import linktiger.http.Route;
 
-import byebye.Util;
-
 /**
  * Manages reuse of HTTP and HTTP/2 connections for reduced network latency. HTTP requests that
  * share the same {@link Address} may share a {@link Connection}. This class implements the policy

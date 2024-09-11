@@ -55,7 +55,6 @@ import linktiger.http.impl.http2.Http2ExchangeCodec;
 import linktiger.http.impl.http2.Http2Stream;
 import linktiger.http.impl.http2.StreamResetException;
 
-import byebye.Util;
 import okio.BufferedSink;
 import okio.BufferedSource;
 import okio.Okio;

@@ -62,9 +62,9 @@ import linktiger.http.impl.ConnectionPool;
 import linktiger.http.impl.RecordingAuthenticator;
 import linktiger.http.impl.RecordingOkAuthenticator;
 import linktiger.http.impl.StatusLine;
+import linktiger.http.impl.Util;
 import linktiger.http.impl.Version;
 
-import byebye.Util;
 import okhttp3.internal.Internal;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;

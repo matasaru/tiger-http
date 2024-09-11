@@ -41,11 +41,10 @@ import javax.net.ssl.X509TrustManager;
 import linktiger.http.impl.ConnectionPool;
 import linktiger.http.impl.NullProxySelector;
 import linktiger.http.impl.OkHostnameVerifier;
+import linktiger.http.impl.Util;
 
 import okio.Sink;
 import okio.Source;
-
-import static byebye.Util.checkDuration;
 
 /**
  * Factory for {@linkplain Call calls}, which can be used to send HTTP requests and read their
@@ -395,7 +394,7 @@ public class HttpClient {
      * <p>The default value is 0 which imposes no timeout.
      */
     public Builder callTimeout(long timeout, TimeUnit unit) {
-      callTimeout = checkDuration("timeout", timeout, unit);
+      callTimeout = Util.checkDuration("timeout", timeout, unit);
       return this;
     }
 
@@ -410,7 +409,7 @@ public class HttpClient {
      * <p>The default value is 0 which imposes no timeout.
      */
     public Builder callTimeout(Duration duration) {
-      callTimeout = checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
+      callTimeout = Util.checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
       return this;
     }
 
@@ -423,7 +422,7 @@ public class HttpClient {
      * The default value is 10 seconds.
      */
     public Builder connectTimeout(long timeout, TimeUnit unit) {
-      connectTimeout = checkDuration("timeout", timeout, unit);
+      connectTimeout = Util.checkDuration("timeout", timeout, unit);
       return this;
     }
 
@@ -436,7 +435,7 @@ public class HttpClient {
      * The default value is 10 seconds.
      */
     public Builder connectTimeout(Duration duration) {
-      connectTimeout = checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
+      connectTimeout = Util.checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
       return this;
     }
 
@@ -451,7 +450,7 @@ public class HttpClient {
      * @see Source#timeout()
      */
     public Builder readTimeout(long timeout, TimeUnit unit) {
-      readTimeout = checkDuration("timeout", timeout, unit);
+      readTimeout = Util.checkDuration("timeout", timeout, unit);
       return this;
     }
 
@@ -466,7 +465,7 @@ public class HttpClient {
      * @see Source#timeout()
      */
     public Builder readTimeout(Duration duration) {
-      readTimeout = checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
+      readTimeout = Util.checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
       return this;
     }
 
@@ -480,7 +479,7 @@ public class HttpClient {
      * @see Sink#timeout()
      */
     public Builder writeTimeout(long timeout, TimeUnit unit) {
-      writeTimeout = checkDuration("timeout", timeout, unit);
+      writeTimeout = Util.checkDuration("timeout", timeout, unit);
       return this;
     }
 
@@ -494,7 +493,7 @@ public class HttpClient {
      * @see Sink#timeout()
      */
     public Builder writeTimeout(Duration duration) {
-      writeTimeout = checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
+      writeTimeout = Util.checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
       return this;
     }
 
@@ -510,7 +509,7 @@ public class HttpClient {
      * <p>The default value of 0 disables client-initiated pings.
      */
     public Builder pingInterval(long interval, TimeUnit unit) {
-      pingInterval = checkDuration("interval", interval, unit);
+      pingInterval = Util.checkDuration("interval", interval, unit);
       return this;
     }
 
@@ -526,7 +525,7 @@ public class HttpClient {
      * <p>The default value of 0 disables client-initiated pings.
      */
     public Builder pingInterval(Duration duration) {
-      pingInterval = checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
+      pingInterval = Util.checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
       return this;
     }
 

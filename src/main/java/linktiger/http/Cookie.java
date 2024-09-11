@@ -27,15 +27,7 @@ import java.util.regex.Pattern;
 
 import linktiger.http.impl.HttpDate;
 import linktiger.http.impl.PublicSuffixDatabase;
-
-import byebye.Util;
-
-import static byebye.Util.UTC;
-import static byebye.Util.canonicalizeHost;
-import static byebye.Util.delimiterOffset;
-import static byebye.Util.indexOfControlOrNonAscii;
-import static byebye.Util.trimSubstring;
-import static byebye.Util.verifyAsIpAddress;
+import linktiger.http.impl.Util;
 
 /**
  * An <a href="http://tools.ietf.org/html/rfc6265">RFC 6265</a> Cookie.
@@ -190,7 +182,7 @@ public final class Cookie {
 
     if (urlHost.endsWith(domain)
         && urlHost.charAt(urlHost.length() - domain.length() - 1) == '.'
-        && !verifyAsIpAddress(urlHost)) {
+        && !Util.verifyAsIpAddress(urlHost)) {
       return true; // As in 'example.com' matching 'www.example.com'.
     }
 
@@ -223,16 +215,16 @@ public final class Cookie {
   static Cookie parse(long currentTimeMillis, Url url, String setCookie) {
     int pos = 0;
     int limit = setCookie.length();
-    int cookiePairEnd = delimiterOffset(setCookie, pos, limit, ';');
+    int cookiePairEnd = Util.delimiterOffset(setCookie, pos, limit, ';');
 
-    int pairEqualsSign = delimiterOffset(setCookie, pos, cookiePairEnd, '=');
+    int pairEqualsSign = Util.delimiterOffset(setCookie, pos, cookiePairEnd, '=');
     if (pairEqualsSign == cookiePairEnd) return null;
 
-    String cookieName = trimSubstring(setCookie, pos, pairEqualsSign);
-    if (cookieName.isEmpty() || indexOfControlOrNonAscii(cookieName) != -1) return null;
+    String cookieName = Util.trimSubstring(setCookie, pos, pairEqualsSign);
+    if (cookieName.isEmpty() || Util.indexOfControlOrNonAscii(cookieName) != -1) return null;
 
-    String cookieValue = trimSubstring(setCookie, pairEqualsSign + 1, cookiePairEnd);
-    if (indexOfControlOrNonAscii(cookieValue) != -1) return null;
+    String cookieValue = Util.trimSubstring(setCookie, pairEqualsSign + 1, cookiePairEnd);
+    if (Util.indexOfControlOrNonAscii(cookieValue) != -1) return null;
 
     long expiresAt = HttpDate.MAX_DATE;
     long deltaSeconds = -1L;
@@ -245,12 +237,12 @@ public final class Cookie {
 
     pos = cookiePairEnd + 1;
     while (pos < limit) {
-      int attributePairEnd = delimiterOffset(setCookie, pos, limit, ';');
+      int attributePairEnd = Util.delimiterOffset(setCookie, pos, limit, ';');
 
-      int attributeEqualsSign = delimiterOffset(setCookie, pos, attributePairEnd, '=');
-      String attributeName = trimSubstring(setCookie, pos, attributeEqualsSign);
+      int attributeEqualsSign = Util.delimiterOffset(setCookie, pos, attributePairEnd, '=');
+      String attributeName = Util.trimSubstring(setCookie, pos, attributeEqualsSign);
       String attributeValue = attributeEqualsSign < attributePairEnd
-          ? trimSubstring(setCookie, attributeEqualsSign + 1, attributePairEnd)
+          ? Util.trimSubstring(setCookie, attributeEqualsSign + 1, attributePairEnd)
           : "";
 
       if (attributeName.equalsIgnoreCase("expires")) {
@@ -370,7 +362,7 @@ public final class Cookie {
     if (minute < 0 || minute > 59) throw new IllegalArgumentException();
     if (second < 0 || second > 59) throw new IllegalArgumentException();
 
-    Calendar calendar = new GregorianCalendar(UTC);
+    Calendar calendar = new GregorianCalendar(Util.UTC);
     calendar.setLenient(false);
     calendar.set(Calendar.YEAR, year);
     calendar.set(Calendar.MONTH, month - 1);
@@ -430,7 +422,7 @@ public final class Cookie {
     if (s.startsWith(".")) {
       s = s.substring(1);
     }
-    String canonicalDomain = canonicalizeHost(s);
+    String canonicalDomain = Util.canonicalizeHost(s);
     if (canonicalDomain == null) {
       throw new IllegalArgumentException();
     }

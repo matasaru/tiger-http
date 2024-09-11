@@ -28,9 +28,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import linktiger.http.Headers;
 import linktiger.http.TestUtil;
+import linktiger.http.impl.Util;
 import linktiger.http.impl.http2.MockHttp2Peer.InFrame;
 
-import byebye.Util;
 import okio.AsyncTimeout;
 import okio.Buffer;
 import okio.BufferedSink;
@@ -45,7 +45,6 @@ import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.rules.Timeout;
 
-import static byebye.Util.EMPTY_BYTE_ARRAY;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.Offset.offset;
@@ -229,7 +228,7 @@ public final class Http2ConnectionTest {
     peer.acceptFrame(); // ACK
     peer.acceptFrame(); // SYN_STREAM 3
     peer.acceptFrame(); // SYN_STREAM 5
-    peer.sendFrame().goAway(3, ErrorCode.PROTOCOL_ERROR, EMPTY_BYTE_ARRAY);
+    peer.sendFrame().goAway(3, ErrorCode.PROTOCOL_ERROR, Util.EMPTY_BYTE_ARRAY);
     peer.acceptFrame(); // PING
     peer.sendFrame().ping(true, Http2Connection.AWAIT_PING, 0);
     peer.acceptFrame(); // DATA STREAM 3
@@ -356,7 +355,7 @@ public final class Http2ConnectionTest {
     Http2Connection connection = connect(peer);
     Http2Stream client = connection.newStream(TestUtil.headerEntries("b", "banana"), true);
     BufferedSink out = Okio.buffer(client.getSink());
-    out.write(EMPTY_BYTE_ARRAY);
+    out.write(Util.EMPTY_BYTE_ARRAY);
     out.flush();
     out.close();
 

@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import linktiger.http.TestUtil;
+import linktiger.http.impl.Util;
 
-import byebye.Util;
 import okio.Buffer;
 import okio.BufferedSink;
 import okio.BufferedSource;

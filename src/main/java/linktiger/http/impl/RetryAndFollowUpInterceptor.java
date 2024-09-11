@@ -33,7 +33,6 @@ import linktiger.http.Route;
 import linktiger.http.Url;
 import linktiger.http.impl.http2.ConnectionShutdownException;
 
-import static byebye.Util.sameConnection;
 import static java.net.HttpURLConnection.HTTP_CLIENT_TIMEOUT;
 import static java.net.HttpURLConnection.HTTP_MOVED_PERM;
 import static java.net.HttpURLConnection.HTTP_MOVED_TEMP;
@@ -269,7 +268,7 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
         // When redirecting across hosts, drop all authentication headers. This
         // is potentially annoying to the application layer since they have no
         // way to retain them.
-        if (!sameConnection(userResponse.request().url(), url)) {
+        if (!Util.sameConnection(userResponse.request().url(), url)) {
           requestBuilder.removeHeader("Authorization");
         }
 

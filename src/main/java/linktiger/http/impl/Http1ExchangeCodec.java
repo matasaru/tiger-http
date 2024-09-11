@@ -26,7 +26,6 @@ import linktiger.http.Request;
 import linktiger.http.Response;
 import linktiger.http.Url;
 
-import byebye.Util;
 import okio.Buffer;
 import okio.BufferedSink;
 import okio.BufferedSource;
@@ -35,7 +34,6 @@ import okio.Sink;
 import okio.Source;
 import okio.Timeout;
 
-import static byebye.Util.checkOffsetAndCount;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
@@ -315,7 +313,7 @@ public final class Http1ExchangeCodec implements ExchangeCodec {
 
     @Override public void write(Buffer source, long byteCount) throws IOException {
       if (closed) throw new IllegalStateException("closed");
-      checkOffsetAndCount(source.size(), 0, byteCount);
+      Util.checkOffsetAndCount(source.size(), 0, byteCount);
       sink.write(source, byteCount);
     }
 

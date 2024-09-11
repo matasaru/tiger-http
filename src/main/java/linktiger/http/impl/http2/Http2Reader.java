@@ -21,13 +21,14 @@ import java.io.IOException;
 import java.util.List;
 import java.util.logging.Logger;
 
+import linktiger.http.impl.Util;
+
 import okio.Buffer;
 import okio.BufferedSource;
 import okio.ByteString;
 import okio.Source;
 import okio.Timeout;
 
-import static byebye.Util.format;
 import static java.util.logging.Level.FINE;
 import static okio.ByteString.EMPTY;
 
@@ -65,7 +66,7 @@ final class Http2Reader implements Closeable {
     } else {
       // The server reads the CONNECTION_PREFACE byte string.
       ByteString connectionPreface = source.readByteString(Http2.CONNECTION_PREFACE.size());
-      if (logger.isLoggable(FINE)) logger.fine(format("<< CONNECTION %s", connectionPreface.hex()));
+      if (logger.isLoggable(FINE)) logger.fine(Util.format("<< CONNECTION %s", connectionPreface.hex()));
       if (!Http2.CONNECTION_PREFACE.equals(connectionPreface)) {
         throw Http2.ioException("Expected a connection header but was %s", connectionPreface.utf8());
       }

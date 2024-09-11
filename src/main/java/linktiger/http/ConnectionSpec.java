@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Objects;
 import javax.net.ssl.SSLSocket;
 
-import byebye.Util;
+import linktiger.http.impl.Util;
 
 /**
  * Specifies configuration for the socket connection that HTTP traffic travels through. For {@code

@@ -15,7 +15,7 @@
  */
 package linktiger.http.impl.http2;
 
-import byebye.Util;
+import linktiger.http.impl.Util;
 import okio.ByteString;
 
 /** HTTP header: the name is an ASCII string, but the value can be UTF-8. */
