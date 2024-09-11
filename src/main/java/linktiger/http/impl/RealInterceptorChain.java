@@ -58,7 +58,7 @@ public final class RealInterceptorChain implements Interceptor.Chain {
     this.writeTimeout = writeTimeout;
   }
 
-  @Override public RealConnection connection() {
+  @Override public Connection connection() {
     return exchange != null ? exchange.connection() : null;
   }
 

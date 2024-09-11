@@ -114,7 +114,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  * make bookkeeping easier for the caller: releasing the allocation as soon as the terminal stream
  * has been found. But only complete the stream once its data stream has been exhausted.
  */
-public final class RealConnection extends Http2Connection.Listener {
+public final class Connection extends Http2Connection.Listener {
 
   private static final int MAX_TUNNEL_ATTEMPTS = 21;
 
@@ -166,7 +166,7 @@ public final class RealConnection extends Http2Connection.Listener {
   /** Nanotime timestamp when {@code allocations.size()} reached zero. */
   long idleAtNanos = Long.MAX_VALUE;
 
-  public RealConnection(RealConnectionPool connectionPool, Route route) {
+  public Connection(RealConnectionPool connectionPool, Route route) {
     this.connectionPool = connectionPool;
     this.route = route;
   }
@@ -179,9 +179,9 @@ public final class RealConnection extends Http2Connection.Listener {
     }
   }
 
-  static RealConnection testConnection(
+  static Connection testConnection(
       RealConnectionPool connectionPool, Route route, Socket socket, long idleAtNanos) {
-    RealConnection result = new RealConnection(connectionPool, route);
+    Connection result = new Connection(connectionPool, route);
     result.socket = socket;
     result.idleAtNanos = idleAtNanos;
     return result;

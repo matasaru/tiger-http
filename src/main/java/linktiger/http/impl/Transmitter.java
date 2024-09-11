@@ -63,7 +63,7 @@ public final class Transmitter {
   private ExchangeFinder exchangeFinder;
 
   // Guarded by connectionPool.
-  public RealConnection connection;
+  public Connection connection;
   private Exchange exchange;
   private boolean exchangeRequestDone;
   private boolean exchangeResponseDone;
@@ -173,7 +173,7 @@ public final class Transmitter {
     }
   }
 
-  void acquireConnectionNoEvents(RealConnection connection) {
+  void acquireConnectionNoEvents(Connection connection) {
     assert (Thread.holdsLock(connectionPool));
 
     if (this.connection != null) throw new IllegalStateException();
@@ -199,7 +199,7 @@ public final class Transmitter {
 
     if (index == -1) throw new IllegalStateException();
 
-    RealConnection released = this.connection;
+    Connection released = this.connection;
     released.transmitters.remove(index);
     this.connection = null;
 
@@ -274,7 +274,7 @@ public final class Transmitter {
    */
   private IOException maybeReleaseConnection(IOException e, boolean force) {
     Socket socket;
-    RealConnection releasedConnection;
+    Connection releasedConnection;
     boolean callEnd;
     synchronized (connectionPool) {
       if (force && exchange != null) {
@@ -331,7 +331,7 @@ public final class Transmitter {
    */
   public void cancel() {
     Exchange exchangeToCancel;
-    RealConnection connectionToCancel;
+    Connection connectionToCancel;
     synchronized (connectionPool) {
       canceled = true;
       exchangeToCancel = exchange;

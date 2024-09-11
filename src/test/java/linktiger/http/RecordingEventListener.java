@@ -25,7 +25,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-import linktiger.http.impl.RealConnection;
+import linktiger.http.impl.Connection;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -110,11 +110,11 @@ public final class RecordingEventListener extends EventListener {
     logEvent(new ConnectFailed(call, inetSocketAddress, proxy, protocol, ioe));
   }
 
-  @Override public void connectionAcquired(Call call, RealConnection connection) {
+  @Override public void connectionAcquired(Call call, Connection connection) {
     logEvent(new ConnectionAcquired(call, connection));
   }
 
-  @Override public void connectionReleased(Call call, RealConnection connection) {
+  @Override public void connectionReleased(Call call, Connection connection) {
     logEvent(new ConnectionReleased(call, connection));
   }
 
@@ -298,18 +298,18 @@ public final class RecordingEventListener extends EventListener {
   }
 
   static final class ConnectionAcquired extends CallEvent {
-    final RealConnection connection;
+    final Connection connection;
 
-    ConnectionAcquired(Call call, RealConnection connection) {
+    ConnectionAcquired(Call call, Connection connection) {
       super(call, connection);
       this.connection = connection;
     }
   }
 
   static final class ConnectionReleased extends CallEvent {
-    final RealConnection connection;
+    final Connection connection;
 
-    ConnectionReleased(Call call, RealConnection connection) {
+    ConnectionReleased(Call call, Connection connection) {
       super(call, connection);
       this.connection = connection;
     }

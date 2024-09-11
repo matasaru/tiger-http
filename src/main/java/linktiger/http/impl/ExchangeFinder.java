@@ -36,7 +36,7 @@ import byebye.Util;
  *
  *   <li>If there is a connection in the pool that can satisfy the request it is used. Note that
  *       it is possible for shared exchanges to make requests to different host names! See {@link
- *       RealConnection#isEligible} for details.
+ *       Connection#isEligible} for details.
  *
  *   <li>If there's no existing connection, make a list of routes (which may require blocking DNS
  *       lookups) and attempt a new connection them. When failures occur, retries iterate the list
@@ -59,7 +59,7 @@ final class ExchangeFinder {
 
   // State guarded by connectionPool.
   private final RouteSelector routeSelector;
-  private RealConnection connectingConnection;
+  private Connection connectingConnection;
   private boolean hasStreamFailure;
   private Route nextRouteToTry;
 
@@ -83,7 +83,7 @@ final class ExchangeFinder {
     boolean connectionRetryEnabled = client.retryOnConnectionFailure();
 
     try {
-      RealConnection resultConnection = findHealthyConnection(connectTimeout, readTimeout,
+      Connection resultConnection = findHealthyConnection(connectTimeout, readTimeout,
           writeTimeout, pingIntervalMillis, connectionRetryEnabled, doExtensiveHealthChecks);
       return resultConnection.newCodec(client, chain);
     } catch (RouteException e) {
@@ -99,11 +99,11 @@ final class ExchangeFinder {
    * Finds a connection and returns it if it is healthy. If it is unhealthy the process is repeated
    * until a healthy connection is found.
    */
-  private RealConnection findHealthyConnection(int connectTimeout, int readTimeout,
+  private Connection findHealthyConnection(int connectTimeout, int readTimeout,
       int writeTimeout, int pingIntervalMillis, boolean connectionRetryEnabled,
       boolean doExtensiveHealthChecks) throws IOException {
     while (true) {
-      RealConnection candidate = findConnection(connectTimeout, readTimeout, writeTimeout,
+      Connection candidate = findConnection(connectTimeout, readTimeout, writeTimeout,
           pingIntervalMillis, connectionRetryEnabled);
 
       // If this is a brand new connection, we can skip the extensive health checks.
@@ -128,12 +128,12 @@ final class ExchangeFinder {
    * Returns a connection to host a new stream. This prefers the existing connection if it exists,
    * then the pool, finally building a new connection.
    */
-  private RealConnection findConnection(int connectTimeout, int readTimeout, int writeTimeout,
+  private Connection findConnection(int connectTimeout, int readTimeout, int writeTimeout,
       int pingIntervalMillis, boolean connectionRetryEnabled) throws IOException {
     boolean foundPooledConnection = false;
-    RealConnection result = null;
+    Connection result = null;
     Route selectedRoute = null;
-    RealConnection releasedConnection;
+    Connection releasedConnection;
     Socket toClose;
     synchronized (connectionPool) {
       if (transmitter.isCanceled()) throw new IOException("Canceled");
@@ -212,7 +212,7 @@ final class ExchangeFinder {
 
         // Create a connection and assign it to this allocation immediately. This makes it possible
         // for an asynchronous cancel() to interrupt the handshake we're about to do.
-        result = new RealConnection(connectionPool, selectedRoute);
+        result = new Connection(connectionPool, selectedRoute);
         connectingConnection = result;
       }
     }
@@ -258,7 +258,7 @@ final class ExchangeFinder {
     return result;
   }
 
-  RealConnection connectingConnection() {
+  Connection connectingConnection() {
     assert (Thread.holdsLock(connectionPool));
     return connectingConnection;
   }

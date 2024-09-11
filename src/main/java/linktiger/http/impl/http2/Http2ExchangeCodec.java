@@ -30,7 +30,7 @@ import linktiger.http.Response;
 import linktiger.http.impl.ExchangeCodec;
 import linktiger.http.impl.HttpHeaders;
 import linktiger.http.impl.Interceptor;
-import linktiger.http.impl.RealConnection;
+import linktiger.http.impl.Connection;
 import linktiger.http.impl.RequestLine;
 import linktiger.http.impl.StatusLine;
 
@@ -73,24 +73,24 @@ public final class Http2ExchangeCodec implements ExchangeCodec {
       UPGRADE);
 
   private final Interceptor.Chain chain;
-  private final RealConnection realConnection;
-  private final Http2Connection connection;
+  private final Connection connection;
+  private final Http2Connection http2Connection;
   private volatile Http2Stream stream;
   private final Protocol protocol;
   private volatile boolean canceled;
 
-  public Http2ExchangeCodec(HttpClient client, RealConnection realConnection,
-      Interceptor.Chain chain, Http2Connection connection) {
-    this.realConnection = realConnection;
-    this.chain = chain;
+  public Http2ExchangeCodec(HttpClient client, Connection connection,
+      Interceptor.Chain chain, Http2Connection http2Connection) {
     this.connection = connection;
+    this.chain = chain;
+    this.http2Connection = http2Connection;
     this.protocol = client.protocols().contains(Protocol.H2_PRIOR_KNOWLEDGE)
         ? Protocol.H2_PRIOR_KNOWLEDGE
         : Protocol.HTTP_2;
   }
 
-  @Override public RealConnection connection() {
-    return realConnection;
+  @Override public Connection connection() {
+    return connection;
   }
 
   @Override public Sink createRequestBody(Request request, long contentLength) {
@@ -102,7 +102,7 @@ public final class Http2ExchangeCodec implements ExchangeCodec {
 
     boolean hasRequestBody = request.body() != null;
     List<Header> requestHeaders = http2HeadersList(request);
-    stream = connection.newStream(requestHeaders, hasRequestBody);
+    stream = http2Connection.newStream(requestHeaders, hasRequestBody);
     // We may have been asked to cancel while creating the new stream and sending the request
     // headers, but there was still no stream to close.
     if (canceled) {
@@ -114,7 +114,7 @@ public final class Http2ExchangeCodec implements ExchangeCodec {
   }
 
   @Override public void flushRequest() throws IOException {
-    connection.flush();
+    http2Connection.flush();
   }
 
   @Override public void finishRequest() throws IOException {

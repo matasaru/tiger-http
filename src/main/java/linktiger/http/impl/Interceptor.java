@@ -39,7 +39,7 @@ public interface Interceptor {
      * Returns the connection the request will be executed on. This is only available in the chains
      * of network interceptors; for application interceptors this is always null.
      */
-    RealConnection connection();
+    Connection connection();
 
     Call call();
 

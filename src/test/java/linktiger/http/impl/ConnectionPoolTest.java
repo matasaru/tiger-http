@@ -48,7 +48,7 @@ public final class ConnectionPoolTest {
     RealConnectionPool pool = new RealConnectionPool(Integer.MAX_VALUE, 100L, TimeUnit.NANOSECONDS);
     pool.cleanupRunning = true; // Prevent the cleanup runnable from being started.
 
-    RealConnection c1 = newConnection(pool, routeA1, 50L);
+    Connection c1 = newConnection(pool, routeA1, 50L);
 
     // Running at time 50, the pool returns that nothing can be evicted until time 150.
     assertThat(pool.cleanup(50L)).isEqualTo(100L);
@@ -81,7 +81,7 @@ public final class ConnectionPoolTest {
     RealConnectionPool pool = poolApi.delegate();
     pool.cleanupRunning = true; // Prevent the cleanup runnable from being started.
 
-    RealConnection c1 = newConnection(pool, routeA1, 50L);
+    Connection c1 = newConnection(pool, routeA1, 50L);
     synchronized (pool) {
       HttpClient client = new HttpClient.Builder()
           .connectionPool(poolApi)
@@ -112,8 +112,8 @@ public final class ConnectionPoolTest {
     RealConnectionPool pool = new RealConnectionPool(Integer.MAX_VALUE, 100L, TimeUnit.NANOSECONDS);
     pool.cleanupRunning = true; // Prevent the cleanup runnable from being started.
 
-    RealConnection c1 = newConnection(pool, routeA1, 75L);
-    RealConnection c2 = newConnection(pool, routeB1, 50L);
+    Connection c1 = newConnection(pool, routeA1, 75L);
+    Connection c2 = newConnection(pool, routeB1, 50L);
 
     // Running at time 75, the pool returns that nothing can be evicted until time 150.
     assertThat(pool.cleanup(75L)).isEqualTo(75L);
@@ -144,8 +144,8 @@ public final class ConnectionPoolTest {
     RealConnectionPool pool = new RealConnectionPool(2, 100L, TimeUnit.NANOSECONDS);
     pool.cleanupRunning = true; // Prevent the cleanup runnable from being started.
 
-    RealConnection c1 = newConnection(pool, routeA1, 50L);
-    RealConnection c2 = newConnection(pool, routeB1, 75L);
+    Connection c1 = newConnection(pool, routeA1, 50L);
+    Connection c2 = newConnection(pool, routeB1, 75L);
 
     // With 2 connections, there's no need to evict until the connections time out.
     assertThat(pool.cleanup(100L)).isEqualTo(50L);
@@ -154,7 +154,7 @@ public final class ConnectionPoolTest {
     assertThat(c2.socket().isClosed()).isFalse();
 
     // Add a third connection
-    RealConnection c3 = newConnection(pool, routeC1, 75L);
+    Connection c3 = newConnection(pool, routeC1, 75L);
 
     // The third connection bounces the first.
     assertThat(pool.cleanup(100L)).isEqualTo(0L);
@@ -169,7 +169,7 @@ public final class ConnectionPoolTest {
     RealConnectionPool pool = poolApi.delegate();
     pool.cleanupRunning = true; // Prevent the cleanup runnable from being started.
 
-    RealConnection c1 = newConnection(pool, routeA1, 0L);
+    Connection c1 = newConnection(pool, routeA1, 0L);
     allocateAndLeakAllocation(poolApi, c1);
 
     TestUtil.awaitGarbageCollection();
@@ -181,7 +181,7 @@ public final class ConnectionPoolTest {
   }
 
   /** Use a helper method so there's no hidden reference remaining on the stack. */
-  private void allocateAndLeakAllocation(ConnectionPool pool, RealConnection connection) {
+  private void allocateAndLeakAllocation(ConnectionPool pool, Connection connection) {
     synchronized (pool.delegate()) {
       HttpClient client = new HttpClient.Builder()
           .connectionPool(pool)
@@ -193,8 +193,8 @@ public final class ConnectionPoolTest {
     }
   }
 
-  private RealConnection newConnection(RealConnectionPool pool, Route route, long idleAtNanos) {
-    RealConnection result = RealConnection.testConnection(pool, route, new Socket(), idleAtNanos);
+  private Connection newConnection(RealConnectionPool pool, Route route, long idleAtNanos) {
+    Connection result = Connection.testConnection(pool, route, new Socket(), idleAtNanos);
     synchronized (pool) {
       pool.put(result);
     }

@@ -72,7 +72,7 @@ public final class Http1ExchangeCodec implements ExchangeCodec {
   private final HttpClient client;
 
   /** The connection that carries this stream. */
-  private final RealConnection realConnection;
+  private final Connection connection;
 
   private final BufferedSource source;
   private final BufferedSink sink;
@@ -85,16 +85,16 @@ public final class Http1ExchangeCodec implements ExchangeCodec {
    */
   private Headers trailers;
 
-  public Http1ExchangeCodec(HttpClient client, RealConnection realConnection,
+  public Http1ExchangeCodec(HttpClient client, Connection connection,
       BufferedSource source, BufferedSink sink) {
     this.client = client;
-    this.realConnection = realConnection;
+    this.connection = connection;
     this.source = source;
     this.sink = sink;
   }
 
-  @Override public RealConnection connection() {
-    return realConnection;
+  @Override public Connection connection() {
+    return connection;
   }
 
   @Override public Sink createRequestBody(Request request, long contentLength) throws IOException {
@@ -117,7 +117,7 @@ public final class Http1ExchangeCodec implements ExchangeCodec {
   }
 
   @Override public void cancel() {
-    if (realConnection != null) realConnection.cancel();
+    if (connection != null) connection.cancel();
   }
 
   /**
@@ -132,7 +132,7 @@ public final class Http1ExchangeCodec implements ExchangeCodec {
    */
   @Override public void writeRequestHeaders(Request request) throws IOException {
     String requestLine = RequestLine.get(
-        request, realConnection.route().proxy().type());
+        request, connection.route().proxy().type());
     writeRequest(request.headers(), requestLine);
   }
 
@@ -225,8 +225,8 @@ public final class Http1ExchangeCodec implements ExchangeCodec {
     } catch (EOFException e) {
       // Provide more context if the server ends the stream before sending a response.
       String address = "unknown";
-      if (realConnection != null) {
-        address = realConnection.route().address().url().redact();
+      if (connection != null) {
+        address = connection.route().address().url().redact();
       }
       throw new IOException("unexpected end of stream on "
           + address, e);
@@ -276,7 +276,7 @@ public final class Http1ExchangeCodec implements ExchangeCodec {
   private Source newUnknownLengthSource() {
     if (state != STATE_OPEN_RESPONSE_BODY) throw new IllegalStateException("state: " + state);
     state = STATE_READING_RESPONSE_BODY;
-    realConnection.noNewExchanges();
+    connection.noNewExchanges();
     return new UnknownLengthSource();
   }
 
@@ -383,7 +383,7 @@ public final class Http1ExchangeCodec implements ExchangeCodec {
       try {
         return source.read(sink, byteCount);
       } catch (IOException e) {
-        realConnection.noNewExchanges();
+        connection.noNewExchanges();
         responseBodyComplete();
         throw e;
       }
@@ -420,7 +420,7 @@ public final class Http1ExchangeCodec implements ExchangeCodec {
 
       long read = super.read(sink, Math.min(bytesRemaining, byteCount));
       if (read == -1) {
-        realConnection.noNewExchanges(); // The server didn't supply the promised content length.
+        connection.noNewExchanges(); // The server didn't supply the promised content length.
         ProtocolException e = new ProtocolException("unexpected end of stream");
         responseBodyComplete();
         throw e;
@@ -437,7 +437,7 @@ public final class Http1ExchangeCodec implements ExchangeCodec {
       if (closed) return;
 
       if (bytesRemaining != 0 && !Util.discard(this, DISCARD_STREAM_TIMEOUT_MILLIS, MILLISECONDS)) {
-        realConnection.noNewExchanges(); // Unread bytes remain on the stream.
+        connection.noNewExchanges(); // Unread bytes remain on the stream.
         responseBodyComplete();
       }
 
@@ -468,7 +468,7 @@ public final class Http1ExchangeCodec implements ExchangeCodec {
 
       long read = super.read(sink, Math.min(byteCount, bytesRemainingInChunk));
       if (read == -1) {
-        realConnection.noNewExchanges(); // The server didn't supply the promised chunk length.
+        connection.noNewExchanges(); // The server didn't supply the promised chunk length.
         ProtocolException e = new ProtocolException("unexpected end of stream");
         responseBodyComplete();
         throw e;
@@ -503,7 +503,7 @@ public final class Http1ExchangeCodec implements ExchangeCodec {
     @Override public void close() throws IOException {
       if (closed) return;
       if (hasMoreChunks && !Util.discard(this, DISCARD_STREAM_TIMEOUT_MILLIS, MILLISECONDS)) {
-        realConnection.noNewExchanges(); // Unread bytes remain on the stream.
+        connection.noNewExchanges(); // Unread bytes remain on the stream.
         responseBodyComplete();
       }
       closed = true;

@@ -53,7 +53,7 @@ public final class Exchange {
     this.codec = codec;
   }
 
-  public RealConnection connection() {
+  public Connection connection() {
     return codec.connection();
   }
 

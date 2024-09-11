@@ -34,7 +34,7 @@ public interface ExchangeCodec {
   int DISCARD_STREAM_TIMEOUT_MILLIS = 100;
 
   /** Returns the connection that carries this codec. */
-  RealConnection connection();
+  Connection connection();
 
   /** Returns an output stream where the request body can be streamed. */
   Sink createRequestBody(Request request, long contentLength) throws IOException;

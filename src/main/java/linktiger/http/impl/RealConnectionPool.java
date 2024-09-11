@@ -67,7 +67,7 @@ public final class RealConnectionPool {
     }
   };
 
-  private final Deque<RealConnection> connections = new ArrayDeque<>();
+  private final Deque<Connection> connections = new ArrayDeque<>();
   final RouteDatabase routeDatabase = new RouteDatabase();
   boolean cleanupRunning;
 
@@ -83,7 +83,7 @@ public final class RealConnectionPool {
 
   public synchronized int idleConnectionCount() {
     int total = 0;
-    for (RealConnection connection : connections) {
+    for (Connection connection : connections) {
       if (connection.transmitters.isEmpty()) total++;
     }
     return total;
@@ -104,7 +104,7 @@ public final class RealConnectionPool {
   boolean transmitterAcquirePooledConnection(Address address, Transmitter transmitter,
       List<Route> routes, boolean requireMultiplexed) {
     assert (Thread.holdsLock(this));
-    for (RealConnection connection : connections) {
+    for (Connection connection : connections) {
       if (requireMultiplexed && !connection.isMultiplexed()) continue;
       if (!connection.isEligible(address, routes)) continue;
       transmitter.acquireConnectionNoEvents(connection);
@@ -113,7 +113,7 @@ public final class RealConnectionPool {
     return false;
   }
 
-  void put(RealConnection connection) {
+  void put(Connection connection) {
     assert (Thread.holdsLock(this));
     if (!cleanupRunning) {
       cleanupRunning = true;
@@ -126,7 +126,7 @@ public final class RealConnectionPool {
    * Notify this pool that {@code connection} has become idle. Returns true if the connection has
    * been removed from the pool and should be closed.
    */
-  boolean connectionBecameIdle(RealConnection connection) {
+  boolean connectionBecameIdle(Connection connection) {
     assert (Thread.holdsLock(this));
     if (connection.noNewExchanges || maxIdleConnections == 0) {
       connections.remove(connection);
@@ -138,10 +138,10 @@ public final class RealConnectionPool {
   }
 
   public void evictAll() {
-    List<RealConnection> evictedConnections = new ArrayList<>();
+    List<Connection> evictedConnections = new ArrayList<>();
     synchronized (this) {
-      for (Iterator<RealConnection> i = connections.iterator(); i.hasNext(); ) {
-        RealConnection connection = i.next();
+      for (Iterator<Connection> i = connections.iterator(); i.hasNext(); ) {
+        Connection connection = i.next();
         if (connection.transmitters.isEmpty()) {
           connection.noNewExchanges = true;
           evictedConnections.add(connection);
@@ -150,7 +150,7 @@ public final class RealConnectionPool {
       }
     }
 
-    for (RealConnection connection : evictedConnections) {
+    for (Connection connection : evictedConnections) {
       try {
         connection.socket().close();
       } catch (IOException _) {
@@ -168,13 +168,13 @@ public final class RealConnectionPool {
   long cleanup(long now) {
     int inUseConnectionCount = 0;
     int idleConnectionCount = 0;
-    RealConnection longestIdleConnection = null;
+    Connection longestIdleConnection = null;
     long longestIdleDurationNs = Long.MIN_VALUE;
 
     // Find either a connection to evict, or the time that the next eviction is due.
     synchronized (this) {
-      for (Iterator<RealConnection> i = connections.iterator(); i.hasNext(); ) {
-        RealConnection connection = i.next();
+      for (Iterator<Connection> i = connections.iterator(); i.hasNext(); ) {
+        Connection connection = i.next();
 
         // If the connection is in use, keep searching.
         if (pruneAndGetAllocationCount(connection, now) > 0) {
@@ -227,7 +227,7 @@ public final class RealConnectionPool {
    * application code has abandoned them. Leak detection is imprecise and relies on garbage
    * collection.
    */
-  private int pruneAndGetAllocationCount(RealConnection connection, long now) {
+  private int pruneAndGetAllocationCount(Connection connection, long now) {
     List<Reference<Transmitter>> references = connection.transmitters;
     for (int i = 0; i < references.size(); ) {
       Reference<Transmitter> reference = references.get(i);
