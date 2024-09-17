@@ -16,7 +16,6 @@
 package linktiger.http.impl;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 import linktiger.http.Call;
 import linktiger.http.Request;
@@ -45,14 +44,8 @@ public interface Interceptor {
 
     int connectTimeoutMillis();
 
-    Chain withConnectTimeout(int timeout, TimeUnit unit);
-
     int readTimeoutMillis();
 
-    Chain withReadTimeout(int timeout, TimeUnit unit);
-
     int writeTimeoutMillis();
-
-    Chain withWriteTimeout(int timeout, TimeUnit unit);
   }
 }

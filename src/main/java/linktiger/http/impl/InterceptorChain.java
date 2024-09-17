@@ -17,7 +17,6 @@ package linktiger.http.impl;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import linktiger.http.Call;
 import linktiger.http.Request;
@@ -64,30 +63,12 @@ public final class InterceptorChain implements Interceptor.Chain {
     return connectTimeout;
   }
 
-  @Override public Interceptor.Chain withConnectTimeout(int timeout, TimeUnit unit) {
-    int millis = Util.checkDuration("timeout", timeout, unit);
-    return new InterceptorChain(interceptors, transmitter, exchange, index, request, call,
-        millis, readTimeout, writeTimeout);
-  }
-
   @Override public int readTimeoutMillis() {
     return readTimeout;
   }
 
-  @Override public Interceptor.Chain withReadTimeout(int timeout, TimeUnit unit) {
-    int millis = Util.checkDuration("timeout", timeout, unit);
-    return new InterceptorChain(interceptors, transmitter, exchange, index, request, call,
-        connectTimeout, millis, writeTimeout);
-  }
-
   @Override public int writeTimeoutMillis() {
     return writeTimeout;
-  }
-
-  @Override public Interceptor.Chain withWriteTimeout(int timeout, TimeUnit unit) {
-    int millis = Util.checkDuration("timeout", timeout, unit);
-    return new InterceptorChain(interceptors, transmitter, exchange, index, request, call,
-        connectTimeout, readTimeout, millis);
   }
 
   public Transmitter transmitter() {
