@@ -23,7 +23,7 @@ import linktiger.http.impl.BridgeInterceptor;
 import linktiger.http.impl.CallServerInterceptor;
 import linktiger.http.impl.ConnectInterceptor;
 import linktiger.http.impl.Interceptor;
-import linktiger.http.impl.RealInterceptorChain;
+import linktiger.http.impl.InterceptorChain;
 import linktiger.http.impl.RetryAndFollowUpInterceptor;
 import linktiger.http.impl.Transmitter;
 
@@ -167,7 +167,7 @@ public class Call implements Cloneable {
     interceptors.add(new ConnectInterceptor(client));
     interceptors.add(new CallServerInterceptor());
 
-    Interceptor.Chain chain = new RealInterceptorChain(interceptors, transmitter, null, 0,
+    Interceptor.Chain chain = new InterceptorChain(interceptors, transmitter, null, 0,
             originalRequest, this, client.connectTimeoutMillis(),
             client.readTimeoutMillis(), client.writeTimeoutMillis());
 

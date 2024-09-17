@@ -28,7 +28,7 @@ import okio.Okio;
 public final class CallServerInterceptor implements Interceptor {
 
   @Override public Response intercept(Chain chain) throws IOException {
-    RealInterceptorChain realChain = (RealInterceptorChain) chain;
+    InterceptorChain realChain = (InterceptorChain) chain;
     Exchange exchange = realChain.exchange();
     Request request = realChain.request();
 

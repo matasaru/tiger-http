@@ -31,7 +31,7 @@ public final class ConnectInterceptor implements Interceptor {
   }
 
   @Override public Response intercept(Chain chain) throws IOException {
-    RealInterceptorChain realChain = (RealInterceptorChain) chain;
+    InterceptorChain realChain = (InterceptorChain) chain;
     Request request = realChain.request();
     Transmitter transmitter = realChain.transmitter();
 

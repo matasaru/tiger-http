@@ -61,7 +61,7 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
 
   @Override public Response intercept(Chain chain) throws IOException {
     Request request = chain.request();
-    RealInterceptorChain realChain = (RealInterceptorChain) chain;
+    InterceptorChain realChain = (InterceptorChain) chain;
     Transmitter transmitter = realChain.transmitter();
 
     int followUpCount = 0;

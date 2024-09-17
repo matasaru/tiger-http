@@ -30,7 +30,7 @@ import linktiger.http.Response;
  * <p>If the chain is for an application interceptor then {@link #connection} must be null.
  * Otherwise it is for a network interceptor and {@link #connection} must be non-null.
  */
-public final class RealInterceptorChain implements Interceptor.Chain {
+public final class InterceptorChain implements Interceptor.Chain {
   private final List<Interceptor> interceptors;
   private final Transmitter transmitter;
   private final Exchange exchange;
@@ -42,7 +42,7 @@ public final class RealInterceptorChain implements Interceptor.Chain {
   private final int writeTimeout;
   private int calls;
 
-  public RealInterceptorChain(List<Interceptor> interceptors, Transmitter transmitter,
+  public InterceptorChain(List<Interceptor> interceptors, Transmitter transmitter,
       Exchange exchange, int index, Request request, Call call,
       int connectTimeout, int readTimeout, int writeTimeout) {
     this.interceptors = interceptors;
@@ -66,7 +66,7 @@ public final class RealInterceptorChain implements Interceptor.Chain {
 
   @Override public Interceptor.Chain withConnectTimeout(int timeout, TimeUnit unit) {
     int millis = Util.checkDuration("timeout", timeout, unit);
-    return new RealInterceptorChain(interceptors, transmitter, exchange, index, request, call,
+    return new InterceptorChain(interceptors, transmitter, exchange, index, request, call,
         millis, readTimeout, writeTimeout);
   }
 
@@ -76,7 +76,7 @@ public final class RealInterceptorChain implements Interceptor.Chain {
 
   @Override public Interceptor.Chain withReadTimeout(int timeout, TimeUnit unit) {
     int millis = Util.checkDuration("timeout", timeout, unit);
-    return new RealInterceptorChain(interceptors, transmitter, exchange, index, request, call,
+    return new InterceptorChain(interceptors, transmitter, exchange, index, request, call,
         connectTimeout, millis, writeTimeout);
   }
 
@@ -86,7 +86,7 @@ public final class RealInterceptorChain implements Interceptor.Chain {
 
   @Override public Interceptor.Chain withWriteTimeout(int timeout, TimeUnit unit) {
     int millis = Util.checkDuration("timeout", timeout, unit);
-    return new RealInterceptorChain(interceptors, transmitter, exchange, index, request, call,
+    return new InterceptorChain(interceptors, transmitter, exchange, index, request, call,
         connectTimeout, readTimeout, millis);
   }
 
@@ -130,7 +130,7 @@ public final class RealInterceptorChain implements Interceptor.Chain {
     }
 
     // Call the next interceptor in the chain.
-    RealInterceptorChain next = new RealInterceptorChain(interceptors, transmitter, exchange,
+    InterceptorChain next = new InterceptorChain(interceptors, transmitter, exchange,
         index + 1, request, call, connectTimeout, readTimeout, writeTimeout);
     Interceptor interceptor = interceptors.get(index);
     Response response = interceptor.intercept(next);
