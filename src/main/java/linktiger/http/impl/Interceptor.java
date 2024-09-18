@@ -17,8 +17,6 @@ package linktiger.http.impl;
 
 import java.io.IOException;
 
-import linktiger.http.Call;
-import linktiger.http.Request;
 import linktiger.http.Response;
 
 /**
@@ -27,25 +25,5 @@ import linktiger.http.Response;
  * or response.
  */
 public interface Interceptor {
-  Response intercept(Chain chain) throws IOException;
-
-  interface Chain {
-    Request request();
-
-    Response proceed(Request request) throws IOException;
-
-    /**
-     * Returns the connection the request will be executed on. This is only available in the chains
-     * of network interceptors; for application interceptors this is always null.
-     */
-    Connection connection();
-
-    Call call();
-
-    int connectTimeoutMillis();
-
-    int readTimeoutMillis();
-
-    int writeTimeoutMillis();
-  }
+  Response intercept(InterceptorChain chain) throws IOException;
 }

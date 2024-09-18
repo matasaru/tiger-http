@@ -30,15 +30,14 @@ public final class ConnectInterceptor implements Interceptor {
     this.client = client;
   }
 
-  @Override public Response intercept(Chain chain) throws IOException {
-    InterceptorChain realChain = (InterceptorChain) chain;
-    Request request = realChain.request();
-    Transmitter transmitter = realChain.transmitter();
+  @Override public Response intercept(InterceptorChain chain) throws IOException {
+    Request request = chain.request();
+    Transmitter transmitter = chain.transmitter();
 
     // We need the network to satisfy this request. Possibly for validating a conditional GET.
     boolean doExtensiveHealthChecks = !request.method().equals("GET");
     Exchange exchange = transmitter.newExchange(chain, doExtensiveHealthChecks);
 
-    return realChain.proceed(request, transmitter, exchange);
+    return chain.proceed(request, transmitter, exchange);
   }
 }

@@ -59,10 +59,9 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
     this.client = client;
   }
 
-  @Override public Response intercept(Chain chain) throws IOException {
+  @Override public Response intercept(InterceptorChain chain) throws IOException {
     Request request = chain.request();
-    InterceptorChain realChain = (InterceptorChain) chain;
-    Transmitter transmitter = realChain.transmitter();
+    Transmitter transmitter = chain.transmitter();
 
     int followUpCount = 0;
     Response priorResponse = null;
@@ -76,7 +75,7 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
       Response response;
       boolean success = false;
       try {
-        response = realChain.proceed(request, transmitter, null);
+        response = chain.proceed(request, transmitter, null);
         success = true;
       } catch (RouteException e) {
         // The attempt to connect via a route failed. The request will not have been sent.

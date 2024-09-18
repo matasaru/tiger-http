@@ -42,7 +42,7 @@ public final class BridgeInterceptor implements Interceptor {
     this.cookieJar = cookieJar;
   }
 
-  @Override public Response intercept(Chain chain) throws IOException {
+  @Override public Response intercept(InterceptorChain chain) throws IOException {
     Request userRequest = chain.request();
     Request.Builder requestBuilder = userRequest.newBuilder();
 

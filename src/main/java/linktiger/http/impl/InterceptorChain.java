@@ -29,7 +29,7 @@ import linktiger.http.Response;
  * <p>If the chain is for an application interceptor then {@link #connection} must be null.
  * Otherwise it is for a network interceptor and {@link #connection} must be non-null.
  */
-public final class InterceptorChain implements Interceptor.Chain {
+public final class InterceptorChain {
   private final List<Interceptor> interceptors;
   private final Transmitter transmitter;
   private final Exchange exchange;
@@ -55,19 +55,23 @@ public final class InterceptorChain implements Interceptor.Chain {
     this.writeTimeout = writeTimeout;
   }
 
-  @Override public Connection connection() {
+  /**
+   * Returns the connection the request will be executed on. This is only available in the chains
+   * of network interceptors; for application interceptors this is always null.
+   */
+  public Connection connection() {
     return exchange != null ? exchange.connection() : null;
   }
 
-  @Override public int connectTimeoutMillis() {
+  public int connectTimeoutMillis() {
     return connectTimeout;
   }
 
-  @Override public int readTimeoutMillis() {
+  public int readTimeoutMillis() {
     return readTimeout;
   }
 
-  @Override public int writeTimeoutMillis() {
+  public int writeTimeoutMillis() {
     return writeTimeout;
   }
 
@@ -80,15 +84,15 @@ public final class InterceptorChain implements Interceptor.Chain {
     return exchange;
   }
 
-  @Override public Call call() {
+  public Call call() {
     return call;
   }
 
-  @Override public Request request() {
+  public Request request() {
     return request;
   }
 
-  @Override public Response proceed(Request request) throws IOException {
+  public Response proceed(Request request) throws IOException {
     return proceed(request, transmitter, exchange);
   }
 

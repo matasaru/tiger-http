@@ -29,7 +29,7 @@ import linktiger.http.Request;
 import linktiger.http.Response;
 import linktiger.http.impl.ExchangeCodec;
 import linktiger.http.impl.HttpHeaders;
-import linktiger.http.impl.Interceptor;
+import linktiger.http.impl.InterceptorChain;
 import linktiger.http.impl.Connection;
 import linktiger.http.impl.RequestLine;
 import linktiger.http.impl.StatusLine;
@@ -72,7 +72,7 @@ public final class Http2ExchangeCodec implements ExchangeCodec {
       ENCODING,
       UPGRADE);
 
-  private final Interceptor.Chain chain;
+  private final InterceptorChain chain;
   private final Connection connection;
   private final Http2Connection http2Connection;
   private volatile Http2Stream stream;
@@ -80,7 +80,7 @@ public final class Http2ExchangeCodec implements ExchangeCodec {
   private volatile boolean canceled;
 
   public Http2ExchangeCodec(HttpClient client, Connection connection,
-      Interceptor.Chain chain, Http2Connection http2Connection) {
+      InterceptorChain chain, Http2Connection http2Connection) {
     this.connection = connection;
     this.chain = chain;
     this.http2Connection = http2Connection;

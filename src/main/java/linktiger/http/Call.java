@@ -167,7 +167,7 @@ public class Call implements Cloneable {
     interceptors.add(new ConnectInterceptor(client));
     interceptors.add(new CallServerInterceptor());
 
-    Interceptor.Chain chain = new InterceptorChain(interceptors, transmitter, null, 0,
+    InterceptorChain chain = new InterceptorChain(interceptors, transmitter, null, 0,
             originalRequest, this, client.connectTimeoutMillis(),
             client.readTimeoutMillis(), client.writeTimeoutMillis());
 

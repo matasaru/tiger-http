@@ -73,7 +73,7 @@ final class ExchangeFinder {
   }
 
   public ExchangeCodec find(
-    HttpClient client, Interceptor.Chain chain, boolean doExtensiveHealthChecks) {
+    HttpClient client, InterceptorChain chain, boolean doExtensiveHealthChecks) {
     int connectTimeout = chain.connectTimeoutMillis();
     int readTimeout = chain.readTimeoutMillis();
     int writeTimeout = chain.writeTimeoutMillis();

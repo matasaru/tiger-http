@@ -576,7 +576,7 @@ public final class Connection extends Http2Connection.Listener {
     return true; // Success. The URL is supported.
   }
 
-  ExchangeCodec newCodec(HttpClient client, Interceptor.Chain chain) throws SocketException {
+  ExchangeCodec newCodec(HttpClient client, InterceptorChain chain) throws SocketException {
     if (http2Connection != null) {
       return new Http2ExchangeCodec(client, this, chain, http2Connection);
     } else {

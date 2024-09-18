@@ -27,10 +27,9 @@ import okio.Okio;
 /** This is the last interceptor in the chain. It makes a network call to the server. */
 public final class CallServerInterceptor implements Interceptor {
 
-  @Override public Response intercept(Chain chain) throws IOException {
-    InterceptorChain realChain = (InterceptorChain) chain;
-    Exchange exchange = realChain.exchange();
-    Request request = realChain.request();
+  @Override public Response intercept(InterceptorChain chain) throws IOException {
+    Exchange exchange = chain.exchange();
+    Request request = chain.request();
 
     long sentRequestMillis = System.currentTimeMillis();
 
