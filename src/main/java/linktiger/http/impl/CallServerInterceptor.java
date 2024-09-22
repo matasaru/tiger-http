@@ -28,8 +28,12 @@ import okio.Okio;
 public final class CallServerInterceptor implements Interceptor {
 
   @Override public Response intercept(InterceptorChain chain) throws IOException {
-    Exchange exchange = chain.exchange();
     Request request = chain.request();
+    Transmitter transmitter = chain.transmitter();
+
+    // We need the network to satisfy this request. Possibly for validating a conditional GET.
+    boolean doExtensiveHealthChecks = !request.method().equals("GET");
+    Exchange exchange = transmitter.newExchange(chain, doExtensiveHealthChecks);
 
     long sentRequestMillis = System.currentTimeMillis();
 
