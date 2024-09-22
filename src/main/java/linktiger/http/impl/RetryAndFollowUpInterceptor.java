@@ -22,16 +22,23 @@ import java.net.ProtocolException;
 import java.net.Proxy;
 import java.net.SocketTimeoutException;
 import java.security.cert.CertificateException;
+import java.util.List;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLPeerUnverifiedException;
 
+import linktiger.http.Cookie;
+import linktiger.http.Headers;
 import linktiger.http.HttpClient;
+import linktiger.http.MediaType;
 import linktiger.http.Request;
 import linktiger.http.RequestBody;
 import linktiger.http.Response;
 import linktiger.http.Route;
 import linktiger.http.Url;
 import linktiger.http.impl.http2.ConnectionShutdownException;
+
+import okio.GzipSource;
+import okio.Okio;
 
 import static java.net.HttpURLConnection.HTTP_CLIENT_TIMEOUT;
 import static java.net.HttpURLConnection.HTTP_MOVED_PERM;
@@ -75,7 +82,72 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
       Response response;
       boolean success = false;
       try {
-        response = chain.proceed(request, transmitter, null);
+        Request.Builder requestBuilder = request.newBuilder();
+
+        RequestBody body = request.body();
+        if (body != null) {
+          MediaType contentType = body.contentType();
+          if (contentType != null) {
+            requestBuilder.header("Content-Type", contentType.toString());
+          }
+
+          long contentLength = body.contentLength();
+          if (contentLength != -1) {
+            requestBuilder.header("Content-Length", Long.toString(contentLength));
+            requestBuilder.removeHeader("Transfer-Encoding");
+          } else {
+            requestBuilder.header("Transfer-Encoding", "chunked");
+            requestBuilder.removeHeader("Content-Length");
+          }
+        }
+
+        if (request.header("Host") == null) {
+          requestBuilder.header("Host", Util.hostHeader(request.url(), false));
+        }
+
+        if (request.header("Connection") == null) {
+          requestBuilder.header("Connection", "Keep-Alive");
+        }
+
+        // If we add an "Accept-Encoding: gzip" header field we're responsible for also decompressing
+        // the transfer stream.
+        boolean transparentGzip = false;
+        if (request.header("Accept-Encoding") == null && request.header("Range") == null) {
+          transparentGzip = true;
+          requestBuilder.header("Accept-Encoding", "gzip");
+        }
+
+        List<Cookie> cookies =  client.cookieJar().loadForRequest(request.url());
+        if (!cookies.isEmpty()) {
+          requestBuilder.header("Cookie", cookieHeader(cookies));
+        }
+
+        if (request.header("User-Agent") == null) {
+          requestBuilder.header("User-Agent", Version.userAgent());
+        }
+
+        Response networkResponse = chain.proceed(requestBuilder.build());
+
+        HttpHeaders.receiveHeaders(client.cookieJar(), request.url(), networkResponse.headers());
+
+        Response.Builder responseBuilder = networkResponse.newBuilder()
+                .request(request)
+                .networkResponse(stripBody(networkResponse));
+
+        if (transparentGzip && "gzip".equalsIgnoreCase(networkResponse.header("Content-Encoding"))
+                && HttpHeaders.hasBody(networkResponse)) {
+          GzipSource responseBody = new GzipSource(networkResponse.body().source());
+          Headers strippedHeaders = networkResponse.headers().newBuilder()
+                  .removeAll("Content-Encoding")
+                  .removeAll("Content-Length")
+                  .build();
+          responseBuilder.headers(strippedHeaders);
+          String contentType = networkResponse.header("Content-Type");
+          responseBuilder.body(new RealResponseBody(contentType, -1L, Okio.buffer(responseBody)));
+        }
+
+        response = responseBuilder.build();
+
         success = true;
       } catch (RouteException e) {
         // The attempt to connect via a route failed. The request will not have been sent.
@@ -332,5 +404,23 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
     }
 
     return Integer.MAX_VALUE;
+  }
+
+  private String cookieHeader(List<Cookie> cookies) {
+    StringBuilder cookieHeader = new StringBuilder();
+    for (int i = 0, size = cookies.size(); i < size; i++) {
+      if (i > 0) {
+        cookieHeader.append("; ");
+      }
+      Cookie cookie = cookies.get(i);
+      cookieHeader.append(cookie.name()).append('=').append(cookie.value());
+    }
+    return cookieHeader.toString();
+  }
+
+  private static Response stripBody(Response response) {
+    return response != null && response.body() != null ?
+            response.newBuilder().body(null).build() :
+            response;
   }
 }
