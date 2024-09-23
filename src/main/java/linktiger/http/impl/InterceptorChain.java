@@ -94,12 +94,6 @@ public final class InterceptorChain {
   public Response proceed(Request request) throws IOException {
     if (index >= interceptors.size()) throw new AssertionError();
 
-    // If we already have a stream, confirm that the incoming request will use it.
-    if (this.exchange != null && !this.exchange.connection().supportsUrl(request.url())) {
-      throw new IllegalStateException("network interceptor " + interceptors.get(index - 1)
-          + " must retain the same host and port");
-    }
-
     // Call the next interceptor in the chain.
     InterceptorChain next = new InterceptorChain(interceptors, transmitter, exchange,
         index + 1, request, call, connectTimeout, readTimeout, writeTimeout);
