@@ -423,10 +423,6 @@ public class Call implements Cloneable {
     return Call.newCall(client, originalRequest);
   }
 
-  String redactedUrl() {
-    return originalRequest.url().redact();
-  }
-
   /**
    * Report and attempt to recover from a failure to communicate with a server. Returns true if
    * {@code e} is recoverable, or false if the failure is permanent. Requests with a body can only
