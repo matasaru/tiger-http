@@ -25,14 +25,10 @@ import linktiger.http.Response;
 /**
  * A concrete interceptor chain that carries the entire interceptor chain: all application
  * interceptors, the OkHttp core, all network interceptors, and finally the network caller.
- *
- * <p>If the chain is for an application interceptor then {@link #connection} must be null.
- * Otherwise it is for a network interceptor and {@link #connection} must be non-null.
  */
 public final class InterceptorChain {
   private final HttpClient client;
   private final Transmitter transmitter;
-  private final Exchange exchange;
   private final int index;
   private final Request request;
   private final Call call;
@@ -41,25 +37,16 @@ public final class InterceptorChain {
   private final int writeTimeout;
 
   public InterceptorChain(HttpClient client, Transmitter transmitter,
-      Exchange exchange, int index, Request request, Call call,
+      int index, Request request, Call call,
       int connectTimeout, int readTimeout, int writeTimeout) {
     this.client = client;
     this.transmitter = transmitter;
-    this.exchange = exchange;
     this.index = index;
     this.request = request;
     this.call = call;
     this.connectTimeout = connectTimeout;
     this.readTimeout = readTimeout;
     this.writeTimeout = writeTimeout;
-  }
-
-  /**
-   * Returns the connection the request will be executed on. This is only available in the chains
-   * of network interceptors; for application interceptors this is always null.
-   */
-  public Connection connection() {
-    return exchange != null ? exchange.connection() : null;
   }
 
   public int connectTimeoutMillis() {
@@ -78,11 +65,6 @@ public final class InterceptorChain {
     return transmitter;
   }
 
-  public Exchange exchange() {
-    if (exchange == null) throw new IllegalStateException();
-    return exchange;
-  }
-
   public Call call() {
     return call;
   }
@@ -92,7 +74,7 @@ public final class InterceptorChain {
   }
 
   public Response proceed(Request request) throws IOException {
-    InterceptorChain next = new InterceptorChain(client, transmitter, exchange,
+    InterceptorChain next = new InterceptorChain(client, transmitter,
         index + 1, request, call, connectTimeout, readTimeout, writeTimeout);
     Interceptor interceptor = new RetryAndFollowUpInterceptor(client);
 
