@@ -54,7 +54,7 @@ import static java.net.HttpURLConnection.HTTP_UNAVAILABLE;
  * This interceptor recovers from failures and follows redirects as necessary. It may throw an
  * {@link IOException} if the call was canceled.
  */
-public final class RetryAndFollowUpInterceptor implements Interceptor {
+public final class RetryAndFollowUpInterceptor {
   /**
    * How many redirects and auth challenges should we attempt? Chrome follows 21 redirects; Firefox,
    * curl, and wget follow 20; Safari follows 16; and HTTP/1.0 recommends 5.
@@ -67,7 +67,7 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
     this.client = client;
   }
 
-  @Override public Response intercept(InterceptorChain chain) throws IOException {
+  public Response intercept(InterceptorChain chain) throws IOException {
     Request request = chain.request();
     Transmitter transmitter = chain.transmitter();
 
