@@ -578,7 +578,7 @@ public final class Connection extends Http2Connection.Listener {
 
   ExchangeCodec newCodec(HttpClient client, InterceptorChain chain) throws SocketException {
     if (http2Connection != null) {
-      return new Http2ExchangeCodec(client, this, chain, http2Connection);
+      return new Http2ExchangeCodec(client, this, http2Connection);
     } else {
       socket.setSoTimeout(chain.readTimeoutMillis());
       source.timeout().timeout(chain.readTimeoutMillis(), MILLISECONDS);

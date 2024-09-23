@@ -29,7 +29,6 @@ import linktiger.http.Request;
 import linktiger.http.Response;
 import linktiger.http.impl.ExchangeCodec;
 import linktiger.http.impl.HttpHeaders;
-import linktiger.http.impl.InterceptorChain;
 import linktiger.http.impl.Connection;
 import linktiger.http.impl.RequestLine;
 import linktiger.http.impl.StatusLine;
@@ -72,7 +71,7 @@ public final class Http2ExchangeCodec implements ExchangeCodec {
       ENCODING,
       UPGRADE);
 
-  private final InterceptorChain chain;
+  private final HttpClient client;
   private final Connection connection;
   private final Http2Connection http2Connection;
   private volatile Http2Stream stream;
@@ -80,9 +79,9 @@ public final class Http2ExchangeCodec implements ExchangeCodec {
   private volatile boolean canceled;
 
   public Http2ExchangeCodec(HttpClient client, Connection connection,
-      InterceptorChain chain, Http2Connection http2Connection) {
+      Http2Connection http2Connection) {
     this.connection = connection;
-    this.chain = chain;
+    this.client = client;
     this.http2Connection = http2Connection;
     this.protocol = client.protocols().contains(Protocol.H2_PRIOR_KNOWLEDGE)
         ? Protocol.H2_PRIOR_KNOWLEDGE
@@ -109,8 +108,8 @@ public final class Http2ExchangeCodec implements ExchangeCodec {
       stream.closeLater(ErrorCode.CANCEL);
       throw new IOException("Canceled");
     }
-    stream.readTimeout().timeout(chain.readTimeoutMillis(), TimeUnit.MILLISECONDS);
-    stream.writeTimeout().timeout(chain.writeTimeoutMillis(), TimeUnit.MILLISECONDS);
+    stream.readTimeout().timeout(client.readTimeoutMillis(), TimeUnit.MILLISECONDS);
+    stream.writeTimeout().timeout(client.writeTimeoutMillis(), TimeUnit.MILLISECONDS);
   }
 
   @Override public void flushRequest() throws IOException {
