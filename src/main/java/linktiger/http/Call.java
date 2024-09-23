@@ -423,15 +423,6 @@ public class Call implements Cloneable {
     return Call.newCall(client, originalRequest);
   }
 
-  /**
-   * Returns a string that describes this call. Doesn't include a full URL as that might contain
-   * sensitive information.
-   */
-  String toLoggableString() {
-    return (isCanceled() ? "canceled " : "")
-            + "call to " + redactedUrl();
-  }
-
   String redactedUrl() {
     return originalRequest.url().redact();
   }
