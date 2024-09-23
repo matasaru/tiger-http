@@ -150,7 +150,7 @@ public final class Transmitter {
   }
 
   /** Returns a new exchange to carry a new request and response. */
-  Exchange newExchange(InterceptorChain chain, boolean doExtensiveHealthChecks) {
+  Exchange newExchange(boolean doExtensiveHealthChecks) {
     synchronized (connectionPool) {
       if (noMoreExchanges) {
         throw new IllegalStateException("released");

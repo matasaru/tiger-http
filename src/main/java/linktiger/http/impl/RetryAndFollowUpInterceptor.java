@@ -131,7 +131,7 @@ public final class RetryAndFollowUpInterceptor {
         Request networkRequest = requestBuilder.build();
         // We need the network to satisfy this request. Possibly for validating a conditional GET.
         boolean doExtensiveHealthChecks = !networkRequest.method().equals("GET");
-        Exchange exchange = transmitter.newExchange(chain, doExtensiveHealthChecks);
+        Exchange exchange = transmitter.newExchange(doExtensiveHealthChecks);
 
         long sentRequestMillis = System.currentTimeMillis();
 
