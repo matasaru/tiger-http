@@ -93,11 +93,6 @@ public final class InterceptorChain {
   }
 
   public Response proceed(Request request) throws IOException {
-    return proceed(request, transmitter, exchange);
-  }
-
-  public Response proceed(Request request, Transmitter transmitter, Exchange exchange)
-      throws IOException {
     if (index >= interceptors.size()) throw new AssertionError();
 
     calls++;
