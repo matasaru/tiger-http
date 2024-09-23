@@ -67,10 +67,7 @@ public final class RetryAndFollowUpInterceptor {
     this.client = client;
   }
 
-  public Response intercept(InterceptorChain chain) throws IOException {
-    Request request = chain.request();
-    Transmitter transmitter = chain.transmitter();
-
+  public Response intercept(Request request, Transmitter transmitter) throws IOException {
     int followUpCount = 0;
     Response priorResponse = null;
     while (true) {

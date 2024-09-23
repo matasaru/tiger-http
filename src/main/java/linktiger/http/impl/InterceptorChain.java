@@ -72,10 +72,8 @@ public final class InterceptorChain {
   }
 
   public Response proceed(Request request) throws IOException {
-    InterceptorChain next = new InterceptorChain(client, transmitter,
-         request, call, connectTimeout, readTimeout, writeTimeout);
     RetryAndFollowUpInterceptor interceptor = new RetryAndFollowUpInterceptor(client);
 
-    return interceptor.intercept(next);
+    return interceptor.intercept(request, transmitter);
   }
 }
