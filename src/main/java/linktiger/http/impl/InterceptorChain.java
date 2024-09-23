@@ -29,7 +29,6 @@ import linktiger.http.Response;
 public final class InterceptorChain {
   private final HttpClient client;
   private final Transmitter transmitter;
-  private final int index;
   private final Request request;
   private final Call call;
   private final int connectTimeout;
@@ -37,11 +36,10 @@ public final class InterceptorChain {
   private final int writeTimeout;
 
   public InterceptorChain(HttpClient client, Transmitter transmitter,
-      int index, Request request, Call call,
+      Request request, Call call,
       int connectTimeout, int readTimeout, int writeTimeout) {
     this.client = client;
     this.transmitter = transmitter;
-    this.index = index;
     this.request = request;
     this.call = call;
     this.connectTimeout = connectTimeout;
@@ -75,7 +73,7 @@ public final class InterceptorChain {
 
   public Response proceed(Request request) throws IOException {
     InterceptorChain next = new InterceptorChain(client, transmitter,
-        index + 1, request, call, connectTimeout, readTimeout, writeTimeout);
+         request, call, connectTimeout, readTimeout, writeTimeout);
     Interceptor interceptor = new RetryAndFollowUpInterceptor(client);
 
     return interceptor.intercept(next);

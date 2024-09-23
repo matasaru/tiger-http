@@ -153,7 +153,7 @@ public class Call implements Cloneable {
   }
 
   Response getResponseWithInterceptorChain() throws IOException {
-    InterceptorChain chain = new InterceptorChain(client, transmitter, 0,
+    InterceptorChain chain = new InterceptorChain(client, transmitter,
             originalRequest, this, client.connectTimeoutMillis(),
             client.readTimeoutMillis(), client.writeTimeoutMillis());
 
