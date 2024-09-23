@@ -56,7 +56,7 @@ import static java.net.HttpURLConnection.HTTP_UNAVAILABLE;
  * A call is a request that has been prepared for execution. A call can be canceled. As this object
  * represents a single request/response pair (stream), it cannot be executed twice.
  */
-public class Call implements Cloneable {
+public class Call {
   /**
    * How many redirects and auth challenges should we attempt? Chrome follows 21 redirects; Firefox,
    * curl, and wget follow 20; Safari follows 16; and HTTP/1.0 recommends 5.
@@ -412,15 +412,6 @@ public class Call implements Cloneable {
    */
   public Timeout timeout() {
     return transmitter.timeout();
-  }
-
-  /**
-   * Create a new, identical call to this one which can be enqueued or executed even if this call
-   * has already been.
-   */
-  @SuppressWarnings("CloneDoesntCallSuperClone") // We are a final type & this saves clearing state.
-  @Override public Call clone() {
-    return Call.newCall(client, originalRequest);
   }
 
   /**
