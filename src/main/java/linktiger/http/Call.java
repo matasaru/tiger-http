@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import linktiger.http.impl.CallServerInterceptor;
 import linktiger.http.impl.Interceptor;
 import linktiger.http.impl.InterceptorChain;
 import linktiger.http.impl.RetryAndFollowUpInterceptor;
@@ -161,7 +160,6 @@ public class Call implements Cloneable {
     // Build a full stack of interceptors.
     List<Interceptor> interceptors = new ArrayList<>();
     interceptors.add(new RetryAndFollowUpInterceptor(client));
-    interceptors.add(new CallServerInterceptor());
 
     InterceptorChain chain = new InterceptorChain(interceptors, transmitter, null, 0,
             originalRequest, this, client.connectTimeoutMillis(),

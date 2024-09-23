@@ -37,6 +37,7 @@ import linktiger.http.Route;
 import linktiger.http.Url;
 import linktiger.http.impl.http2.ConnectionShutdownException;
 
+import okio.BufferedSink;
 import okio.GzipSource;
 import okio.Okio;
 
@@ -126,7 +127,104 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
           requestBuilder.header("User-Agent", Version.userAgent());
         }
 
-        Response networkResponse = chain.proceed(requestBuilder.build());
+        // Response networkResponse = chain.proceed(requestBuilder.build());
+        Request networkRequest = requestBuilder.build();
+        // We need the network to satisfy this request. Possibly for validating a conditional GET.
+        boolean doExtensiveHealthChecks = !networkRequest.method().equals("GET");
+        Exchange exchange = transmitter.newExchange(chain, doExtensiveHealthChecks);
+
+        long sentRequestMillis = System.currentTimeMillis();
+
+        exchange.writeRequestHeaders(networkRequest);
+
+        boolean responseHeadersStarted = false;
+        Response.Builder networkResponseBuilder = null;
+        if (HttpMethod.permitsRequestBody(networkRequest.method()) && networkRequest.body() != null) {
+          // If there's a "Expect: 100-continue" header on the request, wait for a "HTTP/1.1 100
+          // Continue" response before transmitting the request body. If we don't get that, return
+          // what we did get (such as a 4xx response) without ever transmitting the request body.
+          if ("100-continue".equalsIgnoreCase(networkRequest.header("Expect"))) {
+            exchange.flushRequest();
+            responseHeadersStarted = true;
+            exchange.responseHeadersStart();
+            networkResponseBuilder = exchange.readResponseHeaders(true);
+          }
+
+          if (networkResponseBuilder == null) {
+            if (networkRequest.body().isDuplex()) {
+              // Prepare a duplex body so that the application can send a request body later.
+              exchange.flushRequest();
+              BufferedSink bufferedRequestBody = Okio.buffer(
+                      exchange.createRequestBody(networkRequest, true));
+              networkRequest.body().writeTo(bufferedRequestBody);
+            } else {
+              // Write the request body if the "Expect: 100-continue" expectation was met.
+              BufferedSink bufferedRequestBody = Okio.buffer(
+                      exchange.createRequestBody(networkRequest, false));
+              networkRequest.body().writeTo(bufferedRequestBody);
+              bufferedRequestBody.close();
+            }
+          } else {
+            exchange.noRequestBody();
+            if (!exchange.connection().isMultiplexed()) {
+              // If the "Expect: 100-continue" expectation wasn't met, prevent the HTTP/1 connection
+              // from being reused. Otherwise we're still obligated to transmit the request body to
+              // leave the connection in a consistent state.
+              exchange.noNewExchangesOnConnection();
+            }
+          }
+        } else {
+          exchange.noRequestBody();
+        }
+
+        if (networkRequest.body() == null || !networkRequest.body().isDuplex()) {
+          exchange.finishRequest();
+        }
+
+        if (!responseHeadersStarted) {
+          exchange.responseHeadersStart();
+        }
+
+        if (networkResponseBuilder == null) {
+          networkResponseBuilder = exchange.readResponseHeaders(false);
+        }
+
+        Response networkResponse = networkResponseBuilder
+                .request(networkRequest)
+                .handshake(exchange.connection().handshake())
+                .sentRequestAtMillis(sentRequestMillis)
+                .receivedResponseAtMillis(System.currentTimeMillis())
+                .build();
+
+        int code = networkResponse.code();
+        if (code == 100) {
+          // server sent a 100-continue even though we did not request one.
+          // try again to read the actual response
+          networkResponse = exchange.readResponseHeaders(false)
+                  .request(networkRequest)
+                  .handshake(exchange.connection().handshake())
+                  .sentRequestAtMillis(sentRequestMillis)
+                  .receivedResponseAtMillis(System.currentTimeMillis())
+                  .build();
+
+          code = networkResponse.code();
+        }
+
+        exchange.responseHeadersEnd(networkResponse);
+
+        networkResponse = networkResponse.newBuilder()
+                .body(exchange.openResponseBody(networkResponse))
+                .build();
+
+        if ("close".equalsIgnoreCase(networkResponse.request().header("Connection"))
+                || "close".equalsIgnoreCase(networkResponse.header("Connection"))) {
+          exchange.noNewExchangesOnConnection();
+        }
+
+        if ((code == 204 || code == 205) && networkResponse.body().contentLength() > 0) {
+          throw new ProtocolException(
+                  "HTTP " + code + " had non-zero Content-Length: " + networkResponse.body().contentLength());
+        }
 
         HttpHeaders.receiveHeaders(client.cookieJar(), request.url(), networkResponse.headers());
 
