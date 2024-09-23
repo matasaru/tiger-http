@@ -132,7 +132,255 @@ public class Call implements Cloneable {
     transmitter.callStart();
     try {
       client.executed(this);
-      return getResponseWithInterceptorChain();
+
+      boolean calledNoMoreExchanges = false;
+      try {
+        Request request = originalRequest;
+        Response response;
+        Response priorResponse = null;
+        int followUpCount = 0;
+        while (true) {
+          transmitter.prepareToConnect(request);
+
+          if (transmitter.isCanceled()) {
+            throw new IOException("Canceled");
+          }
+
+          boolean success = false;
+          try {
+            Request.Builder requestBuilder = request.newBuilder();
+
+            RequestBody body = request.body();
+            if (body != null) {
+              MediaType contentType = body.contentType();
+              if (contentType != null) {
+                requestBuilder.header("Content-Type", contentType.toString());
+              }
+
+              long contentLength = body.contentLength();
+              if (contentLength != -1) {
+                requestBuilder.header("Content-Length", Long.toString(contentLength));
+                requestBuilder.removeHeader("Transfer-Encoding");
+              }
+              else {
+                requestBuilder.header("Transfer-Encoding", "chunked");
+                requestBuilder.removeHeader("Content-Length");
+              }
+            }
+
+            if (request.header("Host") == null) {
+              requestBuilder.header("Host", Util.hostHeader(request.url(), false));
+            }
+
+            if (request.header("Connection") == null) {
+              requestBuilder.header("Connection", "Keep-Alive");
+            }
+
+            boolean transparentGzip = false;
+            if (request.header("Accept-Encoding") == null && request.header("Range") == null) {
+              transparentGzip = true;
+              requestBuilder.header("Accept-Encoding", "gzip");
+            }
+
+            List<Cookie> cookies =  client.cookieJar().loadForRequest(request.url());
+            if (!cookies.isEmpty()) {
+              requestBuilder.header("Cookie", cookieHeader(cookies));
+            }
+
+            if (request.header("User-Agent") == null) {
+              requestBuilder.header("User-Agent", Version.userAgent());
+            }
+
+            Request networkRequest = requestBuilder.build();
+            // We need the network to satisfy this request. Possibly for validating a conditional GET.
+            boolean doExtensiveHealthChecks = !networkRequest.method().equals("GET");
+            Exchange exchange = transmitter.newExchange(doExtensiveHealthChecks);
+
+            long sentRequestMillis = System.currentTimeMillis();
+
+            exchange.writeRequestHeaders(networkRequest);
+
+            boolean responseHeadersStarted = false;
+            Response.Builder networkResponseBuilder = null;
+            if (HttpMethod.permitsRequestBody(networkRequest.method()) && networkRequest.body() != null) {
+              // If there's a "Expect: 100-continue" header on the request, wait for a "HTTP/1.1 100 Continue" response
+              // before transmitting the request body. If we don't get that, return what we did get (such as a 4xx response)
+              // without ever transmitting the request body.
+              if ("100-continue".equalsIgnoreCase(networkRequest.header("Expect"))) {
+                exchange.flushRequest();
+                responseHeadersStarted = true;
+                exchange.responseHeadersStart();
+                networkResponseBuilder = exchange.readResponseHeaders(true);
+              }
+
+              if (networkResponseBuilder == null) {
+                if (networkRequest.body().isDuplex()) {
+                  // Prepare a duplex body so that the application can send a request body later.
+                  exchange.flushRequest();
+                  BufferedSink bufferedRequestBody = Okio.buffer(exchange.createRequestBody(networkRequest, true));
+                  networkRequest.body().writeTo(bufferedRequestBody);
+                }
+                else {
+                  // Write the request body if the "Expect: 100-continue" expectation was met.
+                  BufferedSink bufferedRequestBody = Okio.buffer(exchange.createRequestBody(networkRequest, false));
+                  networkRequest.body().writeTo(bufferedRequestBody);
+                  bufferedRequestBody.close();
+                }
+              }
+              else {
+                exchange.noRequestBody();
+                if (!exchange.connection().isMultiplexed()) {
+                  // If the "Expect: 100-continue" expectation wasn't met, prevent the HTTP/1 connection
+                  // from being reused. Otherwise we're still obligated to transmit the request body to
+                  // leave the connection in a consistent state.
+                  exchange.noNewExchangesOnConnection();
+                }
+              }
+            }
+            else {
+              exchange.noRequestBody();
+            }
+
+            if (networkRequest.body() == null || !networkRequest.body().isDuplex()) {
+              exchange.finishRequest();
+            }
+
+            if (!responseHeadersStarted) {
+              exchange.responseHeadersStart();
+            }
+
+            if (networkResponseBuilder == null) {
+              networkResponseBuilder = exchange.readResponseHeaders(false);
+            }
+
+            Response networkResponse = networkResponseBuilder
+                    .request(networkRequest)
+                    .handshake(exchange.connection().handshake())
+                    .sentRequestAtMillis(sentRequestMillis)
+                    .receivedResponseAtMillis(System.currentTimeMillis())
+                    .build();
+
+            int code = networkResponse.code();
+            if (code == 100) {
+              // server sent a 100-continue even though we did not request one.
+              // try again to read the actual response
+              networkResponse = exchange.readResponseHeaders(false)
+                      .request(networkRequest)
+                      .handshake(exchange.connection().handshake())
+                      .sentRequestAtMillis(sentRequestMillis)
+                      .receivedResponseAtMillis(System.currentTimeMillis())
+                      .build();
+
+              code = networkResponse.code();
+            }
+
+            exchange.responseHeadersEnd(networkResponse);
+
+            networkResponse = networkResponse.newBuilder()
+                    .body(exchange.openResponseBody(networkResponse))
+                    .build();
+
+            if ("close".equalsIgnoreCase(networkResponse.request().header("Connection")) ||
+                "close".equalsIgnoreCase(networkResponse.header("Connection"))) {
+              exchange.noNewExchangesOnConnection();
+            }
+
+            if ((code == 204 || code == 205) && networkResponse.body().contentLength() > 0) {
+              throw new ProtocolException("HTTP " + code + " had non-zero Content-Length: " + networkResponse.body().contentLength());
+            }
+
+            HttpHeaders.receiveHeaders(client.cookieJar(), request.url(), networkResponse.headers());
+
+            Response.Builder responseBuilder = networkResponse.newBuilder()
+                    .request(request)
+                    .networkResponse(stripBody(networkResponse));
+
+            if (transparentGzip && "gzip".equalsIgnoreCase(networkResponse.header("Content-Encoding")) && HttpHeaders.hasBody(networkResponse)) {
+              GzipSource responseBody = new GzipSource(networkResponse.body().source());
+              Headers strippedHeaders = networkResponse.headers().newBuilder()
+                      .removeAll("Content-Encoding")
+                      .removeAll("Content-Length")
+                      .build();
+              responseBuilder.headers(strippedHeaders);
+              String contentType = networkResponse.header("Content-Type");
+              responseBuilder.body(new RealResponseBody(contentType, -1L, Okio.buffer(responseBody)));
+            }
+
+            response = responseBuilder.build();
+
+            success = true;
+          }
+          catch (RouteException e) {
+            // The attempt to connect via a route failed. The request will not have been sent.
+            if (!recover(e.getLastConnectException(), transmitter, false, request)) {
+              throw e.getFirstConnectException();
+            }
+            continue;
+          }
+          catch (IOException e) {
+            // An attempt to communicate with a server failed. The request may have been sent.
+            boolean requestSendStarted = !(e instanceof ConnectionShutdownException);
+            if (!recover(e, transmitter, requestSendStarted, request)) throw e;
+            continue;
+          }
+          finally {
+            // The network call threw an exception. Release any resources.
+            if (!success) {
+              transmitter.exchangeDoneDueToException();
+            }
+          }
+
+          // Attach the prior response if it exists. Such responses never have a body.
+          if (priorResponse != null) {
+            response = response.newBuilder()
+                .priorResponse(priorResponse.newBuilder().body(null).build())
+                .build();
+          }
+
+          Exchange exchange = response.exchange();
+          Route route = exchange != null ? exchange.connection().route() : null;
+          Request followUp = followUpRequest(response, route);
+          if (followUp == null) {
+            if (exchange != null && exchange.isDuplex()) {
+              transmitter.timeoutEarlyExit();
+            }
+            break;
+          }
+
+          RequestBody followUpBody = followUp.body();
+          if (followUpBody != null && followUpBody.isOneShot()) {
+            break;
+          }
+
+          if (response.body() != null) {
+            response.body().close();
+          }
+
+          if (transmitter.hasExchange()) {
+            exchange.detachWithViolence();
+          }
+
+          if (++followUpCount > MAX_FOLLOW_UPS) {
+            throw new ProtocolException("Too many follow-up requests: " + followUpCount);
+          }
+
+          request = followUp;
+          priorResponse = response;
+        } // while
+
+        if (transmitter.isCanceled()) {
+          response.close();
+          throw new IOException("Canceled");
+        }
+        return response;
+      } catch (IOException e) {
+        calledNoMoreExchanges = true;
+        throw transmitter.noMoreExchanges(e);
+      } finally {
+        if (!calledNoMoreExchanges) {
+          transmitter.noMoreExchanges(null);
+        }
+      }
     } finally {
       client.finished(this);
     }
@@ -186,257 +434,6 @@ public class Call implements Cloneable {
 
   String redactedUrl() {
     return originalRequest.url().redact();
-  }
-
-  Response getResponseWithInterceptorChain() throws IOException {
-    boolean calledNoMoreExchanges = false;
-    try {
-      Request request = originalRequest;
-      Response response;
-      Response priorResponse = null;
-      int followUpCount = 0;
-      while (true) {
-        transmitter.prepareToConnect(request);
-
-        if (transmitter.isCanceled()) {
-          throw new IOException("Canceled");
-        }
-
-        boolean success = false;
-        try {
-          Request.Builder requestBuilder = request.newBuilder();
-
-          RequestBody body = request.body();
-          if (body != null) {
-            MediaType contentType = body.contentType();
-            if (contentType != null) {
-              requestBuilder.header("Content-Type", contentType.toString());
-            }
-
-            long contentLength = body.contentLength();
-            if (contentLength != -1) {
-              requestBuilder.header("Content-Length", Long.toString(contentLength));
-              requestBuilder.removeHeader("Transfer-Encoding");
-            }
-            else {
-              requestBuilder.header("Transfer-Encoding", "chunked");
-              requestBuilder.removeHeader("Content-Length");
-            }
-          }
-
-          if (request.header("Host") == null) {
-            requestBuilder.header("Host", Util.hostHeader(request.url(), false));
-          }
-
-          if (request.header("Connection") == null) {
-            requestBuilder.header("Connection", "Keep-Alive");
-          }
-
-          boolean transparentGzip = false;
-          if (request.header("Accept-Encoding") == null && request.header("Range") == null) {
-            transparentGzip = true;
-            requestBuilder.header("Accept-Encoding", "gzip");
-          }
-
-          List<Cookie> cookies =  client.cookieJar().loadForRequest(request.url());
-          if (!cookies.isEmpty()) {
-            requestBuilder.header("Cookie", cookieHeader(cookies));
-          }
-
-          if (request.header("User-Agent") == null) {
-            requestBuilder.header("User-Agent", Version.userAgent());
-          }
-
-          Request networkRequest = requestBuilder.build();
-          // We need the network to satisfy this request. Possibly for validating a conditional GET.
-          boolean doExtensiveHealthChecks = !networkRequest.method().equals("GET");
-          Exchange exchange = transmitter.newExchange(doExtensiveHealthChecks);
-
-          long sentRequestMillis = System.currentTimeMillis();
-
-          exchange.writeRequestHeaders(networkRequest);
-
-          boolean responseHeadersStarted = false;
-          Response.Builder networkResponseBuilder = null;
-          if (HttpMethod.permitsRequestBody(networkRequest.method()) && networkRequest.body() != null) {
-            // If there's a "Expect: 100-continue" header on the request, wait for a "HTTP/1.1 100 Continue" response
-            // before transmitting the request body. If we don't get that, return what we did get (such as a 4xx response)
-            // without ever transmitting the request body.
-            if ("100-continue".equalsIgnoreCase(networkRequest.header("Expect"))) {
-              exchange.flushRequest();
-              responseHeadersStarted = true;
-              exchange.responseHeadersStart();
-              networkResponseBuilder = exchange.readResponseHeaders(true);
-            }
-
-            if (networkResponseBuilder == null) {
-              if (networkRequest.body().isDuplex()) {
-                // Prepare a duplex body so that the application can send a request body later.
-                exchange.flushRequest();
-                BufferedSink bufferedRequestBody = Okio.buffer(exchange.createRequestBody(networkRequest, true));
-                networkRequest.body().writeTo(bufferedRequestBody);
-              }
-              else {
-                // Write the request body if the "Expect: 100-continue" expectation was met.
-                BufferedSink bufferedRequestBody = Okio.buffer(exchange.createRequestBody(networkRequest, false));
-                networkRequest.body().writeTo(bufferedRequestBody);
-                bufferedRequestBody.close();
-              }
-            }
-            else {
-              exchange.noRequestBody();
-              if (!exchange.connection().isMultiplexed()) {
-                // If the "Expect: 100-continue" expectation wasn't met, prevent the HTTP/1 connection
-                // from being reused. Otherwise we're still obligated to transmit the request body to
-                // leave the connection in a consistent state.
-                exchange.noNewExchangesOnConnection();
-              }
-            }
-          }
-          else {
-            exchange.noRequestBody();
-          }
-
-          if (networkRequest.body() == null || !networkRequest.body().isDuplex()) {
-            exchange.finishRequest();
-          }
-
-          if (!responseHeadersStarted) {
-            exchange.responseHeadersStart();
-          }
-
-          if (networkResponseBuilder == null) {
-            networkResponseBuilder = exchange.readResponseHeaders(false);
-          }
-
-          Response networkResponse = networkResponseBuilder
-                  .request(networkRequest)
-                  .handshake(exchange.connection().handshake())
-                  .sentRequestAtMillis(sentRequestMillis)
-                  .receivedResponseAtMillis(System.currentTimeMillis())
-                  .build();
-
-          int code = networkResponse.code();
-          if (code == 100) {
-            // server sent a 100-continue even though we did not request one.
-            // try again to read the actual response
-            networkResponse = exchange.readResponseHeaders(false)
-                    .request(networkRequest)
-                    .handshake(exchange.connection().handshake())
-                    .sentRequestAtMillis(sentRequestMillis)
-                    .receivedResponseAtMillis(System.currentTimeMillis())
-                    .build();
-
-            code = networkResponse.code();
-          }
-
-          exchange.responseHeadersEnd(networkResponse);
-
-          networkResponse = networkResponse.newBuilder()
-                  .body(exchange.openResponseBody(networkResponse))
-                  .build();
-
-          if ("close".equalsIgnoreCase(networkResponse.request().header("Connection")) ||
-              "close".equalsIgnoreCase(networkResponse.header("Connection"))) {
-            exchange.noNewExchangesOnConnection();
-          }
-
-          if ((code == 204 || code == 205) && networkResponse.body().contentLength() > 0) {
-            throw new ProtocolException("HTTP " + code + " had non-zero Content-Length: " + networkResponse.body().contentLength());
-          }
-
-          HttpHeaders.receiveHeaders(client.cookieJar(), request.url(), networkResponse.headers());
-
-          Response.Builder responseBuilder = networkResponse.newBuilder()
-                  .request(request)
-                  .networkResponse(stripBody(networkResponse));
-
-          if (transparentGzip && "gzip".equalsIgnoreCase(networkResponse.header("Content-Encoding")) && HttpHeaders.hasBody(networkResponse)) {
-            GzipSource responseBody = new GzipSource(networkResponse.body().source());
-            Headers strippedHeaders = networkResponse.headers().newBuilder()
-                    .removeAll("Content-Encoding")
-                    .removeAll("Content-Length")
-                    .build();
-            responseBuilder.headers(strippedHeaders);
-            String contentType = networkResponse.header("Content-Type");
-            responseBuilder.body(new RealResponseBody(contentType, -1L, Okio.buffer(responseBody)));
-          }
-
-          response = responseBuilder.build();
-
-          success = true;
-        }
-        catch (RouteException e) {
-          // The attempt to connect via a route failed. The request will not have been sent.
-          if (!recover(e.getLastConnectException(), transmitter, false, request)) {
-            throw e.getFirstConnectException();
-          }
-          continue;
-        }
-        catch (IOException e) {
-          // An attempt to communicate with a server failed. The request may have been sent.
-          boolean requestSendStarted = !(e instanceof ConnectionShutdownException);
-          if (!recover(e, transmitter, requestSendStarted, request)) throw e;
-          continue;
-        }
-        finally {
-          // The network call threw an exception. Release any resources.
-          if (!success) {
-            transmitter.exchangeDoneDueToException();
-          }
-        }
-
-        // Attach the prior response if it exists. Such responses never have a body.
-        if (priorResponse != null) {
-          response = response.newBuilder()
-              .priorResponse(priorResponse.newBuilder().body(null).build())
-              .build();
-        }
-
-        Exchange exchange = response.exchange();
-        Route route = exchange != null ? exchange.connection().route() : null;
-        Request followUp = followUpRequest(response, route);
-        if (followUp == null) {
-          if (exchange != null && exchange.isDuplex()) {
-            transmitter.timeoutEarlyExit();
-          }
-          break;
-        }
-
-        RequestBody followUpBody = followUp.body();
-        if (followUpBody != null && followUpBody.isOneShot()) {
-          break;
-        }
-
-        if (response.body() != null) {
-          response.body().close();
-        }
-
-        if (transmitter.hasExchange()) {
-          exchange.detachWithViolence();
-        }
-
-        if (++followUpCount > MAX_FOLLOW_UPS) {
-          throw new ProtocolException("Too many follow-up requests: " + followUpCount);
-        }
-
-        request = followUp;
-        priorResponse = response;
-      } // while
-
-      if (transmitter.isCanceled()) {
-        response.close();
-        throw new IOException("Canceled");
-      }
-      return response;
-    } catch (IOException e) {
-      calledNoMoreExchanges = true;
-      throw transmitter.noMoreExchanges(e);
-    } finally {
-      if (!calledNoMoreExchanges) {
-        transmitter.noMoreExchanges(null);
-      }
-    }
   }
 
   /**
