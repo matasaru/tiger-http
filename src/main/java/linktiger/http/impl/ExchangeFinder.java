@@ -73,10 +73,10 @@ final class ExchangeFinder {
   }
 
   public ExchangeCodec find(
-    HttpClient client, InterceptorChain chain, boolean doExtensiveHealthChecks) {
-    int connectTimeout = chain.connectTimeoutMillis();
-    int readTimeout = chain.readTimeoutMillis();
-    int writeTimeout = chain.writeTimeoutMillis();
+    HttpClient client, boolean doExtensiveHealthChecks) {
+    int connectTimeout = client.connectTimeoutMillis();
+    int readTimeout = client.readTimeoutMillis();
+    int writeTimeout = client.writeTimeoutMillis();
     int pingIntervalMillis = client.pingIntervalMillis();
     boolean connectionRetryEnabled = client.retryOnConnectionFailure();
 
