@@ -17,7 +17,7 @@ package linktiger.http;
 
 import java.io.IOException;
 
-import linktiger.http.impl.InterceptorChain;
+import linktiger.http.impl.RetryAndFollowUpInterceptor;
 import linktiger.http.impl.Transmitter;
 
 import okio.Timeout;
@@ -153,13 +153,10 @@ public class Call implements Cloneable {
   }
 
   Response getResponseWithInterceptorChain() throws IOException {
-    InterceptorChain chain = new InterceptorChain(client, transmitter,
-            originalRequest, this, client.connectTimeoutMillis(),
-            client.readTimeoutMillis(), client.writeTimeoutMillis());
-
     boolean calledNoMoreExchanges = false;
     try {
-      Response response = chain.proceed(originalRequest);
+      RetryAndFollowUpInterceptor interceptor = new RetryAndFollowUpInterceptor(client);
+      Response response = interceptor.intercept(originalRequest, transmitter);
       if (transmitter.isCanceled()) {
         response.close();
         throw new IOException("Canceled");
