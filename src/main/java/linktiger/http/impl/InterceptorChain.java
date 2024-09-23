@@ -39,7 +39,6 @@ public final class InterceptorChain {
   private final int connectTimeout;
   private final int readTimeout;
   private final int writeTimeout;
-  private int calls;
 
   public InterceptorChain(List<Interceptor> interceptors, Transmitter transmitter,
       Exchange exchange, int index, Request request, Call call,
@@ -95,18 +94,10 @@ public final class InterceptorChain {
   public Response proceed(Request request) throws IOException {
     if (index >= interceptors.size()) throw new AssertionError();
 
-    calls++;
-
     // If we already have a stream, confirm that the incoming request will use it.
     if (this.exchange != null && !this.exchange.connection().supportsUrl(request.url())) {
       throw new IllegalStateException("network interceptor " + interceptors.get(index - 1)
           + " must retain the same host and port");
-    }
-
-    // If we already have a stream, confirm that this is the only call to chain.proceed().
-    if (this.exchange != null && calls > 1) {
-      throw new IllegalStateException("network interceptor " + interceptors.get(index - 1)
-          + " must call proceed() exactly once");
     }
 
     // Call the next interceptor in the chain.
@@ -114,12 +105,6 @@ public final class InterceptorChain {
         index + 1, request, call, connectTimeout, readTimeout, writeTimeout);
     Interceptor interceptor = interceptors.get(index);
     Response response = interceptor.intercept(next);
-
-    // Confirm that the next interceptor made its required call to chain.proceed().
-    if (exchange != null && index + 1 < interceptors.size() && next.calls != 1) {
-      throw new IllegalStateException("network interceptor " + interceptor
-          + " must call proceed() exactly once");
-    }
 
     // Confirm that the intercepted response isn't null.
     if (response == null) {
