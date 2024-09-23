@@ -16,12 +16,8 @@
 package linktiger.http;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
-import linktiger.http.impl.Interceptor;
 import linktiger.http.impl.InterceptorChain;
-import linktiger.http.impl.RetryAndFollowUpInterceptor;
 import linktiger.http.impl.Transmitter;
 
 import okio.Timeout;
@@ -157,11 +153,7 @@ public class Call implements Cloneable {
   }
 
   Response getResponseWithInterceptorChain() throws IOException {
-    // Build a full stack of interceptors.
-    List<Interceptor> interceptors = new ArrayList<>();
-    interceptors.add(new RetryAndFollowUpInterceptor(client));
-
-    InterceptorChain chain = new InterceptorChain(interceptors, transmitter, null, 0,
+    InterceptorChain chain = new InterceptorChain(client, transmitter, null, 0,
             originalRequest, this, client.connectTimeoutMillis(),
             client.readTimeoutMillis(), client.writeTimeoutMillis());
 

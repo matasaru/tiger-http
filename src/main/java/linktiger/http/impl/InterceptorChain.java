@@ -16,9 +16,9 @@
 package linktiger.http.impl;
 
 import java.io.IOException;
-import java.util.List;
 
 import linktiger.http.Call;
+import linktiger.http.HttpClient;
 import linktiger.http.Request;
 import linktiger.http.Response;
 
@@ -30,7 +30,7 @@ import linktiger.http.Response;
  * Otherwise it is for a network interceptor and {@link #connection} must be non-null.
  */
 public final class InterceptorChain {
-  private final List<Interceptor> interceptors;
+  private final HttpClient client;
   private final Transmitter transmitter;
   private final Exchange exchange;
   private final int index;
@@ -40,10 +40,10 @@ public final class InterceptorChain {
   private final int readTimeout;
   private final int writeTimeout;
 
-  public InterceptorChain(List<Interceptor> interceptors, Transmitter transmitter,
+  public InterceptorChain(HttpClient client, Transmitter transmitter,
       Exchange exchange, int index, Request request, Call call,
       int connectTimeout, int readTimeout, int writeTimeout) {
-    this.interceptors = interceptors;
+    this.client = client;
     this.transmitter = transmitter;
     this.exchange = exchange;
     this.index = index;
@@ -92,15 +92,10 @@ public final class InterceptorChain {
   }
 
   public Response proceed(Request request) throws IOException {
-    if (index >= interceptors.size()) throw new AssertionError();
-
-    // Call the next interceptor in the chain.
-    InterceptorChain next = new InterceptorChain(interceptors, transmitter, exchange,
+    InterceptorChain next = new InterceptorChain(client, transmitter, exchange,
         index + 1, request, call, connectTimeout, readTimeout, writeTimeout);
-    Interceptor interceptor = interceptors.get(index);
-    Response response = interceptor.intercept(next);
+    Interceptor interceptor = new RetryAndFollowUpInterceptor(client);
 
-
-    return response;
+    return interceptor.intercept(next);
   }
 }
