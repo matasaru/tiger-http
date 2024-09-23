@@ -100,15 +100,6 @@ public final class InterceptorChain {
     Interceptor interceptor = interceptors.get(index);
     Response response = interceptor.intercept(next);
 
-    // Confirm that the intercepted response isn't null.
-    if (response == null) {
-      throw new NullPointerException("interceptor " + interceptor + " returned null");
-    }
-
-    if (response.body() == null) {
-      throw new IllegalStateException(
-          "interceptor " + interceptor + " returned a response with no body");
-    }
 
     return response;
   }
