@@ -576,13 +576,13 @@ public final class Connection extends Http2Connection.Listener {
     return true; // Success. The URL is supported.
   }
 
-  ExchangeCodec newCodec(HttpClient client, InterceptorChain chain) throws SocketException {
+  ExchangeCodec newCodec(HttpClient client) throws SocketException {
     if (http2Connection != null) {
       return new Http2ExchangeCodec(client, this, http2Connection);
     } else {
-      socket.setSoTimeout(chain.readTimeoutMillis());
-      source.timeout().timeout(chain.readTimeoutMillis(), MILLISECONDS);
-      sink.timeout().timeout(chain.writeTimeoutMillis(), MILLISECONDS);
+      socket.setSoTimeout(client.readTimeoutMillis());
+      source.timeout().timeout(client.readTimeoutMillis(), MILLISECONDS);
+      sink.timeout().timeout(client.writeTimeoutMillis(), MILLISECONDS);
       return new Http1ExchangeCodec(client, this, source, sink);
     }
   }

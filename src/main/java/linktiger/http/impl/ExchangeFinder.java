@@ -83,7 +83,7 @@ final class ExchangeFinder {
     try {
       Connection resultConnection = findHealthyConnection(connectTimeout, readTimeout,
           writeTimeout, pingIntervalMillis, connectionRetryEnabled, doExtensiveHealthChecks);
-      return resultConnection.newCodec(client, chain);
+      return resultConnection.newCodec(client);
     } catch (RouteException e) {
       trackFailure();
       throw e;
