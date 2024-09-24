@@ -605,7 +605,7 @@ public class Call {
     // https://tools.ietf.org/html/rfc7231#section-7.1.3
     // currently ignores a HTTP-date, and assumes any non int 0 is a delay
     if (header.matches("\\d+")) {
-      return Integer.valueOf(header);
+      return Integer.parseInt(header);
     }
 
     return Integer.MAX_VALUE;
