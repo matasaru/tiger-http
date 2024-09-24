@@ -270,8 +270,6 @@ public class Call {
                       .sentRequestAtMillis(sentRequestMillis)
                       .receivedResponseAtMillis(System.currentTimeMillis())
                       .build();
-
-              code = networkResponse.code();
             }
 
             exchange.responseHeadersEnd(networkResponse);
@@ -283,10 +281,6 @@ public class Call {
             if ("close".equalsIgnoreCase(networkResponse.request().header("Connection")) ||
                 "close".equalsIgnoreCase(networkResponse.header("Connection"))) {
               exchange.noNewExchangesOnConnection();
-            }
-
-            if ((code == 204 || code == 205) && networkResponse.body().contentLength() > 0) {
-              throw new ProtocolException("HTTP " + code + " had non-zero Content-Length: " + networkResponse.body().contentLength());
             }
 
             HttpHeaders.receiveHeaders(client.cookieJar(), request.url(), networkResponse.headers());

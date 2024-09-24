@@ -2643,20 +2643,6 @@ public final class URLConnectionTest {
     Assertions.assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
   }
 
-  @Test public void responseCodeDisagreesWithHeaders() {
-    server.enqueue(new MockResponse()
-        .setResponseCode(HttpURLConnection.HTTP_NO_CONTENT)
-        .setBody("This body is not allowed!"));
-
-    try {
-      getResponse(newRequest("/"));
-      fail();
-    } catch (IOException expected) {
-      Assertions.assertThat(expected.getMessage()).isEqualTo(
-          "HTTP 204 had non-zero Content-Length: 25");
-    }
-  }
-
   @Test public void singleByteReadIsSigned() throws IOException {
     server.enqueue(new MockResponse()
         .setBody(new Buffer()

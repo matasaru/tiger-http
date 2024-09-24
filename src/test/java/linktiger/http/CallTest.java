@@ -1525,24 +1525,6 @@ public final class CallTest {
     }
   }
 
-  @Test public void http204WithBodyDisallowed() throws IOException {
-    server.enqueue(new MockResponse()
-        .setResponseCode(204)
-        .setBody("I'm not even supposed to be here today."));
-
-    executeSynchronously("/")
-        .assertFailure("HTTP 204 had non-zero Content-Length: 39");
-  }
-
-  @Test public void http205WithBodyDisallowed() throws IOException {
-    server.enqueue(new MockResponse()
-        .setResponseCode(205)
-        .setBody("I'm not even supposed to be here today."));
-
-    executeSynchronously("/")
-        .assertFailure("HTTP 205 had non-zero Content-Length: 39");
-  }
-
   @Test public void httpWithExcessiveHeaders() throws IOException {
     String longLine = "HTTP/1.1 200 " + stringFill('O', 256 * 1024) + "K";
 
