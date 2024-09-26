@@ -49,7 +49,6 @@ public final class Response implements Closeable {
   final Handshake handshake;
   final Headers headers;
   final ResponseBody body;
-  final Response networkResponse;
   final Response priorResponse;
   final long sentRequestAtMillis;
   final long receivedResponseAtMillis;
@@ -63,7 +62,6 @@ public final class Response implements Closeable {
     this.handshake = builder.handshake;
     this.headers = builder.headers.build();
     this.body = builder.body;
-    this.networkResponse = builder.networkResponse;
     this.priorResponse = builder.priorResponse;
     this.sentRequestAtMillis = builder.sentRequestAtMillis;
     this.receivedResponseAtMillis = builder.receivedResponseAtMillis;
@@ -166,8 +164,6 @@ public final class Response implements Closeable {
   /**
    * Returns a non-null value if this response was returned from {@link Call#execute()}.
    * Response bodies must be {@linkplain ResponseBody closed} and may be consumed only once.
-   *
-   * <p>This always returns null on responses returned from {@link #networkResponse} and {@link #priorResponse()}.
    */
   public ResponseBody body() {
     return body;
@@ -190,14 +186,6 @@ public final class Response implements Closeable {
       default:
         return false;
     }
-  }
-
-  /**
-   * Returns the raw response received from the network. The body of the returned response
-   * should not be read.
-   */
-  public Response networkResponse() {
-    return networkResponse;
   }
 
   /**
@@ -255,9 +243,6 @@ public final class Response implements Closeable {
 
   /**
    * Closes the response body. Equivalent to {@code body().close()}.
-   *
-   * <p>It is an error to close a response that is not eligible for a body. This includes the
-   * responses returned from {@link #networkResponse}, and {@link #priorResponse()}.
    */
   @Override public void close() {
     if (body == null) {
@@ -286,7 +271,6 @@ public final class Response implements Closeable {
     Handshake handshake;
     Headers.Builder headers;
     ResponseBody body;
-    Response networkResponse;
     Response priorResponse;
     long sentRequestAtMillis;
     long receivedResponseAtMillis;
@@ -304,7 +288,6 @@ public final class Response implements Closeable {
       this.handshake = response.handshake;
       this.headers = response.headers.newBuilder();
       this.body = response.body;
-      this.networkResponse = response.networkResponse;
       this.priorResponse = response.priorResponse;
       this.sentRequestAtMillis = response.sentRequestAtMillis;
       this.receivedResponseAtMillis = response.receivedResponseAtMillis;
@@ -373,22 +356,6 @@ public final class Response implements Closeable {
     public Builder body(ResponseBody body) {
       this.body = body;
       return this;
-    }
-
-    public Builder networkResponse(Response networkResponse) {
-      if (networkResponse != null) checkSupportResponse("networkResponse", networkResponse);
-      this.networkResponse = networkResponse;
-      return this;
-    }
-
-    private void checkSupportResponse(String name, Response response) {
-      if (response.body != null) {
-        throw new IllegalArgumentException(name + ".body != null");
-      } else if (response.networkResponse != null) {
-        throw new IllegalArgumentException(name + ".networkResponse != null");
-      } else if (response.priorResponse != null) {
-        throw new IllegalArgumentException(name + ".priorResponse != null");
-      }
     }
 
     public Builder priorResponse(Response priorResponse) {

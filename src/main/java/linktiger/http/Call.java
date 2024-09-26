@@ -286,8 +286,7 @@ public class Call {
             HttpHeaders.receiveHeaders(client.cookieJar(), request.url(), networkResponse.headers());
 
             Response.Builder responseBuilder = networkResponse.newBuilder()
-                    .request(request)
-                    .networkResponse(stripBody(networkResponse));
+                    .request(request);
 
             if (transparentGzip && "gzip".equalsIgnoreCase(networkResponse.header("Content-Encoding")) && HttpHeaders.hasBody(networkResponse)) {
               GzipSource responseBody = new GzipSource(networkResponse.body().source());
@@ -615,11 +614,5 @@ public class Call {
       cookieHeader.append(cookie.name()).append('=').append(cookie.value());
     }
     return cookieHeader.toString();
-  }
-
-  private static Response stripBody(Response response) {
-    return response != null && response.body() != null ?
-            response.newBuilder().body(null).build() :
-            response;
   }
 }

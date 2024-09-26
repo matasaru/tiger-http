@@ -1664,7 +1664,6 @@ public final class CallTest {
 
   @Test public void gzip() throws Exception {
     Buffer gzippedBody = gzip("abcabcabc");
-    String bodySize = Long.toString(gzippedBody.size());
 
     server.enqueue(new MockResponse()
         .setBody(gzippedBody)
@@ -1678,12 +1677,6 @@ public final class CallTest {
         .assertHeader("Content-Encoding")
         .assertHeader("Content-Length")
         .assertBody("abcabcabc");
-
-    // But the network request doesn't lie. OkHttp used gzip for this call.
-    userResponse.networkResponse()
-        .assertHeader("Content-Encoding", "gzip")
-        .assertHeader("Content-Length", bodySize)
-        .assertRequestHeader("Accept-Encoding", "gzip");
   }
 
   /** https://github.com/square/okhttp/issues/1927 */

@@ -105,22 +105,6 @@ public final class RecordedResponse {
     return new RecordedResponse(priorResponse.request(), priorResponse, null, null);
   }
 
-  /**
-   * Asserts that the current response used the network and returns the network response.
-   */
-  public RecordedResponse networkResponse() {
-    Response networkResponse = response.networkResponse();
-    assertThat(networkResponse).isNotNull();
-    assertThat(networkResponse.body()).isNull();
-    return new RecordedResponse(networkResponse.request(), networkResponse, null, null);
-  }
-
-  /** Asserts that the current response didn't use the network. */
-  public RecordedResponse assertNoNetworkResponse() {
-    assertThat(response.networkResponse()).isNull();
-    return this;
-  }
-
   public RecordedResponse assertFailure(Class<?>... allowedExceptionTypes) {
     boolean found = false;
     for (Class expectedClass : allowedExceptionTypes) {
