@@ -49,7 +49,6 @@ public final class Response implements Closeable {
   final Handshake handshake;
   final Headers headers;
   final ResponseBody body;
-  final Response priorResponse;
   final long sentRequestAtMillis;
   final long receivedResponseAtMillis;
   final Exchange exchange;
@@ -62,7 +61,6 @@ public final class Response implements Closeable {
     this.handshake = builder.handshake;
     this.headers = builder.headers.build();
     this.body = builder.body;
-    this.priorResponse = builder.priorResponse;
     this.sentRequestAtMillis = builder.sentRequestAtMillis;
     this.receivedResponseAtMillis = builder.receivedResponseAtMillis;
     this.exchange = builder.exchange;
@@ -189,16 +187,6 @@ public final class Response implements Closeable {
   }
 
   /**
-   * Returns the response for the HTTP redirect or authorization challenge that triggered this
-   * response, or null if this response wasn't triggered by an automatic retry. The body of the
-   * returned response should not be read because it has already been consumed by the redirecting
-   * client.
-   */
-  public Response priorResponse() {
-    return priorResponse;
-  }
-
-  /**
    * Returns the RFC 7235 authorization challenges appropriate for this response's code. If the
    * response code is 401 unauthorized, this returns the "WWW-Authenticate" challenges. If the
    * response code is 407 proxy unauthorized, this returns the "Proxy-Authenticate" challenges.
@@ -271,7 +259,6 @@ public final class Response implements Closeable {
     Handshake handshake;
     Headers.Builder headers;
     ResponseBody body;
-    Response priorResponse;
     long sentRequestAtMillis;
     long receivedResponseAtMillis;
     Exchange exchange;
@@ -288,7 +275,6 @@ public final class Response implements Closeable {
       this.handshake = response.handshake;
       this.headers = response.headers.newBuilder();
       this.body = response.body;
-      this.priorResponse = response.priorResponse;
       this.sentRequestAtMillis = response.sentRequestAtMillis;
       this.receivedResponseAtMillis = response.receivedResponseAtMillis;
       this.exchange = response.exchange;
@@ -356,18 +342,6 @@ public final class Response implements Closeable {
     public Builder body(ResponseBody body) {
       this.body = body;
       return this;
-    }
-
-    public Builder priorResponse(Response priorResponse) {
-      if (priorResponse != null) checkPriorResponse(priorResponse);
-      this.priorResponse = priorResponse;
-      return this;
-    }
-
-    private void checkPriorResponse(Response response) {
-      if (response.body != null) {
-        throw new IllegalArgumentException("priorResponse.body != null");
-      }
     }
 
     public Builder sentRequestAtMillis(long sentRequestAtMillis) {

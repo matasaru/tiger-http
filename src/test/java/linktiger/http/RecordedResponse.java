@@ -95,16 +95,6 @@ public final class RecordedResponse {
     return this;
   }
 
-  /**
-   * Asserts that the current response was redirected and returns the prior response.
-   */
-  public RecordedResponse priorResponse() {
-    Response priorResponse = response.priorResponse();
-    assertThat(priorResponse).isNotNull();
-    assertThat(priorResponse.body()).isNull();
-    return new RecordedResponse(priorResponse.request(), priorResponse, null, null);
-  }
-
   public RecordedResponse assertFailure(Class<?>... allowedExceptionTypes) {
     boolean found = false;
     for (Class expectedClass : allowedExceptionTypes) {
