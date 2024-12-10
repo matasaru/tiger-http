@@ -45,7 +45,6 @@ import linktiger.http.Response;
 import linktiger.http.TestLogHandler;
 import linktiger.http.TestUtil;
 import linktiger.http.impl.DoubleInetAddressDns;
-import linktiger.http.impl.RecordingOkAuthenticator;
 import linktiger.http.impl.Util;
 
 import okhttp3.mockwebserver.Dispatcher;
@@ -424,32 +423,6 @@ public final class HttpOverHttp2Test {
 
     Response response = call.execute();
     Assertions.assertThat(response.body().string()).isEqualTo("ABCABCABC");
-  }
-
-  @Test public void authenticate() throws Exception {
-    server.enqueue(new MockResponse()
-        .setResponseCode(HttpURLConnection.HTTP_UNAUTHORIZED)
-        .addHeader("www-authenticate: Basic realm=\"protected area\"")
-        .setBody("Please authenticate."));
-    server.enqueue(new MockResponse()
-        .setBody("Successful auth!"));
-
-    String credential = Credentials.basic("username", "password");
-    client = client.newBuilder()
-        .authenticator(new RecordingOkAuthenticator(credential, "Basic"))
-        .build();
-
-    Call call = client.newCall(new Request.Builder()
-        .url(server.url("/").toString())
-        .build());
-    Response response = call.execute();
-    Assertions.assertThat(response.body().string()).isEqualTo("Successful auth!");
-
-    RecordedRequest denied = server.takeRequest();
-    Assertions.assertThat(denied.getHeader("Authorization")).isNull();
-    RecordedRequest accepted = server.takeRequest();
-    Assertions.assertThat(accepted.getRequestLine()).isEqualTo("GET / HTTP/1.1");
-    Assertions.assertThat(accepted.getHeader("Authorization")).isEqualTo(credential);
   }
 
   @Test public void readAfterLastByte() throws Exception {

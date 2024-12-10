@@ -16,13 +16,11 @@
 package linktiger.http;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import linktiger.http.impl.RecordingOkAuthenticator;
 import linktiger.http.impl.http2.AsyncRequestBody;
 
 import okhttp3.internal.duplex.MwsDuplexAccess;
@@ -275,66 +273,6 @@ public final class DuplexTest {
     }
 
     mockDuplexResponseBody.awaitSuccess();
-  }
-
-  /**
-   * Auth requires follow-ups. Unlike redirects, the auth follow-up also has a request body. This
-   * test makes a single call with two duplex requests!
-   */
-  @Test public void duplexWithAuthChallenge() throws Exception {
-    enableProtocol();
-
-    String credential = Credentials.basic("jesse", "secret");
-    client = client.newBuilder()
-        .authenticator(new RecordingOkAuthenticator(credential, null))
-        .build();
-
-    MockDuplexResponseBody mockResponseBody1 = enqueueResponseWithBody(
-        new MockResponse()
-            .clearHeaders()
-            .setResponseCode(HttpURLConnection.HTTP_UNAUTHORIZED),
-        new MockDuplexResponseBody()
-            .sendResponse("please authenticate!\n")
-            .requestIOException()
-            .exhaustResponse());
-    MockDuplexResponseBody mockResponseBody2 = enqueueResponseWithBody(
-        new MockResponse()
-            .clearHeaders(),
-        new MockDuplexResponseBody()
-            .sendResponse("response body\n")
-            .exhaustResponse()
-            .receiveRequest("request body\n")
-            .exhaustRequest());
-
-    Call call = client.newCall(new Request.Builder()
-        .url(server.url("/").toString())
-        .post(new AsyncRequestBody())
-        .build());
-
-    Response response2 = call.execute();
-
-    // First duplex request is detached with violence.
-    BufferedSink requestBody1 = ((AsyncRequestBody) call.request().body()).takeSink();
-    try {
-      requestBody1.writeUtf8("not authenticated\n");
-      requestBody1.flush();
-      fail();
-    } catch (IOException expected) {
-      assertThat(expected.getMessage()).isEqualTo("stream was reset: CANCEL");
-    }
-    mockResponseBody1.awaitSuccess();
-
-    // Second duplex request proceeds normally.
-    BufferedSink requestBody2 = ((AsyncRequestBody) call.request().body()).takeSink();
-    requestBody2.writeUtf8("request body\n");
-    requestBody2.close();
-    BufferedSource responseBody2 = response2.body().source();
-    assertThat(responseBody2.readUtf8Line()).isEqualTo("response body");
-    assertTrue(responseBody2.exhausted());
-    mockResponseBody2.awaitSuccess();
-
-    // No more requests attempted!
-    ((AsyncRequestBody) call.request().body()).assertNoMoreSinks();
   }
 
   @Test public void fullCallTimeoutAppliesToSetup() throws Exception {

@@ -44,7 +44,6 @@ import okio.Timeout;
 
 import static java.net.HttpURLConnection.HTTP_CLIENT_TIMEOUT;
 import static java.net.HttpURLConnection.HTTP_PROXY_AUTH;
-import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
 import static java.net.HttpURLConnection.HTTP_UNAVAILABLE;
 
 /**
@@ -473,9 +472,6 @@ public class Call {
           throw new ProtocolException("Received HTTP_PROXY_AUTH (407) code while not using proxy");
         }
         return client.proxyAuthenticator().authenticate(route, userResponse);
-
-      case HTTP_UNAUTHORIZED:
-        return client.authenticator().authenticate(route, userResponse);
 
       case HTTP_CLIENT_TIMEOUT:
         // 408's are rare in practice, but some servers like HAProxy use this response code. The

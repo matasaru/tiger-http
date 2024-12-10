@@ -348,120 +348,6 @@ public final class CallTest {
     postZeroLength();
   }
 
-  @Test public void postBodyRetransmittedAfterAuthorizationFail() throws Exception {
-    postBodyRetransmittedAfterAuthorizationFail("abc");
-  }
-
-  @Test public void postBodyRetransmittedAfterAuthorizationFail_HTTPS() throws Exception {
-    enableTls();
-    postBodyRetransmittedAfterAuthorizationFail("abc");
-  }
-
-  @Test public void postBodyRetransmittedAfterAuthorizationFail_HTTP_2() throws Exception {
-    enableProtocol();
-    postBodyRetransmittedAfterAuthorizationFail("abc");
-  }
-
-  /** Don't explode when resending an empty post. https://github.com/square/okhttp/issues/1131 */
-  @Test public void postEmptyBodyRetransmittedAfterAuthorizationFail() throws Exception {
-    postBodyRetransmittedAfterAuthorizationFail("");
-  }
-
-  @Test public void postEmptyBodyRetransmittedAfterAuthorizationFail_HTTPS() throws Exception {
-    enableTls();
-    postBodyRetransmittedAfterAuthorizationFail("");
-  }
-
-  @Test public void postEmptyBodyRetransmittedAfterAuthorizationFail_HTTP_2() throws Exception {
-    enableProtocol();
-    postBodyRetransmittedAfterAuthorizationFail("");
-  }
-
-  private void postBodyRetransmittedAfterAuthorizationFail(String body) throws Exception {
-    server.enqueue(new MockResponse().setResponseCode(401));
-    server.enqueue(new MockResponse());
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .method("POST", RequestBody.create(null, body))
-        .build();
-
-    String credential = Credentials.basic("jesse", "secret");
-    client = client.newBuilder()
-        .authenticator(new RecordingOkAuthenticator(credential, null))
-        .build();
-
-    Response response = client.newCall(request).execute();
-    assertThat(response.code()).isEqualTo(200);
-    response.body().close();
-
-    RecordedRequest recordedRequest1 = server.takeRequest();
-    assertThat(recordedRequest1.getMethod()).isEqualTo("POST");
-    assertThat(recordedRequest1.getBody().readUtf8()).isEqualTo(body);
-    assertThat(recordedRequest1.getHeader("Authorization")).isNull();
-
-    RecordedRequest recordedRequest2 = server.takeRequest();
-    assertThat(recordedRequest2.getMethod()).isEqualTo("POST");
-    assertThat(recordedRequest2.getBody().readUtf8()).isEqualTo(body);
-    assertThat(recordedRequest2.getHeader("Authorization")).isEqualTo(credential);
-  }
-
-  @Test public void attemptAuthorization20Times() throws Exception {
-    for (int i = 0; i < 20; i++) {
-      server.enqueue(new MockResponse().setResponseCode(401));
-    }
-    server.enqueue(new MockResponse().setBody("Success!"));
-
-    String credential = Credentials.basic("jesse", "secret");
-    client = client.newBuilder()
-        .authenticator(new RecordingOkAuthenticator(credential, null))
-        .build();
-
-    executeSynchronously("/")
-        .assertCode(200)
-        .assertBody("Success!");
-  }
-
-  @Test public void doesNotAttemptAuthorization21Times() throws Exception {
-    for (int i = 0; i < 21; i++) {
-      server.enqueue(new MockResponse().setResponseCode(401));
-    }
-
-    String credential = Credentials.basic("jesse", "secret");
-    client = client.newBuilder()
-        .authenticator(new RecordingOkAuthenticator(credential, null))
-        .build();
-
-    try {
-      client.newCall(new Request.Builder().url(server.url("/0").toString()).build()).execute();
-      fail();
-    } catch (IOException expected) {
-      assertThat(expected.getMessage()).isEqualTo("Too many follow-up requests: 21");
-    }
-  }
-
-  /**
-   * We had a bug where we were passing a null route to the authenticator.
-   * https://github.com/square/okhttp/issues/3809
-   */
-  @Test public void authenticateWithNoConnection() throws Exception {
-    server.enqueue(new MockResponse()
-        .addHeader("Connection: close")
-        .setResponseCode(401)
-        .setSocketPolicy(SocketPolicy.DISCONNECT_AT_END));
-
-    RecordingOkAuthenticator authenticator = new RecordingOkAuthenticator(null, null);
-
-    client = client.newBuilder()
-        .authenticator(authenticator)
-        .build();
-
-    executeSynchronously("/")
-        .assertCode(401);
-
-    assertThat(authenticator.onlyRoute()).isNotNull();
-  }
-
   @Test public void delete() throws Exception {
     server.enqueue(new MockResponse().setBody("abc"));
 
@@ -1502,20 +1388,6 @@ public final class CallTest {
         .assertBody("abcabcabc");
   }
 
-  /** https://github.com/square/okhttp/issues/1927 */
-  @Test public void gzipResponseAfterAuthenticationChallenge() throws Exception {
-    server.enqueue(new MockResponse()
-        .setResponseCode(401));
-    server.enqueue(new MockResponse()
-        .setBody(gzip("abcabcabc"))
-        .addHeader("Content-Encoding: gzip"));
-    client = client.newBuilder()
-        .authenticator(new RecordingOkAuthenticator("password", null))
-        .build();
-
-    executeSynchronously("/").assertBody("abcabcabc");
-  }
-
   @Test public void rangeHeaderPreventsAutomaticGzip() throws Exception {
     Buffer gzippedBody = gzip("abcabcabc");
 
@@ -2346,24 +2218,6 @@ public final class CallTest {
     } finally {
       logger.setLevel(original);
     }
-  }
-
-  @Test public void failedAuthenticatorReleasesConnection() throws IOException {
-    server.enqueue(new MockResponse()
-        .setResponseCode(401));
-
-    client = client.newBuilder()
-        .authenticator((route, response) -> { throw new IOException("IOException!"); })
-        .build();
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .build();
-
-    executeSynchronously(request)
-        .assertFailure(IOException.class);
-
-    assertThat(client.connectionPool().idleConnectionCount()).isEqualTo(1);
   }
 
   @Test public void failedProxyAuthenticatorReleasesConnection() throws IOException {
