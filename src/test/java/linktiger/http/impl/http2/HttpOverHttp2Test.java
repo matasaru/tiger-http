@@ -452,25 +452,6 @@ public final class HttpOverHttp2Test {
     Assertions.assertThat(accepted.getHeader("Authorization")).isEqualTo(credential);
   }
 
-  @Test public void redirect() throws Exception {
-    server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP)
-        .addHeader("Location: /foo")
-        .setBody("This page has moved!"));
-    server.enqueue(new MockResponse().setBody("This is the new location!"));
-
-    Call call = client.newCall(new Request.Builder()
-        .url(server.url("/").toString())
-        .build());
-
-    Response response = call.execute();
-    Assertions.assertThat(response.body().string()).isEqualTo("This is the new location!");
-
-    RecordedRequest request1 = server.takeRequest();
-    Assertions.assertThat(request1.getPath()).isEqualTo("/");
-    RecordedRequest request2 = server.takeRequest();
-    Assertions.assertThat(request2.getPath()).isEqualTo("/foo");
-  }
-
   @Test public void readAfterLastByte() throws Exception {
     server.enqueue(new MockResponse().setBody("ABC"));
 

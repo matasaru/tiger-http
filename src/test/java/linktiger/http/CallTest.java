@@ -18,8 +18,6 @@ package linktiger.http;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.net.CookieManager;
-import java.net.HttpCookie;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.ProtocolException;
@@ -78,7 +76,6 @@ import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.rules.Timeout;
 
-import static java.net.CookiePolicy.ACCEPT_ORIGINAL_SERVER;
 import static okhttp3.tls.internal.TlsUtil.localhost;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.Offset.offset;
@@ -1074,22 +1071,6 @@ public final class CallTest {
     }
   }
 
-  @Test public void setFollowSslRedirectsFalse() throws Exception {
-    enableTls();
-    server.enqueue(new MockResponse()
-        .setResponseCode(301)
-        .addHeader("Location: http://square.com"));
-
-    client = client.newBuilder()
-        .followSslRedirects(false)
-        .build();
-
-    Request request = new Request.Builder().url(server.url("/").toString()).build();
-    Response response = client.newCall(request).execute();
-    assertThat(response.code()).isEqualTo(301);
-    response.body().close();
-  }
-
   @Test public void postBodyRetransmittedOnFailureRecovery() throws Exception {
     server.enqueue(new MockResponse().setBody("abc"));
     server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AFTER_REQUEST));
@@ -1122,58 +1103,6 @@ public final class CallTest {
   @Test public void postBodyRetransmittedOnFailureRecovery_HTTP2() throws Exception {
     enableProtocol();
     postBodyRetransmittedOnFailureRecovery();
-  }
-
-  @Test public void redirect() throws Exception {
-    server.enqueue(new MockResponse()
-        .setResponseCode(301)
-        .addHeader("Location: /b")
-        .addHeader("Test", "Redirect from /a to /b")
-        .setBody("/a has moved!"));
-    server.enqueue(new MockResponse()
-        .setResponseCode(302)
-        .addHeader("Location: /c")
-        .addHeader("Test", "Redirect from /b to /c")
-        .setBody("/b has moved!"));
-    server.enqueue(new MockResponse().setBody("C"));
-
-    executeSynchronously("/a")
-        .assertCode(200)
-        .assertBody("C")
-        .priorResponse()
-        .assertCode(302)
-        .assertHeader("Test", "Redirect from /b to /c")
-        .priorResponse()
-        .assertCode(301)
-        .assertHeader("Test", "Redirect from /a to /b");
-
-    // New connection.
-    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
-    // Connection reused.
-    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(1);
-    // Connection reused again!
-    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(2);
-  }
-
-  @Test public void postRedirectsToGet() throws Exception {
-    server.enqueue(new MockResponse()
-        .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP)
-        .addHeader("Location: /page2")
-        .setBody("This page has moved!"));
-    server.enqueue(new MockResponse().setBody("Page 2"));
-
-    Response response = client.newCall(new Request.Builder()
-        .url(server.url("/page1").toString())
-        .post(RequestBody.create(MediaType.get("text/plain"), "Request Body"))
-        .build()).execute();
-    assertThat(response.body().string()).isEqualTo("Page 2");
-
-    RecordedRequest page1 = server.takeRequest();
-    assertThat(page1.getRequestLine()).isEqualTo("POST /page1 HTTP/1.1");
-    assertThat(page1.getBody().readUtf8()).isEqualTo("Request Body");
-
-    RecordedRequest page2 = server.takeRequest();
-    assertThat(page2.getRequestLine()).isEqualTo("GET /page2 HTTP/1.1");
   }
 
   @Test public void getClientRequestTimeout() throws Exception {
@@ -1381,32 +1310,6 @@ public final class CallTest {
     assertThat(server.getRequestCount()).isEqualTo(1);
   }
 
-  @Test public void propfindRedirectsToPropfindAndMaintainsRequestBody() throws Exception {
-    // given
-    server.enqueue(new MockResponse()
-        .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP)
-        .addHeader("Location: /page2")
-        .setBody("This page has moved!"));
-    server.enqueue(new MockResponse().setBody("Page 2"));
-
-    // when
-    Response response = client.newCall(new Request.Builder()
-        .url(server.url("/page1").toString())
-        .method("PROPFIND", RequestBody.create(MediaType.get("text/plain"), "Request Body"))
-        .build()).execute();
-
-    // then
-    assertThat(response.body().string()).isEqualTo("Page 2");
-
-    RecordedRequest page1 = server.takeRequest();
-    assertThat(page1.getRequestLine()).isEqualTo("PROPFIND /page1 HTTP/1.1");
-    assertThat(page1.getBody().readUtf8()).isEqualTo("Request Body");
-
-    RecordedRequest page2 = server.takeRequest();
-    assertThat(page2.getRequestLine()).isEqualTo("PROPFIND /page2 HTTP/1.1");
-    assertThat(page2.getBody().readUtf8()).isEqualTo("Request Body");
-  }
-
   @Test public void responseCookies() throws Exception {
     server.enqueue(new MockResponse()
         .addHeader("Set-Cookie", "a=b; Expires=Thu, 01 Jan 1970 00:00:00 GMT")
@@ -1443,86 +1346,6 @@ public final class CallTest {
 
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getHeader("Cookie")).isEqualTo("a=b; c=d");
-  }
-
-  @Test public void redirectsDoNotIncludeTooManyCookies() throws Exception {
-    server2.enqueue(new MockResponse().setBody("Page 2"));
-    server.enqueue(new MockResponse()
-        .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP)
-        .addHeader("Location: " + server2.url("/")));
-
-    CookieManager cookieManager = new CookieManager(null, ACCEPT_ORIGINAL_SERVER);
-    HttpCookie cookie = new HttpCookie("c", "cookie");
-    cookie.setDomain(server.getHostName());
-    cookie.setPath("/");
-    String portList = Integer.toString(server.getPort());
-    cookie.setPortlist(portList);
-    cookieManager.getCookieStore().add(server.url("/").uri(), cookie);
-    client = client.newBuilder()
-        .cookieJar(new JavaNetCookieJar(cookieManager))
-        .build();
-
-    Response response = client.newCall(new Request.Builder()
-        .url(server.url("/page1").toString())
-        .build()).execute();
-    assertThat(response.body().string()).isEqualTo("Page 2");
-
-    RecordedRequest request1 = server.takeRequest();
-    assertThat(request1.getHeader("Cookie")).isEqualTo("c=cookie");
-
-    RecordedRequest request2 = server2.takeRequest();
-    assertThat(request2.getHeader("Cookie")).isNull();
-  }
-
-  @Test public void redirectsDoNotIncludeTooManyAuthHeaders() throws Exception {
-    server2.enqueue(new MockResponse().setBody("Page 2"));
-    server.enqueue(new MockResponse()
-        .setResponseCode(401));
-    server.enqueue(new MockResponse()
-        .setResponseCode(302)
-        .addHeader("Location: " + server2.url("/b")));
-
-    client = client.newBuilder()
-        .authenticator(new RecordingOkAuthenticator(Credentials.basic("jesse", "secret"), null))
-        .build();
-
-    Request request = new Request.Builder().url(server.url("/a").toString()).build();
-    Response response = client.newCall(request).execute();
-    assertThat(response.body().string()).isEqualTo("Page 2");
-
-    RecordedRequest redirectRequest = server2.takeRequest();
-    assertThat(redirectRequest.getHeader("Authorization")).isNull();
-    assertThat(redirectRequest.getPath()).isEqualTo("/b");
-  }
-
-  @Test public void follow20Redirects() throws Exception {
-    for (int i = 0; i < 20; i++) {
-      server.enqueue(new MockResponse()
-          .setResponseCode(301)
-          .addHeader("Location: /" + (i + 1))
-          .setBody("Redirecting to /" + (i + 1)));
-    }
-    server.enqueue(new MockResponse().setBody("Success!"));
-
-    executeSynchronously("/0")
-        .assertCode(200)
-        .assertBody("Success!");
-  }
-
-  @Test public void doesNotFollow21Redirects() throws Exception {
-    for (int i = 0; i < 21; i++) {
-      server.enqueue(new MockResponse()
-          .setResponseCode(301)
-          .addHeader("Location: /" + (i + 1))
-          .setBody("Redirecting to /" + (i + 1)));
-    }
-
-    try {
-      client.newCall(new Request.Builder().url(server.url("/0").toString()).build()).execute();
-      fail();
-    } catch (IOException expected) {
-      assertThat(expected.getMessage()).isEqualTo("Too many follow-up requests: 21");
-    }
   }
 
   @Test public void httpWithExcessiveHeaders() throws IOException {
@@ -1728,21 +1551,6 @@ public final class CallTest {
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getHeader("User-Agent")
         .matches(Version.userAgent())).isTrue();
-  }
-
-  @Test public void setFollowRedirectsFalse() throws Exception {
-    server.enqueue(new MockResponse()
-        .setResponseCode(302)
-        .addHeader("Location: /b")
-        .setBody("A"));
-    server.enqueue(new MockResponse().setBody("B"));
-
-    client = client.newBuilder()
-        .followRedirects(false)
-        .build();
-    executeSynchronously("/a")
-        .assertBody("A")
-        .assertCode(302);
   }
 
   @Test public void expect100ContinueNonEmptyRequestBody() throws Exception {

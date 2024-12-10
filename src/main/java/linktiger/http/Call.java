@@ -32,7 +32,6 @@ import linktiger.http.impl.HttpHeaders;
 import linktiger.http.impl.HttpMethod;
 import linktiger.http.impl.RealResponseBody;
 import linktiger.http.impl.RouteException;
-import linktiger.http.impl.StatusLine;
 import linktiger.http.impl.Transmitter;
 import linktiger.http.impl.Util;
 import linktiger.http.impl.Version;
@@ -44,11 +43,7 @@ import okio.Okio;
 import okio.Timeout;
 
 import static java.net.HttpURLConnection.HTTP_CLIENT_TIMEOUT;
-import static java.net.HttpURLConnection.HTTP_MOVED_PERM;
-import static java.net.HttpURLConnection.HTTP_MOVED_TEMP;
-import static java.net.HttpURLConnection.HTTP_MULT_CHOICE;
 import static java.net.HttpURLConnection.HTTP_PROXY_AUTH;
-import static java.net.HttpURLConnection.HTTP_SEE_OTHER;
 import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
 import static java.net.HttpURLConnection.HTTP_UNAVAILABLE;
 
@@ -469,7 +464,6 @@ public class Call {
     if (userResponse == null) throw new IllegalStateException();
     int responseCode = userResponse.code();
 
-    final String method = userResponse.request().method();
     switch (responseCode) {
       case HTTP_PROXY_AUTH:
         Proxy selectedProxy = route != null
@@ -482,58 +476,6 @@ public class Call {
 
       case HTTP_UNAUTHORIZED:
         return client.authenticator().authenticate(route, userResponse);
-
-      case StatusLine.HTTP_PERM_REDIRECT:
-      case StatusLine.HTTP_TEMP_REDIRECT:
-        // "If the 307 or 308 status code is received in response to a request other than GET
-        // or HEAD, the user agent MUST NOT automatically redirect the request"
-        if (!method.equals("GET") && !method.equals("HEAD")) {
-          return null;
-        }
-        // fall-through
-      case HTTP_MULT_CHOICE:
-      case HTTP_MOVED_PERM:
-      case HTTP_MOVED_TEMP:
-      case HTTP_SEE_OTHER:
-        // Does the client allow redirects?
-        if (!client.followRedirects()) return null;
-
-        String location = userResponse.header("Location");
-        if (location == null) return null;
-        Url url = userResponse.request().url().resolve(location);
-
-        // Don't follow redirects to unsupported protocols.
-        if (url == null) return null;
-
-        // If configured, don't follow redirects between SSL and non-SSL.
-        boolean sameScheme = url.scheme().equals(userResponse.request().url().scheme());
-        if (!sameScheme && !client.followSslRedirects()) return null;
-
-        // Most redirects don't include a request body.
-        Request.Builder requestBuilder = userResponse.request().newBuilder();
-        if (HttpMethod.permitsRequestBody(method)) {
-          final boolean maintainBody = HttpMethod.redirectsWithBody(method);
-          if (HttpMethod.redirectsToGet(method)) {
-            requestBuilder.method("GET", null);
-          } else {
-            RequestBody requestBody = maintainBody ? userResponse.request().body() : null;
-            requestBuilder.method(method, requestBody);
-          }
-          if (!maintainBody) {
-            requestBuilder.removeHeader("Transfer-Encoding");
-            requestBuilder.removeHeader("Content-Length");
-            requestBuilder.removeHeader("Content-Type");
-          }
-        }
-
-        // When redirecting across hosts, drop all authentication headers. This
-        // is potentially annoying to the application layer since they have no
-        // way to retain them.
-        if (!Util.sameConnection(userResponse.request().url(), url)) {
-          requestBuilder.removeHeader("Authorization");
-        }
-
-        return requestBuilder.url(url).build();
 
       case HTTP_CLIENT_TIMEOUT:
         // 408's are rare in practice, but some servers like HAProxy use this response code. The

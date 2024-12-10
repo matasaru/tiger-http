@@ -118,68 +118,6 @@ public final class WholeOperationTimeoutTest {
     }
   }
 
-  @Test public void singleTimeoutForAllFollowUpRequests() throws Exception {
-    server.enqueue(new MockResponse()
-        .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP)
-        .setHeader("Location", "/b")
-        .setHeadersDelay(100, TimeUnit.MILLISECONDS));
-    server.enqueue(new MockResponse()
-        .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP)
-        .setHeader("Location", "/c")
-        .setHeadersDelay(100, TimeUnit.MILLISECONDS));
-    server.enqueue(new MockResponse()
-        .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP)
-        .setHeader("Location", "/d")
-        .setHeadersDelay(100, TimeUnit.MILLISECONDS));
-    server.enqueue(new MockResponse()
-        .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP)
-        .setHeader("Location", "/e")
-        .setHeadersDelay(100, TimeUnit.MILLISECONDS));
-    server.enqueue(new MockResponse()
-        .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP)
-        .setHeader("Location", "/f")
-        .setHeadersDelay(100, TimeUnit.MILLISECONDS));
-    server.enqueue(new MockResponse());
-
-    Request request = new Request.Builder()
-        .url(server.url("/a").toString())
-        .build();
-
-    Call call = client.newCall(request);
-    call.timeout().timeout(250, TimeUnit.MILLISECONDS);
-    try {
-      call.execute();
-      fail();
-    } catch (IOException e) {
-      assertThat(e.getMessage()).isEqualTo("timeout");
-      assertThat(call.isCanceled()).isTrue();
-    }
-  }
-
-  @Test
-  public void timeoutFollowingRedirectOnNewConnection() throws Exception {
-    MockWebServer otherServer = new MockWebServer();
-
-    server.enqueue(
-        new MockResponse()
-            .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP)
-            .setHeader("Location", otherServer.url("/")));
-
-    otherServer.enqueue(new MockResponse().setHeadersDelay(500, TimeUnit.MILLISECONDS));
-
-    Request request = new Request.Builder().url(server.url("/").toString()).build();
-
-    Call call = client.newCall(request);
-    call.timeout().timeout(250, TimeUnit.MILLISECONDS);
-    try {
-      call.execute();
-      fail();
-    } catch (IOException e) {
-      assertThat(e.getMessage()).isEqualTo("timeout");
-      assertThat(call.isCanceled()).isTrue();
-    }
-  }
-
   @Test public void noTimeout() throws Exception {
     server.enqueue(new MockResponse()
         .setHeadersDelay(250, TimeUnit.MILLISECONDS)

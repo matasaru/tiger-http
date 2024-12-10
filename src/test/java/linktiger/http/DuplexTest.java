@@ -278,56 +278,6 @@ public final class DuplexTest {
   }
 
   /**
-   * Duplex calls that have follow-ups are weird. By the time we know there's a follow-up we've
-   * already split off another thread to stream the request body. Because we permit at most one
-   * exchange at a time we break the request stream out from under that writer.
-   */
-  @Test public void duplexWithRedirect() throws Exception {
-    enableProtocol();
-
-    MockDuplexResponseBody mockDuplexResponseBody = enqueueResponseWithBody(
-        new MockResponse()
-            .clearHeaders()
-            .setResponseCode(HttpURLConnection.HTTP_MOVED_PERM)
-            .addHeader("Location: /b"),
-        new MockDuplexResponseBody()
-            .sendResponse("/a has moved!\n")
-            .requestIOException()
-            .exhaustResponse());
-    server.enqueue(new MockResponse()
-        .setBody("this is /b"));
-
-    Call call = client.newCall(new Request.Builder()
-        .url(server.url("/").toString())
-        .post(new AsyncRequestBody())
-        .build());
-
-    try (Response response = call.execute()) {
-      BufferedSource responseBody = response.body().source();
-      assertThat(responseBody.readUtf8Line()).isEqualTo("this is /b");
-    }
-
-    BufferedSink requestBody = ((AsyncRequestBody) call.request().body()).takeSink();
-    try {
-      requestBody.writeUtf8("request body\n");
-      requestBody.flush();
-      fail();
-    } catch (IOException expected) {
-      assertThat(expected.getMessage()).isEqualTo("stream was reset: CANCEL");
-    }
-
-    mockDuplexResponseBody.awaitSuccess();
-
-    List<String> expectedEvents = Arrays.asList("CallStart", "DnsStart", "DnsEnd", "ConnectStart",
-        "SecureConnectStart", "SecureConnectEnd", "ConnectEnd", "ConnectionAcquired",
-        "RequestHeadersStart", "RequestHeadersEnd", "RequestBodyStart", "ResponseHeadersStart",
-        "ResponseHeadersEnd", "ResponseBodyStart", "ResponseBodyEnd", "RequestHeadersStart",
-        "RequestHeadersEnd", "ResponseHeadersStart", "ResponseHeadersEnd", "ResponseBodyStart",
-        "ResponseBodyEnd", "ConnectionReleased", "CallEnd", "RequestFailed");
-    assertThat(listener.recordedEventTypes()).isEqualTo(expectedEvents);
-  }
-
-  /**
    * Auth requires follow-ups. Unlike redirects, the auth follow-up also has a request body. This
    * test makes a single call with two duplex requests!
    */

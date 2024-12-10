@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.HttpCookie;
-import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URI;
 import java.util.Arrays;
@@ -38,7 +37,6 @@ import org.junit.Test;
 import static java.net.CookiePolicy.ACCEPT_ORIGINAL_SERVER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.Offset.offset;
-import static org.junit.Assert.fail;
 
 /** Derived from Android's CookiesTest. */
 public class CookiesTest {
@@ -213,42 +211,6 @@ public class CookiesTest {
     get(urlWithIpAddress(server, "/"));
     RecordedRequest request2 = server.takeRequest();
     assertThat(request2.getHeader("Cookie")).isEqualTo("a=android; b=banana");
-  }
-
-  @Test public void testRedirectsDoNotIncludeTooManyCookies() throws Exception {
-    MockWebServer redirectTarget = new MockWebServer();
-    redirectTarget.enqueue(new MockResponse().setBody("A"));
-    redirectTarget.start();
-    Url redirectTargetUrl = urlWithIpAddress(redirectTarget, "/");
-
-    MockWebServer redirectSource = new MockWebServer();
-    redirectSource.enqueue(new MockResponse()
-        .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP)
-        .addHeader("Location: " + redirectTargetUrl));
-    redirectSource.start();
-    Url redirectSourceUrl = urlWithIpAddress(redirectSource, "/");
-
-    CookieManager cookieManager = new CookieManager(null, ACCEPT_ORIGINAL_SERVER);
-    HttpCookie cookie = new HttpCookie("c", "cookie");
-    cookie.setDomain(redirectSourceUrl.host());
-    cookie.setPath("/");
-    String portList = Integer.toString(redirectSource.getPort());
-    cookie.setPortlist(portList);
-    cookieManager.getCookieStore().add(redirectSourceUrl.uri(), cookie);
-    client = client.newBuilder()
-        .cookieJar(new JavaNetCookieJar(cookieManager))
-        .build();
-
-    get(redirectSourceUrl);
-    RecordedRequest request = redirectSource.takeRequest();
-
-    assertThat(request.getHeader("Cookie")).isEqualTo("c=cookie");
-
-    for (String header : redirectTarget.takeRequest().getHeaders().names()) {
-      if (header.startsWith("Cookie")) {
-        fail(header);
-      }
-    }
   }
 
   @Test public void testCookiesSentIgnoresCase() throws Exception {

@@ -16,7 +16,6 @@
 package linktiger.http;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -393,33 +392,6 @@ public final class EventListenerTest {
     Assertions.assertThat(recordedEvents.contains("DnsEnd")).isFalse();
   }
 
-  @Test public void multipleDnsLookupsForSingleCall() throws IOException {
-    server.enqueue(new MockResponse()
-        .setResponseCode(301)
-        .setHeader("Location", "http://www.fakeurl:" + server.getPort()));
-    server.enqueue(new MockResponse());
-
-    FakeDns dns = new FakeDns();
-    dns.set("fakeurl", client.dns().lookup(server.getHostName()));
-    dns.set("www.fakeurl", client.dns().lookup(server.getHostName()));
-
-    client = client.newBuilder()
-        .dns(dns)
-        .build();
-
-    Call call = client.newCall(new Request.Builder()
-        .url("http://fakeurl:" + server.getPort())
-        .build());
-    Response response = call.execute();
-    Assertions.assertThat(response.code()).isEqualTo(200);
-    response.body().close();
-
-    listener.removeUpToEvent(DnsStart.class);
-    listener.removeUpToEvent(DnsEnd.class);
-    listener.removeUpToEvent(DnsStart.class);
-    listener.removeUpToEvent(DnsEnd.class);
-  }
-
   @Test public void failedDnsLookup() {
     client = client.newBuilder()
         .dns(new FakeDns())
@@ -767,25 +739,6 @@ public final class EventListenerTest {
     Assertions.assertThat(connectionAcquired.connection).isNotNull();
   }
 
-  @Test public void noConnectionFoundOnFollowUp() throws IOException {
-    server.enqueue(new MockResponse()
-        .setResponseCode(301)
-        .addHeader("Location", "/foo"));
-    server.enqueue(new MockResponse()
-        .setBody("ABC"));
-
-    Call call = client.newCall(new Request.Builder()
-        .url(server.url("/").toString())
-        .build());
-    Response response = call.execute();
-    Assertions.assertThat(response.body().string()).isEqualTo("ABC");
-
-    listener.removeUpToEvent(ConnectionAcquired.class);
-
-    List<String> remainingEvents = listener.recordedEventTypes();
-    Assertions.assertThat(remainingEvents.contains("ConnectionAcquired")).isFalse();
-  }
-
   @Test public void pooledConnectionFound() throws IOException {
     server.enqueue(new MockResponse());
     server.enqueue(new MockResponse());
@@ -811,24 +764,6 @@ public final class EventListenerTest {
     ConnectionAcquired connectionAcquired2 = listener.removeUpToEvent(ConnectionAcquired.class);
     Assertions.assertThat(connectionAcquired2.connection).isSameAs(
         connectionAcquired1.connection);
-  }
-
-  @Test public void multipleConnectionsFoundForSingleCall() throws IOException {
-    server.enqueue(new MockResponse()
-        .setResponseCode(301)
-        .addHeader("Location", "/foo")
-        .addHeader("Connection", "Close"));
-    server.enqueue(new MockResponse()
-        .setBody("ABC"));
-
-    Call call = client.newCall(new Request.Builder()
-        .url(server.url("/").toString())
-        .build());
-    Response response = call.execute();
-    Assertions.assertThat(response.body().string()).isEqualTo("ABC");
-
-    listener.removeUpToEvent(ConnectionAcquired.class);
-    listener.removeUpToEvent(ConnectionAcquired.class);
   }
 
   @Test public void responseBodyFailHttp1OverHttps() throws IOException {
@@ -1086,47 +1021,6 @@ public final class EventListenerTest {
         .hostnameVerifier(new RecordingHostnameVerifier())
         .build();
     server.useHttps(handshakeCertificates.sslSocketFactory(), tunnelProxy);
-  }
-
-  @Test public void redirectUsingSameConnectionEventSequence() throws IOException {
-    server.enqueue(
-        new MockResponse()
-            .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP)
-            .addHeader("Location: /foo"));
-    server.enqueue(new MockResponse());
-
-    Call call = client.newCall(new Request.Builder().url(server.url("/").toString()).build());
-    call.execute();
-
-    List<String> expectedEvents = Arrays.asList("CallStart", "DnsStart", "DnsEnd",
-        "ConnectStart", "ConnectEnd", "ConnectionAcquired", "RequestHeadersStart",
-        "RequestHeadersEnd", "ResponseHeadersStart", "ResponseHeadersEnd", "ResponseBodyStart",
-        "ResponseBodyEnd", "RequestHeadersStart", "RequestHeadersEnd", "ResponseHeadersStart",
-        "ResponseHeadersEnd", "ResponseBodyStart", "ResponseBodyEnd", "ConnectionReleased",
-        "CallEnd");
-    Assertions.assertThat(listener.recordedEventTypes()).isEqualTo(expectedEvents);
-  }
-
-  @Test
-  public void redirectUsingNewConnectionEventSequence() throws IOException {
-    MockWebServer otherServer = new MockWebServer();
-    server.enqueue(
-        new MockResponse()
-            .setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP)
-            .addHeader("Location: " + otherServer.url("/foo")));
-    otherServer.enqueue(new MockResponse());
-
-    Call call = client.newCall(new Request.Builder().url(server.url("/").toString()).build());
-    Response response = call.execute();
-
-    List<String> expectedEvents = Arrays.asList("CallStart", "DnsStart", "DnsEnd",
-        "ConnectStart", "ConnectEnd", "ConnectionAcquired", "RequestHeadersStart",
-        "RequestHeadersEnd", "ResponseHeadersStart", "ResponseHeadersEnd", "ResponseBodyStart",
-        "ResponseBodyEnd", "ConnectionReleased", "DnsStart", "DnsEnd", "ConnectStart", "ConnectEnd",
-        "ConnectionAcquired", "RequestHeadersStart", "RequestHeadersEnd", "ResponseHeadersStart",
-        "ResponseHeadersEnd", "ResponseBodyStart", "ResponseBodyEnd", "ConnectionReleased",
-        "CallEnd");
-    Assertions.assertThat(listener.recordedEventTypes()).isEqualTo(expectedEvents);
   }
 
   /** Response headers start, then the entire request body, then response headers end. */

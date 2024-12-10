@@ -119,45 +119,6 @@ public final class ConnectionReuseTest {
     assertConnectionNotReused(request, request);
   }
 
-  @Test public void connectionsReusedWithRedirectEvenIfPoolIsSizeZero() throws Exception {
-    client = client.newBuilder()
-        .connectionPool(new ConnectionPool(0, 5, TimeUnit.SECONDS))
-        .build();
-    server.enqueue(new MockResponse()
-        .setResponseCode(301)
-        .addHeader("Location: /b")
-        .setBody("a"));
-    server.enqueue(new MockResponse().setBody("b"));
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .build();
-    Response response = client.newCall(request).execute();
-    assertThat(response.body().string()).isEqualTo("b");
-    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
-    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(1);
-  }
-
-  @Test public void connectionsNotReusedWithRedirectIfDiscardingResponseIsSlow() throws Exception {
-    client = client.newBuilder()
-        .connectionPool(new ConnectionPool(0, 5, TimeUnit.SECONDS))
-        .build();
-    server.enqueue(new MockResponse()
-        .setResponseCode(301)
-        .addHeader("Location: /b")
-        .setBodyDelay(1, TimeUnit.SECONDS)
-        .setBody("a"));
-    server.enqueue(new MockResponse().setBody("b"));
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .build();
-    Response response = client.newCall(request).execute();
-    assertThat(response.body().string()).isEqualTo("b");
-    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
-    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
-  }
-
   @Test public void silentRetryWhenIdempotentRequestFailsOnReusedConnection() throws Exception {
     server.enqueue(new MockResponse().setBody("a"));
     server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AFTER_REQUEST));

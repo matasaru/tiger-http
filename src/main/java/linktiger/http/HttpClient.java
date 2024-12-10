@@ -133,8 +133,6 @@ public class HttpClient {
   final Authenticator authenticator;
   final ConnectionPool connectionPool;
   final Dns dns;
-  final boolean followSslRedirects;
-  final boolean followRedirects;
   final boolean retryOnConnectionFailure;
   final int callTimeout;
   final int connectTimeout;
@@ -172,8 +170,6 @@ public class HttpClient {
     this.authenticator = builder.authenticator;
     this.connectionPool = builder.connectionPool;
     this.dns = builder.dns;
-    this.followSslRedirects = builder.followSslRedirects;
-    this.followRedirects = builder.followRedirects;
     this.retryOnConnectionFailure = builder.retryOnConnectionFailure;
     this.callTimeout = builder.callTimeout;
     this.connectTimeout = builder.connectTimeout;
@@ -276,14 +272,6 @@ public class HttpClient {
     return connectionPool;
   }
 
-  public boolean followSslRedirects() {
-    return followSslRedirects;
-  }
-
-  public boolean followRedirects() {
-    return followRedirects;
-  }
-
   public boolean retryOnConnectionFailure() {
     return retryOnConnectionFailure;
   }
@@ -325,8 +313,6 @@ public class HttpClient {
     Authenticator authenticator;
     ConnectionPool connectionPool;
     Dns dns;
-    boolean followSslRedirects;
-    boolean followRedirects;
     boolean retryOnConnectionFailure;
     int callTimeout;
     int connectTimeout;
@@ -349,8 +335,6 @@ public class HttpClient {
       authenticator = Authenticator.NONE;
       connectionPool = new ConnectionPool();
       dns = Dns.SYSTEM;
-      followSslRedirects = true;
-      followRedirects = true;
       retryOnConnectionFailure = true;
       callTimeout = 0;
       connectTimeout = 10_000;
@@ -373,8 +357,6 @@ public class HttpClient {
       this.authenticator = httpClient.authenticator;
       this.connectionPool = httpClient.connectionPool;
       this.dns = httpClient.dns;
-      this.followSslRedirects = httpClient.followSslRedirects;
-      this.followRedirects = httpClient.followRedirects;
       this.retryOnConnectionFailure = httpClient.retryOnConnectionFailure;
       this.callTimeout = httpClient.callTimeout;
       this.connectTimeout = httpClient.connectTimeout;
@@ -675,23 +657,6 @@ public class HttpClient {
     public Builder connectionPool(ConnectionPool connectionPool) {
       if (connectionPool == null) throw new NullPointerException("connectionPool == null");
       this.connectionPool = connectionPool;
-      return this;
-    }
-
-    /**
-     * Configure this client to follow redirects from HTTPS to HTTP and from HTTP to HTTPS.
-     *
-     * <p>If unset, protocol redirects will be followed. This is different than the built-in {@code
-     * HttpURLConnection}'s default.
-     */
-    public Builder followSslRedirects(boolean followProtocolRedirects) {
-      this.followSslRedirects = followProtocolRedirects;
-      return this;
-    }
-
-    /** Configure this client to follow redirects. If unset, redirects will be followed. */
-    public Builder followRedirects(boolean followRedirects) {
-      this.followRedirects = followRedirects;
       return this;
     }
 
