@@ -312,7 +312,6 @@ public class Call {
           }
 
           Exchange exchange = response.exchange();
-          if (response == null) throw new IllegalStateException();
 
           Request followUp = null;
           if (followUp == null) {
