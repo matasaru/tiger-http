@@ -143,10 +143,6 @@ public final class Exchange {
     return codec.trailers();
   }
 
-  public void timeoutEarlyExit() {
-    transmitter.timeoutEarlyExit();
-  }
-
   public void noNewExchangesOnConnection() {
     codec.connection().noNewExchanges();
   }
