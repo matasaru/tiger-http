@@ -1676,59 +1676,6 @@ public final class URLConnectionTest {
         Arrays.asList("checkServerTrusted [CN=localhost 1]"));
   }
 
-  @Test public void getClientRequestTimeout() throws Exception {
-    enqueueClientRequestTimeoutResponses();
-
-    Response response = getResponse(newRequest("/"));
-
-    Assertions.assertThat(response.code()).isEqualTo(200);
-    Assertions.assertThat(readAscii(response.body().byteStream(), Integer.MAX_VALUE)).isEqualTo(
-        "Body");
-  }
-
-  private void enqueueClientRequestTimeoutResponses() {
-    server.enqueue(new MockResponse()
-        .setSocketPolicy(SocketPolicy.DISCONNECT_AT_END)
-        .setResponseCode(HttpURLConnection.HTTP_CLIENT_TIMEOUT)
-        .setHeader("Connection", "Close")
-        .setBody("You took too long!"));
-    server.enqueue(new MockResponse()
-        .setBody("Body"));
-  }
-
-  @Test public void bufferedBodyWithClientRequestTimeout() throws Exception {
-    enqueueClientRequestTimeoutResponses();
-
-    Response response = getResponse(new Request.Builder()
-        .url(server.url("/").toString())
-        .post(RequestBody.create(null, "Hello"))
-        .build());
-
-    Assertions.assertThat(response.code()).isEqualTo(200);
-    Assertions.assertThat(readAscii(response.body().byteStream(), Integer.MAX_VALUE)).isEqualTo(
-        "Body");
-
-    RecordedRequest request1 = server.takeRequest();
-    Assertions.assertThat(request1.getBody().readUtf8()).isEqualTo("Hello");
-
-    RecordedRequest request2 = server.takeRequest();
-    Assertions.assertThat(request2.getBody().readUtf8()).isEqualTo("Hello");
-  }
-
-  @Test public void streamedBodyWithClientRequestTimeout() throws Exception {
-    enqueueClientRequestTimeoutResponses();
-
-    Response response = getResponse(new Request.Builder()
-        .url(server.url("/").toString())
-        .post(TransferKind.CHUNKED.newRequestBody("Hello"))
-        .build());
-
-    Assertions.assertThat(response.code()).isEqualTo(200);
-    assertContent("Body", response);
-    response.close();
-    Assertions.assertThat(server.getRequestCount()).isEqualTo(2);
-  }
-
   @Test public void readTimeouts() throws IOException {
     // This relies on the fact that MockWebServer doesn't close the
     // connection after a response has been sent. This causes the client to

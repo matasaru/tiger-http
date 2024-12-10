@@ -42,7 +42,6 @@ import okio.GzipSource;
 import okio.Okio;
 import okio.Timeout;
 
-import static java.net.HttpURLConnection.HTTP_CLIENT_TIMEOUT;
 import static java.net.HttpURLConnection.HTTP_PROXY_AUTH;
 import static java.net.HttpURLConnection.HTTP_UNAVAILABLE;
 
@@ -472,32 +471,6 @@ public class Call {
           throw new ProtocolException("Received HTTP_PROXY_AUTH (407) code while not using proxy");
         }
         return client.proxyAuthenticator().authenticate(route, userResponse);
-
-      case HTTP_CLIENT_TIMEOUT:
-        // 408's are rare in practice, but some servers like HAProxy use this response code. The
-        // spec says that we may repeat the request without modifications. Modern browsers also
-        // repeat the request (even non-idempotent ones.)
-        if (!client.retryOnConnectionFailure()) {
-          // The application layer has directed us not to retry the request.
-          return null;
-        }
-
-        RequestBody requestBody = userResponse.request().body();
-        if (requestBody != null && requestBody.isOneShot()) {
-          return null;
-        }
-
-        if (userResponse.priorResponse() != null
-                && userResponse.priorResponse().code() == HTTP_CLIENT_TIMEOUT) {
-          // We attempted to retry and got another timeout. Give up.
-          return null;
-        }
-
-        if (retryAfter(userResponse, 0) > 0) {
-          return null;
-        }
-
-        return userResponse.request();
 
       case HTTP_UNAVAILABLE:
         if (userResponse.priorResponse() != null
