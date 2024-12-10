@@ -43,7 +43,6 @@ import okio.Okio;
 import okio.Timeout;
 
 import static java.net.HttpURLConnection.HTTP_PROXY_AUTH;
-import static java.net.HttpURLConnection.HTTP_UNAVAILABLE;
 
 /**
  * A call is a request that has been prepared for execution. A call can be canceled. As this object
@@ -130,7 +129,6 @@ public class Call {
       try {
         Request request = originalRequest;
         Response response;
-        Response priorResponse = null;
         int followUpCount = 0;
         while (true) {
           transmitter.prepareToConnect(request);
@@ -316,13 +314,6 @@ public class Call {
             }
           }
 
-          // Attach the prior response if it exists. Such responses never have a body.
-          if (priorResponse != null) {
-            response = response.newBuilder()
-                .priorResponse(priorResponse.newBuilder().body(null).build())
-                .build();
-          }
-
           Exchange exchange = response.exchange();
           Route route = exchange != null ? exchange.connection().route() : null;
           Request followUp = followUpRequest(response, route);
@@ -351,7 +342,6 @@ public class Call {
           }
 
           request = followUp;
-          priorResponse = response;
         } // while
 
         if (transmitter.isCanceled()) {
@@ -472,39 +462,9 @@ public class Call {
         }
         return client.proxyAuthenticator().authenticate(route, userResponse);
 
-      case HTTP_UNAVAILABLE:
-        if (userResponse.priorResponse() != null
-                && userResponse.priorResponse().code() == HTTP_UNAVAILABLE) {
-          // We attempted to retry and got another timeout. Give up.
-          return null;
-        }
-
-        if (retryAfter(userResponse, Integer.MAX_VALUE) == 0) {
-          // specifically received an instruction to retry without delay
-          return userResponse.request();
-        }
-
-        return null;
-
       default:
         return null;
     }
-  }
-
-  private int retryAfter(Response userResponse, int defaultDelay) {
-    String header = userResponse.header("Retry-After");
-
-    if (header == null) {
-      return defaultDelay;
-    }
-
-    // https://tools.ietf.org/html/rfc7231#section-7.1.3
-    // currently ignores a HTTP-date, and assumes any non int 0 is a delay
-    if (header.matches("\\d+")) {
-      return Integer.parseInt(header);
-    }
-
-    return Integer.MAX_VALUE;
   }
 
   private String cookieHeader(List<Cookie> cookies) {
