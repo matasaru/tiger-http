@@ -19,7 +19,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.ProtocolException;
-import java.net.Proxy;
 import java.net.SocketTimeoutException;
 import java.security.cert.CertificateException;
 import java.util.List;
@@ -41,8 +40,6 @@ import okio.BufferedSink;
 import okio.GzipSource;
 import okio.Okio;
 import okio.Timeout;
-
-import static java.net.HttpURLConnection.HTTP_PROXY_AUTH;
 
 /**
  * A call is a request that has been prepared for execution. A call can be canceled. As this object
@@ -315,8 +312,7 @@ public class Call {
           }
 
           Exchange exchange = response.exchange();
-          Route route = exchange != null ? exchange.connection().route() : null;
-          Request followUp = followUpRequest(response, route);
+          Request followUp = followUpRequest(response);
           if (followUp == null) {
             if (exchange != null && exchange.isDuplex()) {
               transmitter.timeoutEarlyExit();
@@ -448,23 +444,10 @@ public class Call {
    * either add authentication headers, follow redirects or handle a client request timeout. If a
    * follow-up is either unnecessary or not applicable, this returns null.
    */
-  private Request followUpRequest(Response userResponse, Route route) throws IOException {
+  private Request followUpRequest(Response userResponse) throws IOException {
     if (userResponse == null) throw new IllegalStateException();
-    int responseCode = userResponse.code();
 
-    switch (responseCode) {
-      case HTTP_PROXY_AUTH:
-        Proxy selectedProxy = route != null
-                ? route.proxy()
-                : client.proxy();
-        if (selectedProxy.type() != Proxy.Type.HTTP) {
-          throw new ProtocolException("Received HTTP_PROXY_AUTH (407) code while not using proxy");
-        }
-        return client.proxyAuthenticator().authenticate(route, userResponse);
-
-      default:
-        return null;
-    }
+    return null;
   }
 
   private String cookieHeader(List<Cookie> cookies) {

@@ -24,13 +24,9 @@ import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.ProtocolException;
 import java.net.Proxy;
-import java.net.ProxySelector;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
-import java.net.URI;
-import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.security.KeyStore;
@@ -58,7 +54,6 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 import linktiger.http.impl.ConnectionPool;
-import linktiger.http.impl.RecordingAuthenticator;
 import linktiger.http.impl.Util;
 import linktiger.http.impl.Version;
 
@@ -84,7 +79,6 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Locale.US;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static okhttp3.mockwebserver.SocketPolicy.DISCONNECT_AFTER_REQUEST;
@@ -964,47 +958,6 @@ public final class URLConnectionTest {
         Arrays.asList("verify android.com"));
   }
 
-  @Test public void proxyAuthenticateOnConnect() throws Exception {
-    Authenticator.setDefault(new RecordingAuthenticator());
-    server.useHttps(handshakeCertificates.sslSocketFactory(), true);
-    server.enqueue(new MockResponse()
-        .setResponseCode(407)
-        .addHeader("Proxy-Authenticate: Basic realm=\"localhost\""));
-    server.enqueue(new MockResponse()
-        .setSocketPolicy(UPGRADE_TO_SSL_AT_END)
-        .clearHeaders());
-    server.enqueue(new MockResponse()
-        .setBody("A"));
-
-    client = client.newBuilder()
-        .proxyAuthenticator(new JavaNetAuthenticator())
-        .proxy(server.toProxyAddress())
-        .sslSocketFactory(
-            handshakeCertificates.sslSocketFactory(), handshakeCertificates.trustManager())
-        .hostnameVerifier(new RecordingHostnameVerifier())
-        .build();
-
-    Response response = getResponse(new Request.Builder()
-        .url(Url.parse("https://android.com/foo"))
-        .build());
-    assertContent("A", response);
-
-    RecordedRequest connect1 = server.takeRequest();
-    Assertions.assertThat(connect1.getRequestLine()).isEqualTo(
-        "CONNECT android.com:443 HTTP/1.1");
-    Assertions.assertThat(connect1.getHeader("Proxy-Authorization")).isNull();
-
-    RecordedRequest connect2 = server.takeRequest();
-    Assertions.assertThat(connect2.getRequestLine()).isEqualTo(
-        "CONNECT android.com:443 HTTP/1.1");
-    Assertions.assertThat(connect2.getHeader("Proxy-Authorization")).isEqualTo(
-        ("Basic " + RecordingAuthenticator.BASE_64_CREDENTIALS));
-
-    RecordedRequest get = server.takeRequest();
-    Assertions.assertThat(get.getRequestLine()).isEqualTo("GET /foo HTTP/1.1");
-    Assertions.assertThat(get.getHeader("Proxy-Authorization")).isNull();
-  }
-
   // Don't disconnect after building a tunnel with CONNECT
   // http://code.google.com/p/android/issues/detail?id=37221
   @Test public void proxyWithConnectionClose() throws IOException {
@@ -1051,27 +1004,6 @@ public final class URLConnectionTest {
 
     assertContent("response 1", getResponse(newRequest(Url.get("https://android.com/foo"))));
     assertContent("response 2", getResponse(newRequest(Url.get("https://android.com/foo"))));
-  }
-
-  @Test public void proxySelectorHttpWithConnectionReuse() throws IOException {
-    server.enqueue(new MockResponse()
-        .setBody("response 1"));
-    server.enqueue(new MockResponse()
-        .setResponseCode(407));
-
-    client = client.newBuilder()
-        .proxySelector(new ProxySelector() {
-          @Override public List<Proxy> select(URI uri) {
-            return Collections.singletonList(server.toProxyAddress());
-          }
-
-          @Override public void connectFailed(
-              URI uri, SocketAddress socketAddress, IOException e) {
-          }
-        }).build();
-    Url url = Url.get("http://android.com/foo");
-    assertContent("response 1", getResponse(newRequest(url)));
-    Assertions.assertThat(getResponse(newRequest(url)).code()).isEqualTo(407);
   }
 
   @Test public void disconnectedConnection() throws IOException {
@@ -1467,44 +1399,6 @@ public final class URLConnectionTest {
     Assertions.assertThat(request.getBody().readUtf8()).isEqualTo("ABCDEFGHIJKLMNOPQ");
     Assertions.assertThat(request.getChunkSizes()).isEqualTo(
         Arrays.asList("ABCDEFGHIJKLMNOPQ".length()));
-  }
-
-  @Test public void allAttributesSetInProxyAuthenticationCallbacks() throws Exception {
-    List<String> calls = authCallsForHeader();
-    Assertions.assertThat(calls.size()).isEqualTo(1);
-    URL url = server.url("/").url();
-    String call = calls.get(0);
-    Assertions.assertThat(call.contains("host=" + url.getHost())).overridingErrorMessage(call).isTrue();
-    Assertions.assertThat(call.contains("port=" + url.getPort())).overridingErrorMessage(call).isTrue();
-    Assertions.assertThat(call.contains("site=" + url.getHost())).overridingErrorMessage(call).isTrue();
-    Assertions.assertThat(call.contains("url=http://android.com")).overridingErrorMessage(call).isTrue();
-    Assertions.assertThat(call.contains("type=" + Authenticator.RequestorType.PROXY)).overridingErrorMessage(
-        call).isTrue();
-    Assertions.assertThat(call.contains("prompt=Bar")).overridingErrorMessage(call).isTrue();
-    Assertions.assertThat(call.contains("protocol=http")).overridingErrorMessage(call).isTrue();
-    // lowercase for the RI.
-    Assertions.assertThat(call.toLowerCase(US).contains("scheme=basic")).overridingErrorMessage(
-        call).isTrue();
-  }
-
-  private List<String> authCallsForHeader() throws IOException {
-    int responseCode = 407;
-    RecordingAuthenticator authenticator = new RecordingAuthenticator(null);
-    Authenticator.setDefault(authenticator);
-    server.enqueue(new MockResponse()
-        .setResponseCode(responseCode)
-        .addHeader("Proxy-Authenticate: Basic realm=\"Bar\"")
-        .setBody("Please authenticate."));
-
-    Response response;
-      client = client.newBuilder()
-              .proxy(server.toProxyAddress())
-              .proxyAuthenticator(new JavaNetAuthenticator())
-              .build();
-      response = getResponse(newRequest(Url.get("http://android.com/")));
-      Assertions.assertThat(response.code()).isEqualTo(responseCode);
-    response.body().byteStream().close();
-    return authenticator.calls;
   }
 
   @Test public void setValidRequestMethod() {
