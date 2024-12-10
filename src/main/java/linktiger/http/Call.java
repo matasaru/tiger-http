@@ -312,7 +312,9 @@ public class Call {
           }
 
           Exchange exchange = response.exchange();
-          Request followUp = followUpRequest(response);
+          if (response == null) throw new IllegalStateException();
+
+          Request followUp = null;
           if (followUp == null) {
             if (exchange != null && exchange.isDuplex()) {
               transmitter.timeoutEarlyExit();
@@ -437,17 +439,6 @@ public class Call {
     // proxy and would manifest as a standard IOException. Unless it is one we know we should not
     // retry, we return true and try a new route.
     return true;
-  }
-
-  /**
-   * Figures out the HTTP request to make in response to receiving {@code userResponse}. This will
-   * either add authentication headers, follow redirects or handle a client request timeout. If a
-   * follow-up is either unnecessary or not applicable, this returns null.
-   */
-  private Request followUpRequest(Response userResponse) throws IOException {
-    if (userResponse == null) throw new IllegalStateException();
-
-    return null;
   }
 
   private String cookieHeader(List<Cookie> cookies) {
