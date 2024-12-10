@@ -384,14 +384,6 @@ public class Call {
     transmitter.cancel();
   }
 
-  /**
-   * Returns true if this call has been {@linkplain #execute() executed}.
-   * It is an error to execute a call more than once.
-   */
-  public synchronized boolean isExecuted() {
-    return executed;
-  }
-
   public boolean isCanceled() {
     return transmitter.isCanceled();
   }
