@@ -155,15 +155,6 @@ public final class Exchange {
     codec.cancel();
   }
 
-  /**
-   * Revoke this exchange's access to streams. This is necessary when a follow-up request is
-   * required but the preceding exchange hasn't completed yet.
-   */
-  public void detachWithViolence() {
-    codec.cancel();
-    transmitter.exchangeMessageDone(this, true, true, null);
-  }
-
   void trackFailure(IOException e) {
     finder.trackFailure();
     codec.connection().trackFailure(e);

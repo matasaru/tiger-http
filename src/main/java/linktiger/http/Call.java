@@ -46,11 +46,6 @@ import okio.Timeout;
  * represents a single request/response pair (stream), it cannot be executed twice.
  */
 public class Call {
-  /**
-   * How many redirects and auth challenges should we attempt? Chrome follows 21 redirects; Firefox,
-   * curl, and wget follow 20; Safari follows 16; and HTTP/1.0 recommends 5.
-   */
-  private static final int MAX_FOLLOW_UPS = 20;
 
   final HttpClient client;
 
@@ -126,7 +121,6 @@ public class Call {
       try {
         Request request = originalRequest;
         Response response;
-        int followUpCount = 0;
         while (true) {
           transmitter.prepareToConnect(request);
 
@@ -312,33 +306,10 @@ public class Call {
           }
 
           Exchange exchange = response.exchange();
-
-          Request followUp = null;
-          if (followUp == null) {
-            if (exchange != null && exchange.isDuplex()) {
-              transmitter.timeoutEarlyExit();
-            }
-            break;
+          if (exchange != null && exchange.isDuplex()) {
+            transmitter.timeoutEarlyExit();
           }
-
-          RequestBody followUpBody = followUp.body();
-          if (followUpBody != null && followUpBody.isOneShot()) {
-            break;
-          }
-
-          if (response.body() != null) {
-            response.body().close();
-          }
-
-          if (transmitter.hasExchange()) {
-            exchange.detachWithViolence();
-          }
-
-          if (++followUpCount > MAX_FOLLOW_UPS) {
-            throw new ProtocolException("Too many follow-up requests: " + followUpCount);
-          }
-
-          request = followUp;
+          break;
         } // while
 
         if (transmitter.isCanceled()) {
