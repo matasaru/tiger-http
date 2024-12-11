@@ -366,7 +366,7 @@ public final class Connection extends Http2Connection.Listener {
           rawSocket, address.url().host(), address.url().port(), true /* autoClose */);
 
       // Configure the socket's ciphers, TLS versions, and extensions.
-      ConnectionSpec connectionSpec = connectionSpecSelector.configureSecureSocket(sslSocket);
+      connectionSpecSelector.configureSecureSocket(sslSocket);
       List<Protocol> protocols = address.protocols();
       String[] names = new String[protocols.size()];
       for (int i = 0; i < protocols.size(); i++) {
