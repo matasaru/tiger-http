@@ -16,7 +16,6 @@
 package linktiger.http;
 
 import java.net.URI;
-import java.net.URL;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -217,8 +216,6 @@ class UrlComponentEncodingTester {
 
       testParseOriginal(codePoint, encoding, component);
       testParseAlreadyEncoded(codePoint, encoding, component);
-      testToUrl(codePoint, encoding, component);
-      testFromUrl(codePoint, encoding, component);
 
       if (codePoint != '%') {
         boolean uriEscaped = uriEscapedCodePoints.indexOf(
@@ -259,24 +256,6 @@ class UrlComponentEncodingTester {
     String s = component.encodedValue(url);
     if (!s.equals(encoded)) {
       fail(Util.format("Encoding %s %#02x using %s", component, codePoint, encoding));
-    }
-  }
-
-  private void testToUrl(int codePoint, Encoding encoding, Component component) {
-    String encoded = encoding.encode(codePoint);
-    Url url = Url.get(component.urlString(encoded));
-    URL javaNetUrl = url.url();
-    if (!javaNetUrl.toString().equals(javaNetUrl.toString())) {
-      fail(Util.format("Encoding %s %#x using %s", component, codePoint, encoding));
-    }
-  }
-
-  private void testFromUrl(int codePoint, Encoding encoding, Component component) {
-    String encoded = encoding.encode(codePoint);
-    Url url = Url.get(component.urlString(encoded));
-    Url toAndFromJavaNetUrl = Url.get(url.url());
-    if (!toAndFromJavaNetUrl.equals(url)) {
-      fail(Util.format("Encoding %s %#x using %s", component, codePoint, encoding));
     }
   }
 

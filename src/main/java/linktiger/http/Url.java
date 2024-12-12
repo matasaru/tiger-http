@@ -16,7 +16,6 @@
 package linktiger.http;
 
 import java.net.InetAddress;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -346,15 +345,6 @@ public final class Url {
         ? percentDecode(builder.encodedFragment, false)
         : null;
     this.url = builder.toString();
-  }
-
-  /** Returns this URL as a {@link URL java.net.URL}. */
-  public URL url() {
-    try {
-      return new URL(url);
-    } catch (MalformedURLException e) {
-      throw new RuntimeException(e); // Unexpected!
-    }
   }
 
   /**

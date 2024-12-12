@@ -1270,13 +1270,6 @@ public final class UrlTest {
     }
   }
 
-  @Test public void toJavaNetUrl() throws Exception {
-    Url url = parse("http://username:password@host/path?query#fragment");
-    URL javaNetUrl = url.url();
-    assertThat(javaNetUrl.toString()).isEqualTo(
-        "http://username:password@host/path?query#fragment");
-  }
-
   @Test public void toUri() throws Exception {
     Url url = parse("http://username:password@host/path?query#fragment");
     URI uri = url.uri();
