@@ -16,7 +16,6 @@
 package linktiger.http;
 
 import java.net.URI;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -1462,18 +1461,6 @@ public final class UrlTest {
   @Test public void toUriWithTruncatedPercentEscape() throws Exception {
     assertThat(parse("http://host/%a").uri()).isEqualTo(new URI("http://host/%25a"));
     assertThat(parse("http://host/%").uri()).isEqualTo(new URI("http://host/%25"));
-  }
-
-  @Test public void fromJavaNetUrl() throws Exception {
-    URL javaNetUrl = new URL("http://username:password@host/path?query#fragment");
-    Url url = Url.get(javaNetUrl);
-    assertThat(url.toString()).isEqualTo(
-        "http://username:password@host/path?query#fragment");
-  }
-
-  @Test public void fromJavaNetUrlUnsupportedScheme() throws Exception {
-    URL javaNetUrl = new URL("mailto:user@example.com");
-    assertThat(Url.get(javaNetUrl)).isNull();
   }
 
   @Test public void fromUri() throws Exception {

@@ -903,14 +903,6 @@ public final class Url {
     return new Builder().parse(null, url).build();
   }
 
-  /**
-   * Returns an {@link Url} for {@code url} if its protocol is {@code http} or {@code https}, or
-   * null if it has any other protocol.
-   */
-  public static Url get(URL url) {
-    return parse(url.toString());
-  }
-
   public static Url get(URI uri) {
     return parse(uri.toString());
   }
