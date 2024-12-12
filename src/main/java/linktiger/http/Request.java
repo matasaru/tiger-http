@@ -15,7 +15,6 @@
  */
 package linktiger.http;
 
-import java.net.URL;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -151,17 +150,6 @@ public final class Request {
       }
 
       return url(Url.get(url));
-    }
-
-    /**
-     * Sets the URL target of this request.
-     *
-     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code
-     * https}.
-     */
-    public Builder url(URL url) {
-      if (url == null) throw new NullPointerException("url == null");
-      return url(Url.get(url.toString()));
     }
 
     /**
