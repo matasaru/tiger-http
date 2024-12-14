@@ -1722,12 +1722,6 @@ public final class Url {
   }
 
   static String canonicalize(String input, String encodeSet, boolean alreadyEncoded, boolean strict,
-      boolean plusIsSpace, boolean asciiOnly, Charset charset) {
-    return canonicalize(input, 0, input.length(), encodeSet, alreadyEncoded, strict, plusIsSpace,
-        asciiOnly, charset);
-  }
-
-  static String canonicalize(String input, String encodeSet, boolean alreadyEncoded, boolean strict,
       boolean plusIsSpace, boolean asciiOnly) {
    return canonicalize(
         input, 0, input.length(), encodeSet, alreadyEncoded, strict, plusIsSpace, asciiOnly, null);
