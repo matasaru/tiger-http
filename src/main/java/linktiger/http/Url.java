@@ -533,9 +533,9 @@ public final class Url {
   }
 
   static void pathSegmentsToString(StringBuilder out, List<String> pathSegments) {
-    for (int i = 0, size = pathSegments.size(); i < size; i++) {
+    for (var pathSegment : pathSegments) {
       out.append('/');
-      out.append(pathSegments.get(i));
+      out.append(pathSegment);
     }
   }
 
@@ -1454,7 +1454,7 @@ public final class Url {
         pop();
         return;
       }
-      if (encodedPathSegments.get(encodedPathSegments.size() - 1).isEmpty()) {
+      if (encodedPathSegments.getLast().isEmpty()) {
         encodedPathSegments.set(encodedPathSegments.size() - 1, segment);
       } else {
         encodedPathSegments.add(segment);
@@ -1486,7 +1486,7 @@ public final class Url {
      * to ["a", "b", ""].
      */
     private void pop() {
-      String removed = encodedPathSegments.remove(encodedPathSegments.size() - 1);
+      String removed = encodedPathSegments.removeLast();
 
       // Make sure the path ends with a '/' by either adding an empty string or clearing a segment.
       if (removed.isEmpty() && !encodedPathSegments.isEmpty()) {
@@ -1584,8 +1584,7 @@ public final class Url {
   private List<String> percentDecode(List<String> list, boolean plusIsSpace) {
     int size = list.size();
     List<String> result = new ArrayList<>(size);
-    for (int i = 0; i < size; i++) {
-      String s = list.get(i);
+    for (var s : list) {
       result.add(s != null ? percentDecode(s, plusIsSpace) : null);
     }
     return Collections.unmodifiableList(result);
