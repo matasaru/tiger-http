@@ -1665,7 +1665,37 @@ public final class Url {
         Buffer out = new Buffer();
         out.writeUtf8(input, pos, i);
 
-        canonicalize(out, input, i, limit, encodeSet, alreadyEncoded, strict, plusIsSpace, asciiOnly);
+        Buffer encodedCharBuffer = null; // Lazily allocated.
+        int codePointToEncode;
+        for (int j = i; j < limit; j += Character.charCount(codePointToEncode)) {
+          codePointToEncode = input.codePointAt(j);
+          if (alreadyEncoded && (codePointToEncode == '\t' || codePointToEncode == '\n' || codePointToEncode == '\f' || codePointToEncode == '\r')) {
+            // Skip this character.
+          } else if (codePointToEncode == '+' && plusIsSpace) {
+            // Encode '+' as '%2B' since we permit ' ' to be encoded as either '+' or '%20'.
+            out.writeUtf8(alreadyEncoded ? "+" : "%2B");
+          } else if (codePointToEncode < 0x20
+              || codePointToEncode == 0x7f
+              || codePointToEncode >= 0x80 && asciiOnly
+              || encodeSet.indexOf(codePointToEncode) != -1
+              || codePointToEncode == '%' && (!alreadyEncoded || strict && !percentEncoded(input, j, limit))) {
+            // Percent encode this character.
+            if (encodedCharBuffer == null) {
+              encodedCharBuffer = new Buffer();
+            }
+            encodedCharBuffer.writeUtf8CodePoint(codePointToEncode);
+
+            while (!encodedCharBuffer.exhausted()) {
+              int b = encodedCharBuffer.readByte() & 0xff;
+              out.writeByte('%');
+              out.writeByte(HEX_DIGITS[(b >> 4) & 0xf]);
+              out.writeByte(HEX_DIGITS[b & 0xf]);
+            }
+          } else {
+            // This character doesn't need encoding. Just copy it over.
+            out.writeUtf8CodePoint(codePointToEncode);
+          }
+        }
 
         return out.readUtf8();
       }
@@ -1673,43 +1703,6 @@ public final class Url {
 
     // Fast path: no characters in [pos..limit) required encoding.
     return input.substring(pos, limit);
-  }
-
-  static void canonicalize(Buffer out, String input, int pos, int limit, String encodeSet,
-      boolean alreadyEncoded, boolean strict, boolean plusIsSpace, boolean asciiOnly) {
-    Buffer encodedCharBuffer = null; // Lazily allocated.
-    int codePoint;
-    for (int i = pos; i < limit; i += Character.charCount(codePoint)) {
-      codePoint = input.codePointAt(i);
-      if (alreadyEncoded
-          && (codePoint == '\t' || codePoint == '\n' || codePoint == '\f' || codePoint == '\r')) {
-        // Skip this character.
-      } else if (codePoint == '+' && plusIsSpace) {
-        // Encode '+' as '%2B' since we permit ' ' to be encoded as either '+' or '%20'.
-        out.writeUtf8(alreadyEncoded ? "+" : "%2B");
-      } else if (codePoint < 0x20
-          || codePoint == 0x7f
-          || codePoint >= 0x80 && asciiOnly
-          || encodeSet.indexOf(codePoint) != -1
-          || codePoint == '%' && (!alreadyEncoded || strict && !percentEncoded(input, i, limit))) {
-        // Percent encode this character.
-        if (encodedCharBuffer == null) {
-          encodedCharBuffer = new Buffer();
-        }
-
-        encodedCharBuffer.writeUtf8CodePoint(codePoint);
-
-        while (!encodedCharBuffer.exhausted()) {
-          int b = encodedCharBuffer.readByte() & 0xff;
-          out.writeByte('%');
-          out.writeByte(HEX_DIGITS[(b >> 4) & 0xf]);
-          out.writeByte(HEX_DIGITS[b & 0xf]);
-        }
-      } else {
-        // This character doesn't need encoding. Just copy it over.
-        out.writeUtf8CodePoint(codePoint);
-      }
-    }
   }
 
   static String canonicalize(String input, String encodeSet, boolean alreadyEncoded, boolean strict,
