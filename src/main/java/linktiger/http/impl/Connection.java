@@ -537,15 +537,6 @@ public final class Connection {
     }
   }
 
-  /**
-   * Returns the protocol negotiated by this connection, or {@link Protocol#HTTP_1_1} if no protocol
-   * has been negotiated. This method returns {@link Protocol#HTTP_1_1} even if the remote peer is
-   * using {@link Protocol#HTTP_1_0}.
-   */
-  public Protocol protocol() {
-    return protocol;
-  }
-
   @Override public String toString() {
     return "Connection{"
         + route.address().url().host() + ":" + route.address().url().port()
