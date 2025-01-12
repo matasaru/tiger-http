@@ -184,7 +184,16 @@ public final class Connection {
         } else {
           connectSocket(connectTimeout, readTimeout, call, eventListener);
         }
-        establishProtocol(connectionSpecSelector, call, eventListener);
+
+        if (route.address().sslSocketFactory() == null) {
+          socket = rawSocket;
+          protocol = Protocol.HTTP_1_1;
+        } else {
+          eventListener.secureConnectStart(call);
+          connectTls(connectionSpecSelector);
+          eventListener.secureConnectEnd(call, handshake);
+        }
+
         eventListener.connectEnd(call, route.socketAddress(), route.proxy(), protocol);
         break;
       } catch (IOException e) {
@@ -279,18 +288,6 @@ public final class Connection {
 
     source = Okio.buffer(Okio.source(rawSocket));
     sink = Okio.buffer(Okio.sink(rawSocket));
-  }
-
-  private void establishProtocol(ConnectionSpecSelector connectionSpecSelector, Call call, EventListener eventListener) throws IOException {
-    if (route.address().sslSocketFactory() == null) {
-      socket = rawSocket;
-      protocol = Protocol.HTTP_1_1;
-      return;
-    }
-
-    eventListener.secureConnectStart(call);
-    connectTls(connectionSpecSelector);
-    eventListener.secureConnectEnd(call, handshake);
   }
 
   private void connectTls(ConnectionSpecSelector connectionSpecSelector) throws IOException {
