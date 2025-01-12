@@ -34,7 +34,6 @@ import linktiger.http.impl.RouteException;
 import linktiger.http.impl.Transmitter;
 import linktiger.http.impl.Util;
 import linktiger.http.impl.Version;
-import linktiger.http.impl.http2.ConnectionShutdownException;
 
 import okio.BufferedSink;
 import okio.GzipSource;
@@ -196,36 +195,25 @@ public class Call {
               }
 
               if (networkResponseBuilder == null) {
-                if (networkRequest.body().isDuplex()) {
-                  // Prepare a duplex body so that the application can send a request body later.
-                  exchange.flushRequest();
-                  BufferedSink bufferedRequestBody = Okio.buffer(exchange.createRequestBody(networkRequest, true));
-                  networkRequest.body().writeTo(bufferedRequestBody);
-                }
-                else {
-                  // Write the request body if the "Expect: 100-continue" expectation was met.
-                  BufferedSink bufferedRequestBody = Okio.buffer(exchange.createRequestBody(networkRequest, false));
-                  networkRequest.body().writeTo(bufferedRequestBody);
-                  bufferedRequestBody.close();
-                }
+                // Write the request body if the "Expect: 100-continue" expectation was met.
+                BufferedSink bufferedRequestBody = Okio.buffer(exchange.createRequestBody(networkRequest));
+                networkRequest.body().writeTo(bufferedRequestBody);
+                bufferedRequestBody.close();
               }
               else {
                 exchange.noRequestBody();
-                if (!exchange.connection().isMultiplexed()) {
-                  // If the "Expect: 100-continue" expectation wasn't met, prevent the HTTP/1 connection
-                  // from being reused. Otherwise we're still obligated to transmit the request body to
-                  // leave the connection in a consistent state.
-                  exchange.noNewExchangesOnConnection();
-                }
+                exchange.connection();
+                // If the "Expect: 100-continue" expectation wasn't met, prevent the HTTP/1 connection
+                // from being reused. Otherwise we're still obligated to transmit the request body to
+                // leave the connection in a consistent state.
+                exchange.noNewExchangesOnConnection();
               }
             }
             else {
               exchange.noRequestBody();
             }
 
-            if (networkRequest.body() == null || !networkRequest.body().isDuplex()) {
-              exchange.finishRequest();
-            }
+            exchange.finishRequest();
 
             if (!responseHeadersStarted) {
               exchange.responseHeadersStart();
@@ -294,8 +282,7 @@ public class Call {
           }
           catch (IOException e) {
             // An attempt to communicate with a server failed. The request may have been sent.
-            boolean requestSendStarted = !(e instanceof ConnectionShutdownException);
-            if (!recover(e, transmitter, requestSendStarted, request)) throw e;
+              if (!recover(e, transmitter, true, request)) throw e;
             continue;
           }
           finally {
@@ -305,10 +292,6 @@ public class Call {
             }
           }
 
-          Exchange exchange = response.exchange();
-          if (exchange != null && exchange.isDuplex()) {
-            transmitter.timeoutEarlyExit();
-          }
           break;
         } // while
 

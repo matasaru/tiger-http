@@ -56,7 +56,6 @@ public final class HttpClientTest {
     assertThat(client.connectTimeoutMillis()).isEqualTo(10_000);
     assertThat(client.readTimeoutMillis()).isEqualTo(10_000);
     assertThat(client.writeTimeoutMillis()).isEqualTo(10_000);
-    assertThat(client.pingIntervalMillis()).isEqualTo(0);
   }
 
   @Test public void timeoutValidRange() {
@@ -120,38 +119,6 @@ public final class HttpClientTest {
       fail();
     } catch (IllegalArgumentException expected) {
     }
-  }
-
-  @Test public void testH2PriorKnowledgeOkHttpClientConstructionFallback() {
-    try {
-      new HttpClient.Builder()
-          .protocols(Arrays.asList(Protocol.H2_PRIOR_KNOWLEDGE, Protocol.HTTP_1_1));
-      fail();
-    } catch (IllegalArgumentException expected) {
-      assertThat(expected.getMessage()).isEqualTo(
-          ("protocols containing h2_prior_knowledge cannot use other protocols: "
-            + "[h2_prior_knowledge, http/1.1]"));
-    }
-  }
-
-  @Test public void testH2PriorKnowledgeOkHttpClientConstructionDuplicates() {
-    try {
-      new HttpClient.Builder()
-          .protocols(Arrays.asList(Protocol.H2_PRIOR_KNOWLEDGE, Protocol.H2_PRIOR_KNOWLEDGE));
-      fail();
-    } catch (IllegalArgumentException expected) {
-      assertThat(expected.getMessage()).isEqualTo(
-          ("protocols containing h2_prior_knowledge cannot use other protocols: "
-            + "[h2_prior_knowledge, h2_prior_knowledge]"));
-    }
-  }
-
-  @Test public void testH2PriorKnowledgeOkHttpClientConstructionSuccess() {
-    HttpClient httpClient = new HttpClient.Builder()
-        .protocols(Arrays.asList(Protocol.H2_PRIOR_KNOWLEDGE))
-        .build();
-    assertThat(httpClient.protocols().size()).isEqualTo(1);
-    assertThat(httpClient.protocols().get(0)).isEqualTo(Protocol.H2_PRIOR_KNOWLEDGE);
   }
 
   @Test public void nullDefaultProxySelector() throws Exception {

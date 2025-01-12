@@ -41,9 +41,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  * layer primitives: connections, requests, responses, and streams.
  *
  * <p>This class supports {@linkplain #cancel asynchronous canceling}. This is intended to have the
- * smallest blast radius possible. If an HTTP/2 stream is active, canceling will cancel that stream
- * but not the other streams sharing its connection. But if the TLS handshake is still in progress
- * then canceling may break the entire connection.
+ * smallest blast radius possible.
  */
 public final class Transmitter {
   private final HttpClient client;
@@ -67,7 +65,6 @@ public final class Transmitter {
   private boolean exchangeRequestDone;
   private boolean exchangeResponseDone;
   private boolean canceled;
-  private boolean timeoutEarlyExit;
   private boolean noMoreExchanges;
 
   public Transmitter(HttpClient client, Call call) {
@@ -86,18 +83,7 @@ public final class Transmitter {
     timeout.enter();
   }
 
-  /**
-   * Stops applying the timeout before the call is entirely complete. This is used for
-   * duplex calls where the timeout only applies to the initial setup.
-   */
-  public void timeoutEarlyExit() {
-    if (timeoutEarlyExit) throw new IllegalStateException();
-    timeoutEarlyExit = true;
-    timeout.exit();
-  }
-
   private IOException timeoutExit(IOException cause) {
-    if (timeoutEarlyExit) return cause;
     if (!timeout.exit()) return cause;
 
     InterruptedIOException e = new InterruptedIOException("timeout");
@@ -318,9 +304,7 @@ public final class Transmitter {
    * in-flight request from any thread. It's the caller's responsibility to close the request body
    * and response body streams; otherwise resources may be leaked.
    *
-   * <p>This method is safe to be called concurrently, but provides limited guarantees. If a
-   * transport layer connection has been established (such as a HTTP/2 stream) that is terminated.
-   * Otherwise if a socket connection is being established, that is terminated.
+   * <p>This method is safe to be called concurrently, but provides limited guarantees.
    */
   public void cancel() {
     Exchange exchangeToCancel;

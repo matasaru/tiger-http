@@ -104,16 +104,12 @@ import okio.Source;
  *
  *     client.connectionPool().evictAll();
  * }</pre>
- *
- * <p>OkHttp also uses daemon threads for HTTP/2 connections. These will exit automatically if they
- * remain idle.
  */
 public class HttpClient {
   // TODO review the usage of this logger
   public static final Logger logger = Logger.getLogger(HttpClient.class.getName());
 
-  static final List<Protocol> DEFAULT_PROTOCOLS = List.of(
-      Protocol.HTTP_2, Protocol.HTTP_1_1);
+  static final List<Protocol> DEFAULT_PROTOCOLS = List.of(Protocol.HTTP_1_1);
 
   static final List<ConnectionSpec> DEFAULT_CONNECTION_SPECS = List.of(
       ConnectionSpec.MODERN_TLS, ConnectionSpec.CLEARTEXT);
@@ -138,7 +134,6 @@ public class HttpClient {
   final int connectTimeout;
   final int readTimeout;
   final int writeTimeout;
-  final int pingInterval;
 
   public HttpClient() {
     this(new Builder());
@@ -175,7 +170,6 @@ public class HttpClient {
     this.connectTimeout = builder.connectTimeout;
     this.readTimeout = builder.readTimeout;
     this.writeTimeout = builder.writeTimeout;
-    this.pingInterval = builder.pingInterval;
   }
 
   private static SSLSocketFactory newSslSocketFactory(X509TrustManager trustManager) {
@@ -225,11 +219,6 @@ public class HttpClient {
   /** Default write timeout (in milliseconds). The default is 10 seconds. */
   public int writeTimeoutMillis() {
     return writeTimeout;
-  }
-
-  /** Web socket and HTTP/2 ping interval (in milliseconds). By default pings are not sent. */
-  public int pingIntervalMillis() {
-    return pingInterval;
   }
 
   public Proxy proxy() {
@@ -318,7 +307,6 @@ public class HttpClient {
     int connectTimeout;
     int readTimeout;
     int writeTimeout;
-    int pingInterval;
 
     public Builder() {
       protocols = DEFAULT_PROTOCOLS;
@@ -340,7 +328,6 @@ public class HttpClient {
       connectTimeout = 10_000;
       readTimeout = 10_000;
       writeTimeout = 10_000;
-      pingInterval = 0;
     }
 
     Builder(HttpClient httpClient) {
@@ -362,7 +349,6 @@ public class HttpClient {
       this.connectTimeout = httpClient.connectTimeout;
       this.readTimeout = httpClient.readTimeout;
       this.writeTimeout = httpClient.writeTimeout;
-      this.pingInterval = httpClient.pingInterval;
     }
 
     /**
@@ -476,38 +462,6 @@ public class HttpClient {
      */
     public Builder writeTimeout(Duration duration) {
       writeTimeout = Util.checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
-      return this;
-    }
-
-    /**
-     * Sets the interval between HTTP/2 pings initiated by this client. Use this to automatically
-     * send ping frames until either the connection fails or it is closed. This keeps the connection
-     * alive and may detect connectivity failures.
-     *
-     * <p>If the server does not respond to each ping with a pong within {@code interval}, this
-     * client will assume that connectivity has been lost. When this happens, the connection is closed
-     * and any calls it is carrying {@linkplain java.io.IOException will fail with an IOException}.
-     *
-     * <p>The default value of 0 disables client-initiated pings.
-     */
-    public Builder pingInterval(long interval, TimeUnit unit) {
-      pingInterval = Util.checkDuration("interval", interval, unit);
-      return this;
-    }
-
-    /**
-     * Sets the interval between HTTP/2 pings initiated by this client. Use this to automatically
-     * send ping frames until either the connection fails or it is closed. This keeps the connection
-     * alive and may detect connectivity failures.
-     *
-     * <p>If the server does not respond to each ping with a pong within {@code interval}, this
-     * client will assume that connectivity has been lost. When this happens, the connection is closed
-     * and any calls it is carrying {@linkplain java.io.IOException will fail with an IOException}.
-     *
-     * <p>The default value of 0 disables client-initiated pings.
-     */
-    public Builder pingInterval(Duration duration) {
-      pingInterval = Util.checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
       return this;
     }
 
@@ -684,49 +638,15 @@ public class HttpClient {
     }
 
     /**
-     * Configure the protocols used by this client to communicate with remote servers. By default
-     * this client will prefer the most efficient transport available, falling back to more
-     * ubiquitous protocols. Applications should only call this method to avoid specific
-     * compatibility problems, such as web servers that behave incorrectly when HTTP/2 is enabled.
-     *
-     * <p>The following protocols are currently supported:
-     *
-     * <ul>
-     *     <li><a href="http://www.w3.org/Protocols/rfc2616/rfc2616.html">http/1.1</a>
-     *     <li><a href="https://tools.ietf.org/html/rfc7540">h2</a>
-     *     <li><a href="https://tools.ietf.org/html/rfc7540#section-3.4">h2 with prior knowledge
-     *         (cleartext only)</a>
-     * </ul>
-     *
-     * <p><strong>This is an evolving set.</strong> Future releases include support for transitional
-     * protocols. The http/1.1 transport will never be dropped.
-     *
-     * <p>If multiple protocols are specified, <a
-     * href="http://tools.ietf.org/html/draft-ietf-tls-applayerprotoneg">ALPN</a> will be used to
-     * negotiate a transport. Protocol negotiation is only attempted for HTTPS URLs.
-     *
-     * <p>{@link Protocol#HTTP_1_0} is not supported in this set. Requests are initiated with {@code
-     * HTTP/1.1}. If the server responds with {@code HTTP/1.0}, that will be exposed by {@link
-     * Response#protocol()}.
-     *
-     * @param protocols the protocols to use, in order of preference. If the list contains {@link
-     *     Protocol#H2_PRIOR_KNOWLEDGE} then that must be the only protocol and HTTPS URLs will not
-     *     be supported. Otherwise the list must contain {@link Protocol#HTTP_1_1}. The list must
-     *     not contain null or {@link Protocol#HTTP_1_0}.
+     TODO remove this method - only HTTP 1.1 is implemented
      */
     public Builder protocols(List<Protocol> protocols) {
       // Create a private copy of the list.
       protocols = new ArrayList<>(protocols);
 
       // Validate that the list has everything we require and nothing we forbid.
-      if (!protocols.contains(Protocol.H2_PRIOR_KNOWLEDGE)
-          && !protocols.contains(Protocol.HTTP_1_1)) {
-        throw new IllegalArgumentException(
-            "protocols must contain h2_prior_knowledge or http/1.1: " + protocols);
-      }
-      if (protocols.contains(Protocol.H2_PRIOR_KNOWLEDGE) && protocols.size() > 1) {
-        throw new IllegalArgumentException(
-            "protocols containing h2_prior_knowledge cannot use other protocols: " + protocols);
+      if (!protocols.contains(Protocol.HTTP_1_1)) {
+        throw new IllegalArgumentException("protocols must contain http/1.1: " + protocols);
       }
       if (protocols.contains(Protocol.HTTP_1_0)) {
         throw new IllegalArgumentException("protocols must not contain http/1.0: " + protocols);

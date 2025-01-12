@@ -42,7 +42,6 @@ public final class Exchange {
   final EventListener eventListener;
   final ExchangeFinder finder;
   final ExchangeCodec codec;
-  private boolean duplex;
 
   public Exchange(Transmitter transmitter, Call call, EventListener eventListener,
       ExchangeFinder finder, ExchangeCodec codec) {
@@ -57,11 +56,6 @@ public final class Exchange {
     return codec.connection();
   }
 
-  /** Returns true if the request body need not complete before the response body starts. */
-  public boolean isDuplex() {
-    return duplex;
-  }
-
   public void writeRequestHeaders(Request request) throws IOException {
     try {
       eventListener.requestHeadersStart(call);
@@ -74,8 +68,7 @@ public final class Exchange {
     }
   }
 
-  public Sink createRequestBody(Request request, boolean duplex) throws IOException {
-    this.duplex = duplex;
+  public Sink createRequestBody(Request request) throws IOException {
     long contentLength = request.body().contentLength();
     eventListener.requestBodyStart(call);
     Sink rawRequestBody = codec.createRequestBody(request, contentLength);

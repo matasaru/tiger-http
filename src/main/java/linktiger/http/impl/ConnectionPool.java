@@ -35,9 +35,10 @@ import linktiger.http.HttpClient;
 import linktiger.http.Route;
 
 /**
- * Manages reuse of HTTP and HTTP/2 connections for reduced network latency. HTTP requests that
- * share the same {@link Address} may share a {@link Connection}. This class implements the policy
- * of which connections to keep open for future use.
+ * Manages reuse of HTTP connections for reduced network latency.
+ * TODO review text below
+ * HTTP requests that share the same {@link Address} may share a {@link Connection}.
+ * This class implements the policy of which connections to keep open for future use.
  */
 public final class ConnectionPool {
 
@@ -130,19 +131,15 @@ public final class ConnectionPool {
   }
 
   /**
-   * Attempts to acquire a recycled connection to {@code address} for {@code transmitter}. Returns
-   * true if a connection was acquired.
-   *
-   * <p>If {@code routes} is non-null these are the resolved routes (ie. IP addresses) for the
-   * connection. This is used to coalesce related domains to the same HTTP/2 connection, such as
-   * {@code square.com} and {@code square.ca}.
+   * Attempts to acquire a recycled connection to {@code address} for {@code transmitter}.
+   * Returns true if a connection was acquired.
    */
-  boolean transmitterAcquirePooledConnection(Address address, Transmitter transmitter,
-                                             List<Route> routes, boolean requireMultiplexed) {
+  boolean transmitterAcquirePooledConnection(Address address, Transmitter transmitter) {
     assert (Thread.holdsLock(this));
     for (Connection connection : connections) {
-      if (requireMultiplexed && !connection.isMultiplexed()) continue;
-      if (!connection.isEligible(address, routes)) continue;
+      if (!connection.isEligible(address)) {
+        continue;
+      }
       transmitter.acquireConnectionNoEvents(connection);
       return true;
     }

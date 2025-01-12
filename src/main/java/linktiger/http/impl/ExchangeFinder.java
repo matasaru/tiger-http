@@ -17,7 +17,6 @@ package linktiger.http.impl;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.List;
 
 import linktiger.http.Address;
 import linktiger.http.Call;
@@ -42,9 +41,10 @@ import linktiger.http.Route;
  * </ol>
  *
  * <p>If the pool gains an eligible connection while DNS, TCP, or TLS work is in flight, this finder
- * will prefer pooled connections. Only pooled HTTP/2 connections are used for such de-duplication.
+ * will prefer pooled connections.
  *
  * <p>It is possible to cancel the finding process.
+ * TODO review this class
  */
 final class ExchangeFinder {
   private final Transmitter transmitter;
@@ -72,17 +72,15 @@ final class ExchangeFinder {
         address, connectionPool.routeDatabase, call, eventListener);
   }
 
-  public ExchangeCodec find(
-    HttpClient client, boolean doExtensiveHealthChecks) {
+  public ExchangeCodec find(HttpClient client, boolean doExtensiveHealthChecks) {
     int connectTimeout = client.connectTimeoutMillis();
     int readTimeout = client.readTimeoutMillis();
     int writeTimeout = client.writeTimeoutMillis();
-    int pingIntervalMillis = client.pingIntervalMillis();
     boolean connectionRetryEnabled = client.retryOnConnectionFailure();
 
     try {
       Connection resultConnection = findHealthyConnection(connectTimeout, readTimeout,
-          writeTimeout, pingIntervalMillis, connectionRetryEnabled, doExtensiveHealthChecks);
+          writeTimeout, connectionRetryEnabled, doExtensiveHealthChecks);
       return resultConnection.newCodec(client);
     } catch (RouteException e) {
       trackFailure();
@@ -98,15 +96,15 @@ final class ExchangeFinder {
    * until a healthy connection is found.
    */
   private Connection findHealthyConnection(int connectTimeout, int readTimeout,
-      int writeTimeout, int pingIntervalMillis, boolean connectionRetryEnabled,
+      int writeTimeout, boolean connectionRetryEnabled,
       boolean doExtensiveHealthChecks) throws IOException {
     while (true) {
       Connection candidate = findConnection(connectTimeout, readTimeout, writeTimeout,
-          pingIntervalMillis, connectionRetryEnabled);
+           connectionRetryEnabled);
 
       // If this is a brand new connection, we can skip the extensive health checks.
       synchronized (connectionPool) {
-        if (candidate.successCount == 0 && !candidate.isMultiplexed()) {
+        if (candidate.successCount == 0) {
           return candidate;
         }
       }
@@ -126,8 +124,7 @@ final class ExchangeFinder {
    * Returns a connection to host a new stream. This prefers the existing connection if it exists,
    * then the pool, finally building a new connection.
    */
-  private Connection findConnection(int connectTimeout, int readTimeout, int writeTimeout,
-      int pingIntervalMillis, boolean connectionRetryEnabled) throws IOException {
+  private Connection findConnection(int connectTimeout, int readTimeout, int writeTimeout, boolean connectionRetryEnabled) throws IOException {
     boolean foundPooledConnection = false;
     Connection result = null;
     Route selectedRoute = null;
@@ -141,8 +138,8 @@ final class ExchangeFinder {
       // already-allocated connection may have been restricted from creating new exchanges.
       releasedConnection = transmitter.connection;
       toClose = transmitter.connection != null && transmitter.connection.noNewExchanges
-          ? transmitter.releaseConnectionNoEvents()
-          : null;
+              ? transmitter.releaseConnectionNoEvents()
+              : null;
 
       if (transmitter.connection != null) {
         // We had an already-allocated connection and it's good.
@@ -152,7 +149,7 @@ final class ExchangeFinder {
 
       if (result == null) {
         // Attempt to get a connection from the pool.
-        if (connectionPool.transmitterAcquirePooledConnection(address, transmitter, null, false)) {
+        if (connectionPool.transmitterAcquirePooledConnection(address, transmitter)) {
           foundPooledConnection = true;
           result = transmitter.connection;
         } else if (nextRouteToTry != null) {
@@ -188,16 +185,13 @@ final class ExchangeFinder {
       routeSelection = routeSelector.next();
     }
 
-    List<Route> routes = null;
     synchronized (connectionPool) {
       if (transmitter.isCanceled()) throw new IOException("Canceled");
 
       if (newRouteSelection) {
         // Now that we have a set of IP addresses, make another attempt at getting a connection from
         // the pool. This could match due to connection coalescing.
-        routes = routeSelection.getAll();
-        if (connectionPool.transmitterAcquirePooledConnection(
-            address, transmitter, routes, false)) {
+        if (connectionPool.transmitterAcquirePooledConnection(address, transmitter)) {
           foundPooledConnection = true;
           result = transmitter.connection;
         }
@@ -222,34 +216,15 @@ final class ExchangeFinder {
     }
 
     // Do TCP + TLS handshakes. This is a blocking operation.
-    result.connect(connectTimeout, readTimeout, writeTimeout, pingIntervalMillis,
-        connectionRetryEnabled, call, eventListener);
+    result.connect(connectTimeout, readTimeout, writeTimeout, connectionRetryEnabled, call, eventListener);
     connectionPool.routeDatabase.connected(result.route());
 
-    Socket socket = null;
     synchronized (connectionPool) {
       connectingConnection = null;
       // Last attempt at connection coalescing, which only occurs if we attempted multiple
       // concurrent connections to the same host.
-      if (connectionPool.transmitterAcquirePooledConnection(address, transmitter, routes, true)) {
-        // We lost the race! Close the connection we created and return the pooled connection.
-        result.noNewExchanges = true;
-        socket = result.socket();
-        result = transmitter.connection;
-
-        // It's possible for us to obtain a coalesced connection that is immediately unhealthy. In
-        // that case we will retry the route we just successfully connected with.
-        nextRouteToTry = selectedRoute;
-      } else {
-        connectionPool.put(result);
-        transmitter.acquireConnectionNoEvents(result);
-      }
-    }
-    if (socket != null) {
-      try {
-        socket.close();
-      } catch (IOException _) {
-      }
+      connectionPool.put(result);
+      transmitter.acquireConnectionNoEvents(result);
     }
 
     eventListener.connectionAcquired(call, result);
@@ -287,7 +262,7 @@ final class ExchangeFinder {
         return true;
       }
       return (routeSelection != null && routeSelection.hasNext())
-          || routeSelector.hasNext();
+              || routeSelector.hasNext();
     }
   }
 
@@ -298,7 +273,7 @@ final class ExchangeFinder {
    */
   private boolean retryCurrentRoute() {
     return transmitter.connection != null
-        && transmitter.connection.routeFailureCount == 0
-        && Util.sameConnection(transmitter.connection.route().address().url(), address.url());
+            && transmitter.connection.routeFailureCount == 0
+            && Util.sameConnection(transmitter.connection.route().address().url(), address.url());
   }
 }

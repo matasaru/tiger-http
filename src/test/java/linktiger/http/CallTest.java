@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
-import java.net.ProtocolException;
 import java.net.Proxy;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -49,7 +48,6 @@ import linktiger.http.RecordingEventListener.ConnectionReleased;
 import linktiger.http.RecordingEventListener.ResponseFailed;
 import linktiger.http.impl.ConnectionPool;
 import linktiger.http.impl.DoubleInetAddressDns;
-import linktiger.http.impl.RecordingOkAuthenticator;
 import linktiger.http.impl.RecordingProxySelector;
 import linktiger.http.impl.Util;
 import linktiger.http.impl.Version;
@@ -167,11 +165,6 @@ public final class CallTest {
         .assertNotSuccessful();
   }
 
-  @Test public void get_HTTP_2() throws Exception {
-    enableProtocol();
-    get();
-  }
-
   @Test public void get_HTTPS() throws Exception {
     enableTls();
     get();
@@ -189,11 +182,6 @@ public final class CallTest {
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getHeaders().values("A")).isEqualTo(
         Arrays.asList("345", "456"));
-  }
-
-  @Test public void repeatedHeaderNames_HTTP_2() throws Exception {
-    enableProtocol();
-    repeatedHeaderNames();
   }
 
   @Test public void getWithRequestBody() throws Exception {
@@ -284,11 +272,6 @@ public final class CallTest {
     head();
   }
 
-  @Test public void head_HTTP_2() throws Exception {
-    enableProtocol();
-    head();
-  }
-
   @Test public void post() throws Exception {
     server.enqueue(new MockResponse().setBody("abc"));
 
@@ -311,11 +294,6 @@ public final class CallTest {
 
   @Test public void post_HTTPS() throws Exception {
     enableTls();
-    post();
-  }
-
-  @Test public void post_HTTP_2() throws Exception {
-    enableProtocol();
     post();
   }
 
@@ -343,11 +321,6 @@ public final class CallTest {
     postZeroLength();
   }
 
-  @Test public void postZerolength_HTTP_2() throws Exception {
-    enableProtocol();
-    postZeroLength();
-  }
-
   @Test public void delete() throws Exception {
     server.enqueue(new MockResponse().setBody("abc"));
 
@@ -369,11 +342,6 @@ public final class CallTest {
 
   @Test public void delete_HTTPS() throws Exception {
     enableTls();
-    delete();
-  }
-
-  @Test public void delete_HTTP_2() throws Exception {
-    enableProtocol();
     delete();
   }
 
@@ -419,11 +387,6 @@ public final class CallTest {
     put();
   }
 
-  @Test public void put_HTTP_2() throws Exception {
-    enableProtocol();
-    put();
-  }
-
   @Test public void patch() throws Exception {
     server.enqueue(new MockResponse().setBody("abc"));
 
@@ -442,11 +405,6 @@ public final class CallTest {
     assertThat(recordedRequest.getHeader("Content-Length")).isEqualTo("3");
     assertThat(recordedRequest.getHeader("Content-Type")).isEqualTo(
         "text/plain; charset=utf-8");
-  }
-
-  @Test public void patch_HTTP_2() throws Exception {
-    enableProtocol();
-    patch();
   }
 
   @Test public void patch_HTTPS() throws Exception {
@@ -744,11 +702,6 @@ public final class CallTest {
     listener.removeUpToEvent(CallEnd.class);
   }
 
-  @Test public void recoverWhenRetryOnConnectionFailureIsTrue_HTTP2() throws Exception {
-    enableProtocol();
-    recoverWhenRetryOnConnectionFailureIsTrue();
-  }
-
   @Test public void noRecoverWhenRetryOnConnectionFailureIsFalse() throws Exception {
     server.enqueue(new MockResponse().setBody("seed connection pool"));
     server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AFTER_REQUEST));
@@ -766,11 +719,6 @@ public final class CallTest {
         .assertFailure(IOException.class)
         .assertFailureMatches("stream was reset: CANCEL",
             "unexpected end of stream on " + server.url("/").redact());
-  }
-
-  @Test public void recoverWhenRetryOnConnectionFailureIsFalse_HTTP2() throws Exception {
-    enableProtocol();
-    noRecoverWhenRetryOnConnectionFailureIsFalse();
   }
 
   @Test public void tlsHandshakeFailure_noFallbackByDefault() throws Exception {
@@ -937,26 +885,6 @@ public final class CallTest {
     }
   }
 
-  @Test public void httpsCallsFailWhenProtocolIsH2PriorKnowledge() throws Exception {
-    client = client.newBuilder()
-        .protocols(Collections.singletonList(Protocol.H2_PRIOR_KNOWLEDGE))
-        .build();
-
-    server.useHttps(handshakeCertificates.sslSocketFactory(), false);
-    server.enqueue(new MockResponse());
-
-    Call call = client.newCall(new Request.Builder()
-        .url(server.url("/").toString())
-        .build());
-    try {
-      call.execute();
-      fail();
-    } catch (UnknownServiceException expected) {
-      assertThat(expected.getMessage()).isEqualTo(
-          "H2_PRIOR_KNOWLEDGE cannot be used with HTTPS");
-    }
-  }
-
   @Test public void postBodyRetransmittedOnFailureRecovery() throws Exception {
     server.enqueue(new MockResponse().setBody("abc"));
     server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AFTER_REQUEST));
@@ -984,11 +912,6 @@ public final class CallTest {
     RecordedRequest post2 = server.takeRequest();
     assertThat(post2.getBody().readUtf8()).isEqualTo("body!");
     assertThat(post2.getSequenceNumber()).isEqualTo(0);
-  }
-
-  @Test public void postBodyRetransmittedOnFailureRecovery_HTTP2() throws Exception {
-    enableProtocol();
-    postBodyRetransmittedOnFailureRecovery();
   }
 
   @Test public void responseCookies() throws Exception {
@@ -1114,12 +1037,6 @@ public final class CallTest {
     }
   }
 
-  @Test
-  public void cancelWhileRequestHeadersAreSent_HTTP_2() throws Exception {
-    enableProtocol();
-    cancelWhileRequestHeadersAreSent();
-  }
-
   @Test public void cancelBeforeBodyIsRead() throws Exception {
     server.enqueue(new MockResponse().setBody("def").throttleBody(1, 750, TimeUnit.MILLISECONDS));
 
@@ -1158,11 +1075,6 @@ public final class CallTest {
 
   @Test public void cancelInFlightBeforeResponseReadThrowsIOE_HTTPS() throws Exception {
     enableTls();
-    cancelInFlightBeforeResponseReadThrowsIOE();
-  }
-
-  @Test public void cancelInFlightBeforeResponseReadThrowsIOE_HTTP_2() throws Exception {
-    enableProtocol();
     cancelInFlightBeforeResponseReadThrowsIOE();
   }
 
@@ -1251,11 +1163,6 @@ public final class CallTest {
         .assertSuccessful();
   }
 
-  @Test public void expect100ContinueEmptyRequestBody_HTTP2() throws Exception {
-    enableProtocol();
-    expect100ContinueEmptyRequestBody();
-  }
-
   @Test public void expect100ContinueTimesOutWithoutContinue() throws Exception {
     server.enqueue(new MockResponse()
         .setSocketPolicy(SocketPolicy.NO_RESPONSE));
@@ -1281,11 +1188,6 @@ public final class CallTest {
     assertThat(recordedRequest.getBody().readUtf8()).isEqualTo("");
   }
 
-  @Test public void expect100ContinueTimesOutWithoutContinue_HTTP2() throws Exception {
-    enableProtocol();
-    expect100ContinueTimesOutWithoutContinue();
-  }
-
   @Test public void serverRespondsWithUnsolicited100Continue() throws Exception {
     server.enqueue(new MockResponse()
         .setSocketPolicy(SocketPolicy.CONTINUE_ALWAYS));
@@ -1301,11 +1203,6 @@ public final class CallTest {
 
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getBody().readUtf8()).isEqualTo("abc");
-  }
-
-  @Test public void serverRespondsWithUnsolicited100Continue_HTTP2() throws Exception {
-    enableProtocol();
-    serverRespondsWithUnsolicited100Continue();
   }
 
   @Test public void serverRespondsWith100ContinueOnly() throws Exception {
@@ -1332,11 +1229,6 @@ public final class CallTest {
     assertThat(recordedRequest.getBody().readUtf8()).isEqualTo("abc");
   }
 
-  @Test public void serverRespondsWith100ContinueOnly_HTTP2() throws Exception {
-    enableProtocol();
-    serverRespondsWith100ContinueOnly();
-  }
-
   @Test public void successfulExpectContinuePermitsConnectionReuse() throws Exception {
     server.enqueue(new MockResponse()
         .setSocketPolicy(SocketPolicy.EXPECT_CONTINUE));
@@ -1355,11 +1247,6 @@ public final class CallTest {
     assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(1);
   }
 
-  @Test public void successfulExpectContinuePermitsConnectionReuseWithHttp2() throws Exception {
-    enableProtocol();
-    successfulExpectContinuePermitsConnectionReuse();
-  }
-
   @Test public void unsuccessfulExpectContinuePreventsConnectionReuse() throws Exception {
     server.enqueue(new MockResponse());
     server.enqueue(new MockResponse());
@@ -1375,25 +1262,6 @@ public final class CallTest {
 
     assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
     assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
-  }
-
-  @Test public void unsuccessfulExpectContinuePermitsConnectionReuseWithHttp2() throws Exception {
-    enableProtocol();
-
-    server.enqueue(new MockResponse());
-    server.enqueue(new MockResponse());
-
-    executeSynchronously(new Request.Builder()
-        .url(server.url("/").toString())
-        .header("Expect", "100-continue")
-        .post(RequestBody.create(MediaType.get("text/plain"), "abc"))
-        .build());
-    executeSynchronously(new Request.Builder()
-        .url(server.url("/").toString())
-        .build());
-
-    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
-    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(1);
   }
 
   /** We forbid non-ASCII characters in outgoing request headers, but accept UTF-8. */
@@ -1443,35 +1311,6 @@ public final class CallTest {
     executeSynchronously(request).assertFailure(dns + " returned no addresses for android.com");
 
     dns.assertRequests("android.com");
-  }
-
-  /** We had a bug where failed HTTP/2 calls could break the entire connection. */
-  @Test public void failingCallsDoNotInterfereWithConnection() throws Exception {
-    enableProtocol();
-
-    server.enqueue(new MockResponse().setBody("Response 1"));
-    server.enqueue(new MockResponse().setBody("Response 2"));
-
-    RequestBody requestBody = new RequestBody() {
-      @Override public MediaType contentType() {
-        return null;
-      }
-
-      @Override public void writeTo(BufferedSink sink) throws IOException {
-        sink.writeUtf8("abc");
-        sink.flush();
-
-        makeFailingCall();
-
-        sink.writeUtf8("def");
-        sink.flush();
-      }
-    };
-    Call call = client.newCall(new Request.Builder()
-        .url(server.url("/").toString())
-        .post(requestBody)
-        .build());
-    assertThat(call.execute().body().string()).isEqualTo("Response 1");
   }
 
   /** Test which headers are sent unencrypted to the HTTP proxy. */
@@ -1973,34 +1812,6 @@ public final class CallTest {
     assertThat(response.trailers()).isEqualTo(Headers.of("trailers", "boom"));
   }
 
-  @Test public void clientReadsHeadersDataTrailersHttp2() throws IOException {
-    MockResponse mockResponse = new MockResponse()
-        .clearHeaders()
-        .addHeader("h1", "v1")
-        .addHeader("h2", "v2")
-        .setBody("HelloBonjour")
-        .setTrailers(okhttp3.Headers.of("trailers", "boom"));
-    server.enqueue(mockResponse);
-    enableProtocol();
-
-    Call call = client.newCall(new Request.Builder()
-        .url(server.url("/").toString())
-        .build());
-
-    try (Response response = call.execute()) {
-      BufferedSource source = response.body().source();
-
-      assertThat(response.header("h1")).isEqualTo("v1");
-      assertThat(response.header("h2")).isEqualTo("v2");
-
-      assertThat(source.readUtf8(5)).isEqualTo("Hello");
-      assertThat(source.readUtf8(7)).isEqualTo("Bonjour");
-
-      assertThat(source.exhausted()).isTrue();
-      assertThat(response.trailers()).isEqualTo(Headers.of("trailers", "boom"));
-    }
-  }
-
   @Test public void requestBodyThrowsUnrelatedToNetwork() throws Exception {
     server.enqueue(new MockResponse());
 
@@ -2018,11 +1829,6 @@ public final class CallTest {
         .build();
 
     executeSynchronously(request).assertFailure("boom");
-  }
-
-  @Test public void requestBodyThrowsUnrelatedToNetwork_HTTP2() throws Exception {
-    enableProtocol();
-    requestBodyThrowsUnrelatedToNetwork();
   }
 
   private void makeFailingCall() {
@@ -2072,18 +1878,6 @@ public final class CallTest {
     } catch (IOException e) {
       return new RecordedResponse(request, null, null, e);
     }
-  }
-
-  /**
-   * Tests that use this will fail unless boot classpath is set. Ex. {@code
-   * -Xbootclasspath/p:/tmp/alpn-boot-8.0.0.v20140317}
-   */
-  private void enableProtocol() {
-    enableTls();
-    client = client.newBuilder()
-        .protocols(Arrays.asList(Protocol.HTTP_2, Protocol.HTTP_1_1))
-        .build();
-    server.setProtocols(List.of(okhttp3.Protocol.HTTP_2, okhttp3.Protocol.HTTP_1_1));
   }
 
   private void enableTls() {

@@ -17,13 +17,11 @@ package linktiger.http;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import linktiger.http.impl.ConnectionPool;
-import linktiger.http.impl.http2.Header;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -59,14 +57,6 @@ public final class TestUtil {
         .connectionPool(connectionPool)
         .dns(SINGLE_INET_ADDRESS_DNS) // Prevent unexpected fallback addresses.
         .build();
-  }
-
-  public static List<Header> headerEntries(String... elements) {
-    List<Header> result = new ArrayList<>(elements.length / 2);
-    for (int i = 0; i < elements.length; i += 2) {
-      result.add(new Header(elements[i], elements[i + 1]));
-    }
-    return result;
   }
 
   public static String repeat(char c, int count) {

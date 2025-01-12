@@ -48,12 +48,6 @@ import linktiger.http.Response;
 import linktiger.http.ResponseBody;
 import linktiger.http.Route;
 import linktiger.http.Url;
-import linktiger.http.impl.http2.ConnectionShutdownException;
-import linktiger.http.impl.http2.ErrorCode;
-import linktiger.http.impl.http2.Http2Connection;
-import linktiger.http.impl.http2.Http2ExchangeCodec;
-import linktiger.http.impl.http2.Http2Stream;
-import linktiger.http.impl.http2.StreamResetException;
 
 import okio.BufferedSink;
 import okio.BufferedSource;
@@ -64,7 +58,7 @@ import static java.net.HttpURLConnection.HTTP_PROXY_AUTH;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
- * The sockets and streams of an HTTP, HTTPS, or HTTPS+HTTP/2 connection. May be used for multiple
+ * The sockets and streams of an HTTP or HTTPS connection. May be used for multiple
  * HTTP request/response exchanges. Connections may be direct to the origin server or via a proxy.
  *
  * <p>Typically instances of this class are created, connected and exercised automatically by the
@@ -77,14 +71,8 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  * <h3>Modern TLS</h3>
  *
  * <p>There are tradeoffs when selecting which options to include when negotiating a secure
- * connection to a remote host. Newer TLS options are quite useful:
- *
- * <ul>
- *     <li>Server Name Indication (SNI) enables one IP address to negotiate secure connections for
- *         multiple domain names.
- *     <li>Application Layer Protocol Negotiation (ALPN) enables the HTTPS port (443) to be used to
- *         negotiate HTTP/2.
- * </ul>
+ * connection to a remote host. Newer TLS offers options such as Server Name Indication (SNI)
+ * which enables one IP address to negotiate secure connections for multiple domain names.
  *
  * <p>Unfortunately, older HTTPS servers refuse to connect when such options are presented. Rather
  * than avoiding these options entirely, this class allows a connection to be attempted with modern
@@ -92,12 +80,10 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  *
  * <h3>Connection Reuse</h3>
  *
- * <p>Each connection can carry a varying number of streams, depending on the underlying protocol
- * being used. HTTP/1.x connections can carry either zero or one streams. HTTP/2 connections can
- * carry any number of streams, dynamically configured with {@code SETTINGS_MAX_CONCURRENT_STREAMS}.
- * A connection currently carrying zero streams is an idle stream. We keep it alive because reusing
- * an existing connection is typically faster than establishing a new one.
- *
+ * <p>Each connection can carry a either zero or one streams. A connection currently carrying zero
+ * streams is an idle stream. We keep it alive because reusing an existing connection is typically
+ * faster than establishing a new one.
+ * TODO review the text below
  * <p>When a single logical call requires multiple streams due to redirects or authorization
  * challenges, we prefer to use the same physical connection for all streams in the sequence. There
  * are potential performance and behavior consequences to this preference. To support this feature,
@@ -112,7 +98,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  * make bookkeeping easier for the caller: releasing the allocation as soon as the terminal stream
  * has been found. But only complete the stream once its data stream has been exhausted.
  */
-public final class Connection extends Http2Connection.Listener {
+public final class Connection {
 
   private static final int MAX_TUNNEL_ATTEMPTS = 21;
 
@@ -131,7 +117,6 @@ public final class Connection extends Http2Connection.Listener {
   private Socket socket;
   private Handshake handshake;
   private Protocol protocol;
-  private Http2Connection http2Connection;
   private BufferedSource source;
   private BufferedSink sink;
 
@@ -150,14 +135,8 @@ public final class Connection extends Http2Connection.Listener {
   int routeFailureCount;
 
   int successCount;
-  private int refusedStreamCount;
 
-  /**
-   * The maximum number of concurrent streams that can be carried by this connection. If {@code
-   * allocations.size() < allocationLimit} then new streams can be created on this connection.
-   */
-  private int allocationLimit = 1;
-
+  // TODO no need for list - there can be at most one transmitter
   /** Current calls carried by this connection. */
   final List<Reference<Transmitter>> transmitters = new ArrayList<>();
 
@@ -186,7 +165,7 @@ public final class Connection extends Http2Connection.Listener {
   }
 
   public void connect(int connectTimeout, int readTimeout, int writeTimeout,
-      int pingIntervalMillis, boolean connectionRetryEnabled, Call call,
+      boolean connectionRetryEnabled, Call call,
       EventListener eventListener) {
     if (protocol != null) throw new IllegalStateException("already connected");
 
@@ -198,11 +177,6 @@ public final class Connection extends Http2Connection.Listener {
       if (!connectionSpecs.contains(ConnectionSpec.CLEARTEXT)) {
         throw new RouteException(new UnknownServiceException(
             "CLEARTEXT communication not enabled for client"));
-      }
-    } else {
-      if (route.address().protocols().contains(Protocol.H2_PRIOR_KNOWLEDGE)) {
-        throw new RouteException(new UnknownServiceException(
-            "H2_PRIOR_KNOWLEDGE cannot be used with HTTPS"));
       }
     }
 
@@ -217,7 +191,7 @@ public final class Connection extends Http2Connection.Listener {
         } else {
           connectSocket(connectTimeout, readTimeout, call, eventListener);
         }
-        establishProtocol(connectionSpecSelector, pingIntervalMillis, call, eventListener);
+        establishProtocol(connectionSpecSelector, call, eventListener);
         eventListener.connectEnd(call, route.socketAddress(), route.proxy(), protocol);
         break;
       } catch (IOException e) {
@@ -239,7 +213,6 @@ public final class Connection extends Http2Connection.Listener {
         sink = null;
         handshake = null;
         protocol = null;
-        http2Connection = null;
 
         eventListener.connectFailed(call, route.socketAddress(), route.proxy(), null, e);
 
@@ -259,12 +232,6 @@ public final class Connection extends Http2Connection.Listener {
       ProtocolException exception = new ProtocolException("Too many tunnel connections attempted: "
           + MAX_TUNNEL_ATTEMPTS);
       throw new RouteException(exception);
-    }
-
-    if (http2Connection != null) {
-      synchronized (connectionPool) {
-        allocationLimit = http2Connection.maxConcurrentStreams();
-      }
     }
   }
 
@@ -321,16 +288,8 @@ public final class Connection extends Http2Connection.Listener {
     sink = Okio.buffer(Okio.sink(rawSocket));
   }
 
-  private void establishProtocol(ConnectionSpecSelector connectionSpecSelector,
-      int pingIntervalMillis, Call call, EventListener eventListener) throws IOException {
+  private void establishProtocol(ConnectionSpecSelector connectionSpecSelector, Call call, EventListener eventListener) throws IOException {
     if (route.address().sslSocketFactory() == null) {
-      if (route.address().protocols().contains(Protocol.H2_PRIOR_KNOWLEDGE)) {
-        socket = rawSocket;
-        protocol = Protocol.H2_PRIOR_KNOWLEDGE;
-        startHttp2(pingIntervalMillis);
-        return;
-      }
-
       socket = rawSocket;
       protocol = Protocol.HTTP_1_1;
       return;
@@ -339,20 +298,6 @@ public final class Connection extends Http2Connection.Listener {
     eventListener.secureConnectStart(call);
     connectTls(connectionSpecSelector);
     eventListener.secureConnectEnd(call, handshake);
-
-    if (protocol == Protocol.HTTP_2) {
-      startHttp2(pingIntervalMillis);
-    }
-  }
-
-  private void startHttp2(int pingIntervalMillis) throws IOException {
-    socket.setSoTimeout(0); // HTTP/2 connection timeouts are set per-stream.
-    http2Connection = new Http2Connection.Builder(true)
-        .socket(socket, route.address().url().host(), source, sink)
-        .listener(this)
-        .pingIntervalMillis(pingIntervalMillis)
-        .build();
-    http2Connection.start();
   }
 
   private void connectTls(ConnectionSpecSelector connectionSpecSelector) throws IOException {
@@ -514,9 +459,9 @@ public final class Connection extends Http2Connection.Listener {
    * Returns true if this connection can carry a stream allocation to {@code address}. If non-null
    * {@code route} is the resolved route for a connection.
    */
-  boolean isEligible(Address address, List<Route> routes) {
+  boolean isEligible(Address address) {
     // If this connection is not accepting new exchanges, we're done.
-    if (transmitters.size() >= allocationLimit || noNewExchanges) return false;
+    if (!transmitters.isEmpty() || noNewExchanges) return false;
 
     // If the non-host fields of the address don't overlap, we're done.
     if (!this.route.address().equalsNonHost(address)) return false;
@@ -526,65 +471,14 @@ public final class Connection extends Http2Connection.Listener {
       return true; // This connection is a perfect match.
     }
 
-    // At this point we don't have a hostname match. But we still be able to carry the request if
-    // our connection coalescing requirements are met. See also:
-    // https://hpbn.co/optimizing-application-delivery/#eliminate-domain-sharding
-    // https://daniel.haxx.se/blog/2016/08/18/http2-connection-coalescing/
-
-    // 1. This connection must be HTTP/2.
-    if (http2Connection == null) return false;
-
-    // 2. The routes must share an IP address.
-    if (routes == null || !routeMatchesAny(routes)) return false;
-
-    // 3. This connection's server certificate's must cover the new host.
-    if (address.hostnameVerifier() != OkHostnameVerifier.INSTANCE) return false;
-    if (!supportsUrl(address.url())) return false;
-
-    return true; // The caller's address can be carried by this connection.
-  }
-
-  /**
-   * Returns true if this connection's route has the same address as any of {@code routes}. This
-   * requires us to have a DNS address for both hosts, which only happens after route planning. We
-   * can't coalesce connections that use a proxy, since proxies don't tell us the origin server's IP
-   * address.
-   */
-  private boolean routeMatchesAny(List<Route> candidates) {
-    for (int i = 0, size = candidates.size(); i < size; i++) {
-      Route candidate = candidates.get(i);
-      if (candidate.proxy().type() == Proxy.Type.DIRECT
-          && route.proxy().type() == Proxy.Type.DIRECT
-          && route.socketAddress().equals(candidate.socketAddress())) {
-        return true;
-      }
-    }
     return false;
   }
 
-  public boolean supportsUrl(Url url) {
-    if (url.port() != route.address().url().port()) {
-      return false; // Port mismatch.
-    }
-
-    if (!url.host().equals(route.address().url().host())) {
-      // We have a host mismatch. But if the certificate matches, we're still good.
-      return handshake != null && OkHostnameVerifier.INSTANCE.verify(
-          url.host(), (X509Certificate) handshake.peerCertificates().get(0));
-    }
-
-    return true; // Success. The URL is supported.
-  }
-
   ExchangeCodec newCodec(HttpClient client) throws SocketException {
-    if (http2Connection != null) {
-      return new Http2ExchangeCodec(client, this, http2Connection);
-    } else {
-      socket.setSoTimeout(client.readTimeoutMillis());
-      source.timeout().timeout(client.readTimeoutMillis(), MILLISECONDS);
-      sink.timeout().timeout(client.writeTimeoutMillis(), MILLISECONDS);
-      return new Http1ExchangeCodec(client, this, source, sink);
-    }
+    socket.setSoTimeout(client.readTimeoutMillis());
+    source.timeout().timeout(client.readTimeoutMillis(), MILLISECONDS);
+    sink.timeout().timeout(client.writeTimeoutMillis(), MILLISECONDS);
+    return new Http1ExchangeCodec(client, this, source, sink);
   }
 
   /** Returns the route used by this connection. */
@@ -602,8 +496,7 @@ public final class Connection extends Http2Connection.Listener {
 
   /**
    * Returns the socket that this connection is using. Returns an {@linkplain
-   * javax.net.ssl.SSLSocket SSL socket} if this connection is HTTPS. If this is an HTTP/2
-   * connection the socket may be shared by multiple concurrent calls.
+   * javax.net.ssl.SSLSocket SSL socket} if this connection is HTTPS.
    */
   public Socket socket() {
     return socket;
@@ -613,10 +506,6 @@ public final class Connection extends Http2Connection.Listener {
   public boolean isHealthy(boolean doExtensiveChecks) {
     if (socket.isClosed() || socket.isInputShutdown() || socket.isOutputShutdown()) {
       return false;
-    }
-
-    if (http2Connection != null) {
-      return http2Connection.isHealthy(System.nanoTime());
     }
 
     if (doExtensiveChecks) {
@@ -641,31 +530,11 @@ public final class Connection extends Http2Connection.Listener {
     return true;
   }
 
-  /** Refuse incoming streams. */
-  @Override public void onStream(Http2Stream stream) throws IOException {
-    stream.close(ErrorCode.REFUSED_STREAM, null);
-  }
-
-  /** When settings are received, adjust the allocation limit. */
-  @Override public void onSettings(Http2Connection connection) {
-    synchronized (connectionPool) {
-      allocationLimit = connection.maxConcurrentStreams();
-    }
-  }
-
   /**
    * Returns the TLS handshake used to establish this connection, or null if the connection is not HTTPS.
    */
   public Handshake handshake() {
     return handshake;
-  }
-
-  /**
-   * Returns true if this is an HTTP/2 connection. Such connections can be used in multiple HTTP
-   * requests simultaneously.
-   */
-  public boolean isMultiplexed() {
-    return http2Connection != null;
   }
 
   /**
@@ -675,30 +544,14 @@ public final class Connection extends Http2Connection.Listener {
   void trackFailure(IOException e) {
     assert (!Thread.holdsLock(connectionPool));
     synchronized (connectionPool) {
-      if (e instanceof StreamResetException) {
-        ErrorCode errorCode = ((StreamResetException) e).errorCode;
-        if (errorCode == ErrorCode.REFUSED_STREAM) {
-          // Retry REFUSED_STREAM errors once on the same connection.
-          refusedStreamCount++;
-          if (refusedStreamCount > 1) {
-            noNewExchanges = true;
-            routeFailureCount++;
-          }
-        } else if (errorCode != ErrorCode.CANCEL) {
-          // Keep the connection for CANCEL errors. Everything else wants a fresh connection.
-          noNewExchanges = true;
-          routeFailureCount++;
-        }
-      } else if (!isMultiplexed() || e instanceof ConnectionShutdownException) {
-        noNewExchanges = true;
+      noNewExchanges = true;
 
-        // If this route hasn't completed a call, avoid it for new connections.
-        if (successCount == 0) {
-          if (e != null) {
-            connectionPool.connectFailed(route, e);
-          }
-          routeFailureCount++;
+      // If this route hasn't completed a call, avoid it for new connections.
+      if (successCount == 0) {
+        if (e != null) {
+          connectionPool.connectFailed(route, e);
         }
+        routeFailureCount++;
       }
     }
   }

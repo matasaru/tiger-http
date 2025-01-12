@@ -74,8 +74,6 @@ public final class StatusLineTest {
   }
 
   @Test public void protocolVersions() throws IOException {
-    assertInvalid("HTTP/2.0 200 OK");
-    assertInvalid("HTTP/2.1 200 OK");
     assertInvalid("HTTP/-.1 200 OK");
     assertInvalid("HTTP/1.- 200 OK");
     assertInvalid("HTTP/0.1 200 OK");

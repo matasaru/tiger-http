@@ -31,7 +31,7 @@ import java.util.TreeSet;
 
 import linktiger.http.impl.HttpDate;
 import linktiger.http.impl.Util;
-import linktiger.http.impl.http2.Header;
+import linktiger.http.impl.Header;
 
 /**
  * The header fields of a single HTTP message. Values are uninterpreted strings; use {@code Request}
@@ -125,9 +125,7 @@ public final class Headers {
   }
 
   /**
-   * Returns the number of bytes required to encode these headers using HTTP/1.1. This is also the
-   * approximate size of HTTP/2 headers before they are compressed with HPACK. This value is
-   * intended to be used as a metric: smaller headers are more efficient to encode and transmit.
+   * Returns the number of bytes required to encode these headers.
    */
   public long byteCount() {
     // Each header name has 2 bytes of overhead for ': ' and every header value has 2 bytes of

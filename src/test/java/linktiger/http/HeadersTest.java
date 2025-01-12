@@ -15,7 +15,6 @@
  */
 package linktiger.http;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,8 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import linktiger.http.impl.HttpHeaders;
-import linktiger.http.impl.http2.Header;
-import linktiger.http.impl.http2.Http2ExchangeCodec;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -35,52 +32,10 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
-import static linktiger.http.TestUtil.headerEntries;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 public final class HeadersTest {
-  @Test public void readNameValueBlockDropsForbiddenHeadersHttp2() throws IOException {
-    Headers headerBlock = Headers.of(
-        ":status", "200 OK",
-        ":version", "HTTP/1.1",
-        "connection", "close");
-    Request request = new Request.Builder().url("http://square.com/").build();
-    Response response = Http2ExchangeCodec.readHttp2HeadersList(headerBlock, Protocol.HTTP_2).request(request).build();
-    Headers headers = response.headers();
-    assertThat(headers.size()).isEqualTo(1);
-    assertThat(headers.name(0)).isEqualTo(":version");
-    assertThat(headers.value(0)).isEqualTo("HTTP/1.1");
-  }
-
-  @Test public void http2HeadersListDropsForbiddenHeadersHttp2() {
-    Request request = new Request.Builder()
-        .url("http://square.com/")
-        .header("Connection", "upgrade")
-        .header("Upgrade", "websocket")
-        .header("Host", "square.com")
-        .header("TE", "gzip")
-        .build();
-    List<Header> expected = headerEntries(
-        ":method", "GET",
-        ":path", "/",
-        ":authority", "square.com",
-        ":scheme", "http");
-    assertThat(Http2ExchangeCodec.http2HeadersList(request)).isEqualTo(expected);
-  }
-
-  @Test public void http2HeadersListDontDropTeIfTrailersHttp2() {
-    Request request = new Request.Builder()
-        .url("http://square.com/")
-        .header("TE", "trailers")
-        .build();
-    List<Header> expected = headerEntries(
-        ":method", "GET",
-        ":path", "/",
-        ":scheme", "http",
-        "te", "trailers");
-    assertThat(Http2ExchangeCodec.http2HeadersList(request)).isEqualTo(expected);
-  }
 
   @Test public void ofTrims() {
     Headers headers = Headers.of("\t User-Agent \n", " \r OkHttp ");

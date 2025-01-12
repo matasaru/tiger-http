@@ -15,7 +15,6 @@
  */
 package linktiger.http;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLException;
@@ -44,17 +43,6 @@ public final class ConnectionReuseTest {
   private HttpClient client = clientTestRule.client;
 
   @Test public void connectionsAreReused() throws Exception {
-    server.enqueue(new MockResponse().setBody("a"));
-    server.enqueue(new MockResponse().setBody("b"));
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .build();
-    assertConnectionReused(request, request);
-  }
-
-  @Test public void connectionsAreReusedWithHttp2() throws Exception {
-    enableHttp2();
     server.enqueue(new MockResponse().setBody("a"));
     server.enqueue(new MockResponse().setBody("b"));
 
@@ -162,22 +150,6 @@ public final class ConnectionReuseTest {
     assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
   }
 
-  @Test public void http2ConnectionsAreSharedBeforeResponseIsConsumed() throws Exception {
-    enableHttp2();
-    server.enqueue(new MockResponse().setBody("a"));
-    server.enqueue(new MockResponse().setBody("b"));
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .build();
-    Response response1 = client.newCall(request).execute();
-    Response response2 = client.newCall(request).execute();
-    response1.body().string(); // Discard the response body.
-    response2.body().string(); // Discard the response body.
-    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
-    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(1);
-  }
-
   @Test public void connectionsAreEvicted() throws Exception {
     server.enqueue(new MockResponse().setBody("a"));
     server.enqueue(new MockResponse().setBody("b"));
@@ -262,17 +234,6 @@ public final class ConnectionReuseTest {
         .build();
     server.useHttps(handshakeCertificates.sslSocketFactory(), false);
     server.setProtocols(List.of(okhttp3.Protocol.HTTP_1_1));
-  }
-
-  private void enableHttp2() {
-    client = client.newBuilder()
-        .sslSocketFactory(
-            handshakeCertificates.sslSocketFactory(), handshakeCertificates.trustManager())
-        .hostnameVerifier(new RecordingHostnameVerifier())
-        .protocols(Arrays.asList(Protocol.HTTP_2, Protocol.HTTP_1_1))
-        .build();
-    server.useHttps(handshakeCertificates.sslSocketFactory(), false);
-    server.setProtocols(List.of(okhttp3.Protocol.HTTP_2, okhttp3.Protocol.HTTP_1_1));
   }
 
   private void assertConnectionReused(Request... requests) throws Exception {

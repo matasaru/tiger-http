@@ -2189,22 +2189,6 @@ public final class URLConnectionTest {
     fail("TODO");
   }
 
-  @Test public void setsNegotiatedProtocolHeader_HTTP_2() throws Exception {
-    setsNegotiatedProtocolHeader();
-  }
-
-  private void setsNegotiatedProtocolHeader() throws IOException {
-    enableProtocol();
-    server.enqueue(new MockResponse()
-        .setBody("A"));
-    client = client.newBuilder()
-        .protocols(Arrays.asList(Protocol.HTTP_2, Protocol.HTTP_1_1))
-        .build();
-    Response response = getResponse(newRequest("/"));
-    Assertions.assertThat(response.protocol()).isEqualTo(Protocol.HTTP_2);
-    assertContent("A", response);
-  }
-
   @Test public void http10SelectedProtocol() throws IOException {
     server.enqueue(new MockResponse()
         .setStatus("HTTP/1.0 200 OK"));
@@ -2224,19 +2208,9 @@ public final class URLConnectionTest {
     zeroLengthPayload("POST");
   }
 
-  @Test public void zeroLengthPost_HTTP_2() throws Exception {
-    enableProtocol();
-    zeroLengthPost();
-  }
-
   /** For example, creating an Amazon S3 bucket ends up as a zero-length POST. */
   @Test public void zeroLengthPut() throws Exception {
     zeroLengthPayload("PUT");
-  }
-
-  @Test public void zeroLengthPut_HTTP_2() throws Exception {
-    enableProtocol();
-    zeroLengthPut();
   }
 
   private void zeroLengthPayload(String method) throws Exception {
@@ -2260,15 +2234,6 @@ public final class URLConnectionTest {
         .protocols(Arrays.asList(Protocol.HTTP_1_1))
         .build();
     assertContent("A", getResponse(newRequest("/")));
-  }
-
-  @Test public void setProtocolsWithoutHttp11() {
-    try {
-      new HttpClient.Builder()
-          .protocols(Arrays.asList(Protocol.HTTP_2));
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
   }
 
   @Test public void setProtocolsWithNull() {
@@ -2454,34 +2419,6 @@ public final class URLConnectionTest {
     }
   }
 
-  @Test public void streamedBodyIsRetriedOnHttp2Shutdown() throws Exception {
-    enableProtocol();
-    server.enqueue(new MockResponse()
-        .setSocketPolicy(SocketPolicy.DISCONNECT_AT_END)
-        .setBody("abc"));
-    server.enqueue(new MockResponse()
-        .setBody("def"));
-
-    // Send a separate request which will trigger a GOAWAY frame on the healthy connection.
-    Response response = getResponse(newRequest("/"));
-    assertContent("abc", response);
-
-    // Ensure the GOAWAY frame has time to be read and processed.
-    Thread.sleep(500);
-
-    assertContent("def", getResponse(new Request.Builder()
-        .url(server.url("/").toString())
-        .post(RequestBody.create(null, "123"))
-        .build()));
-
-    RecordedRequest request1 = server.takeRequest();
-    Assertions.assertThat(request1.getSequenceNumber()).isEqualTo(0);
-
-    RecordedRequest request2 = server.takeRequest();
-    Assertions.assertThat(request2.getBody().readUtf8()).isEqualTo("123");
-    Assertions.assertThat(request2.getSequenceNumber()).isEqualTo(0);
-  }
-
   private Request newRequest(String s) {
     return newRequest(Url.get(server.url(s).toString()));
   }
@@ -2663,22 +2600,6 @@ public final class URLConnectionTest {
       }
       return result.toString();
     }
-  }
-
-  /**
-   * Tests that use this will fail unless boot classpath is set. Ex. {@code
-   * -Xbootclasspath/p:/tmp/alpn-boot-8.0.0.v20140317}
-   */
-  private void enableProtocol() {
-    client = client.newBuilder()
-        .sslSocketFactory(
-            handshakeCertificates.sslSocketFactory(), handshakeCertificates.trustManager())
-        .hostnameVerifier(new RecordingHostnameVerifier())
-        .protocols(Arrays.asList(Protocol.HTTP_2, Protocol.HTTP_1_1))
-        .build();
-    server.useHttps(handshakeCertificates.sslSocketFactory(), false);
-    server.setProtocolNegotiationEnabled(true);
-    server.setProtocols(Arrays.asList(okhttp3.Protocol.HTTP_2, okhttp3.Protocol.HTTP_1_1));
   }
 
   /**

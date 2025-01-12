@@ -43,10 +43,6 @@ public class ForwardingRequestBody extends RequestBody {
     delegate.writeTo(sink);
   }
 
-  @Override public boolean isDuplex() {
-    return delegate.isDuplex();
-  }
-
   @Override public String toString() {
     return getClass().getSimpleName() + "(" + delegate.toString() + ")";
   }

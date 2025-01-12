@@ -203,7 +203,7 @@ public final class EventListenerTest {
 
   @Test public void secondCallEventSequence() throws IOException {
     enableTlsWithTunnel(false);
-    server.setProtocols(Arrays.asList(okhttp3.Protocol.HTTP_2, okhttp3.Protocol.HTTP_1_1));
+    server.setProtocols(List.of(okhttp3.Protocol.HTTP_1_1));
     server.enqueue(new MockResponse());
     server.enqueue(new MockResponse());
 
@@ -287,29 +287,6 @@ public final class EventListenerTest {
     };
   }
 
-  private Matcher<Response> matchesProtocol(final Protocol protocol) {
-    return new BaseMatcher<Response>() {
-      @Override public void describeTo(Description description) {
-        description.appendText("is HTTP/2");
-      }
-
-      @Override public boolean matches(Object o) {
-        return ((Response)o).protocol() == protocol;
-      }
-    };
-  }
-
-  @Test public void successfulEmptyH2CallEventSequence() throws IOException {
-    enableTlsWithTunnel(false);
-    server.setProtocols(Arrays.asList(okhttp3.Protocol.HTTP_2, okhttp3.Protocol.HTTP_1_1));
-    server.enqueue(new MockResponse());
-
-    assertSuccessfulEventOrder(matchesProtocol(Protocol.HTTP_2));
-
-    assertBytesReadWritten(listener, any(Long.class), null, greaterThan(0L),
-        equalTo(0L));
-  }
-
   @Test public void successfulEmptyHttpsCallEventSequence() throws IOException {
     enableTlsWithTunnel(false);
     server.setProtocols(Arrays.asList(okhttp3.Protocol.HTTP_1_1));
@@ -332,18 +309,6 @@ public final class EventListenerTest {
 
     assertBytesReadWritten(listener, any(Long.class), null, greaterThan(0L),
         equalTo(6L));
-  }
-
-  @Test public void successfulChunkedH2CallEventSequence() throws IOException {
-    enableTlsWithTunnel(false);
-    server.setProtocols(Arrays.asList(okhttp3.Protocol.HTTP_2, okhttp3.Protocol.HTTP_1_1));
-    server.enqueue(
-        new MockResponse().setBodyDelay(100, TimeUnit.MILLISECONDS).setChunkedBody("Hello!", 2));
-
-    assertSuccessfulEventOrder(matchesProtocol(Protocol.HTTP_2));
-
-    assertBytesReadWritten(listener, any(Long.class), null, equalTo(0L),
-        greaterThan(6L));
   }
 
   @Test public void successfulDnsLookup() throws IOException {
@@ -769,20 +734,14 @@ public final class EventListenerTest {
   @Test public void responseBodyFailHttp1OverHttps() throws IOException {
     enableTlsWithTunnel(false);
     server.setProtocols(Arrays.asList(okhttp3.Protocol.HTTP_1_1));
-    responseBodyFail(Protocol.HTTP_1_1);
-  }
-
-  @Test public void responseBodyFailHttp2OverHttps() throws IOException {
-    enableTlsWithTunnel(false);
-    server.setProtocols(Arrays.asList(okhttp3.Protocol.HTTP_2, okhttp3.Protocol.HTTP_1_1));
-    responseBodyFail(Protocol.HTTP_2);
+    responseBodyFail();
   }
 
   @Test public void responseBodyFailHttp() throws IOException {
-    responseBodyFail(Protocol.HTTP_1_1);
+    responseBodyFail();
   }
 
-  private void responseBodyFail(Protocol expectedProtocol) throws IOException {
+  private void responseBodyFail() throws IOException {
     // Use a 2 MiB body so the disconnect won't happen until the client has read some data.
     int responseBodySize = 2 * 1024 * 1024; // 2 MiB
     server.enqueue(new MockResponse()
@@ -793,11 +752,7 @@ public final class EventListenerTest {
         .url(server.url("/").toString())
         .build());
     Response response = call.execute();
-    if (expectedProtocol == Protocol.HTTP_2) {
-      // soft failure since client may not support depending on Platform
-      assumeThat(response, matchesProtocol(Protocol.HTTP_2));
-    }
-    Assertions.assertThat(response.protocol()).isEqualTo(expectedProtocol);
+    Assertions.assertThat(response.protocol()).isEqualTo(Protocol.HTTP_1_1);
     try {
       response.body().string();
       fail();
@@ -866,13 +821,7 @@ public final class EventListenerTest {
 
   @Test public void requestBodyFailHttp1OverHttps() throws IOException {
     enableTlsWithTunnel(false);
-    server.setProtocols(Arrays.asList(okhttp3.Protocol.HTTP_1_1));
-    requestBodyFail();
-  }
-
-  @Test public void requestBodyFailHttp2OverHttps() throws IOException {
-    enableTlsWithTunnel(false);
-    server.setProtocols(Arrays.asList(okhttp3.Protocol.HTTP_2, okhttp3.Protocol.HTTP_1_1));
+    server.setProtocols(List.of(okhttp3.Protocol.HTTP_1_1));
     requestBodyFail();
   }
 
@@ -963,13 +912,6 @@ public final class EventListenerTest {
   @Test public void requestBodySuccessHttp1OverHttps() throws IOException {
     enableTlsWithTunnel(false);
     server.setProtocols(Arrays.asList(okhttp3.Protocol.HTTP_1_1));
-    requestBodySuccess(RequestBody.create(MediaType.get("text/plain"), "Hello"), equalTo(5L),
-        equalTo(19L));
-  }
-
-  @Test public void requestBodySuccessHttp2OverHttps() throws IOException {
-    enableTlsWithTunnel(false);
-    server.setProtocols(Arrays.asList(okhttp3.Protocol.HTTP_2, okhttp3.Protocol.HTTP_1_1));
     requestBodySuccess(RequestBody.create(MediaType.get("text/plain"), "Hello"), equalTo(5L),
         equalTo(19L));
   }
