@@ -114,7 +114,8 @@ public final class Connection {
    * The application layer socket. Either an {@link SSLSocket} layered over {@link #rawSocket}, or
    * {@link #rawSocket} itself if this connection does not use SSL.
    */
-  private Socket socket;
+  Socket socket;
+
   private Handshake handshake;
   private Protocol protocol;
   private BufferedSource source;
@@ -154,14 +155,6 @@ public final class Connection {
     synchronized (connectionPool) {
       noNewExchanges = true;
     }
-  }
-
-  static Connection testConnection(
-      ConnectionPool connectionPool, Route route, Socket socket, long idleAtNanos) {
-    Connection result = new Connection(connectionPool, route);
-    result.socket = socket;
-    result.idleAtNanos = idleAtNanos;
-    return result;
   }
 
   public void connect(int connectTimeout, int readTimeout, int writeTimeout,

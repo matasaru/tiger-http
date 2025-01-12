@@ -191,7 +191,10 @@ public final class ConnectionPoolTest {
   }
 
   private Connection newConnection(ConnectionPool pool, Route route, long idleAtNanos) {
-    Connection result = Connection.testConnection(pool, route, new Socket(), idleAtNanos);
+    Connection result = new Connection(pool, route);
+    result.socket = new Socket();
+    result.idleAtNanos = idleAtNanos;
+
     synchronized (pool) {
       pool.put(result);
     }
