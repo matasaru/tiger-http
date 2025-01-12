@@ -132,7 +132,7 @@ public final class Transmitter {
 
     return new Address(url.host(), url.port(), client.dns(), client.socketFactory(),
         sslSocketFactory, hostnameVerifier, client.proxyAuthenticator(),
-        client.proxy(), client.protocols(), client.connectionSpecs(), client.proxySelector());
+        client.proxy(), client.connectionSpecs(), client.proxySelector());
   }
 
   /** Returns a new exchange to carry a new request and response. */

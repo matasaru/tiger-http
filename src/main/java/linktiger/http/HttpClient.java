@@ -22,9 +22,7 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.time.Duration;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -109,15 +107,12 @@ public class HttpClient {
   // TODO review the usage of this logger
   public static final Logger logger = Logger.getLogger(HttpClient.class.getName());
 
-  static final List<Protocol> DEFAULT_PROTOCOLS = List.of(Protocol.HTTP_1_1);
-
   static final List<ConnectionSpec> DEFAULT_CONNECTION_SPECS = List.of(
       ConnectionSpec.MODERN_TLS, ConnectionSpec.CLEARTEXT);
 
   private final Deque<Call> runningCalls = new ArrayDeque<>();
 
   final Proxy proxy;
-  final List<Protocol> protocols;
   final List<ConnectionSpec> connectionSpecs;
   final EventListener.Factory eventListenerFactory;
   final ProxySelector proxySelector;
@@ -141,7 +136,6 @@ public class HttpClient {
 
   HttpClient(Builder builder) {
     this.proxy = builder.proxy;
-    this.protocols = builder.protocols;
     this.connectionSpecs = builder.connectionSpecs;
     this.eventListenerFactory = builder.eventListenerFactory;
     this.proxySelector = builder.proxySelector;
@@ -265,10 +259,6 @@ public class HttpClient {
     return retryOnConnectionFailure;
   }
 
-  public List<Protocol> protocols() {
-    return protocols;
-  }
-
   public List<ConnectionSpec> connectionSpecs() {
     return connectionSpecs;
   }
@@ -290,7 +280,6 @@ public class HttpClient {
 
   public static final class Builder {
     Proxy proxy;
-    List<Protocol> protocols;
     List<ConnectionSpec> connectionSpecs;
     EventListener.Factory eventListenerFactory;
     ProxySelector proxySelector;
@@ -309,7 +298,6 @@ public class HttpClient {
     int writeTimeout;
 
     public Builder() {
-      protocols = DEFAULT_PROTOCOLS;
       connectionSpecs = DEFAULT_CONNECTION_SPECS;
       eventListenerFactory = EventListener.factory(EventListener.NONE);
       proxySelector = ProxySelector.getDefault();
@@ -332,7 +320,6 @@ public class HttpClient {
 
     Builder(HttpClient httpClient) {
       this.proxy = httpClient.proxy;
-      this.protocols = httpClient.protocols;
       this.connectionSpecs = httpClient.connectionSpecs;
       this.eventListenerFactory = httpClient.eventListenerFactory;
       this.proxySelector = httpClient.proxySelector;
@@ -634,29 +621,6 @@ public class HttpClient {
      */
     public Builder retryOnConnectionFailure(boolean retryOnConnectionFailure) {
       this.retryOnConnectionFailure = retryOnConnectionFailure;
-      return this;
-    }
-
-    /**
-     TODO remove this method - only HTTP 1.1 is implemented
-     */
-    public Builder protocols(List<Protocol> protocols) {
-      // Create a private copy of the list.
-      protocols = new ArrayList<>(protocols);
-
-      // Validate that the list has everything we require and nothing we forbid.
-      if (!protocols.contains(Protocol.HTTP_1_1)) {
-        throw new IllegalArgumentException("protocols must contain http/1.1: " + protocols);
-      }
-      if (protocols.contains(Protocol.HTTP_1_0)) {
-        throw new IllegalArgumentException("protocols must not contain http/1.0: " + protocols);
-      }
-      if (protocols.contains(null)) {
-        throw new IllegalArgumentException("protocols must not contain null");
-      }
-
-      // Assign as an unmodifiable list. This is effectively immutable.
-      this.protocols = Collections.unmodifiableList(protocols);
       return this;
     }
 

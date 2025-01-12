@@ -230,7 +230,6 @@ public final class ConnectionReuseTest {
         .sslSocketFactory(
             handshakeCertificates.sslSocketFactory(), handshakeCertificates.trustManager())
         .hostnameVerifier(new RecordingHostnameVerifier())
-        .protocols(List.of(Protocol.HTTP_1_1))
         .build();
     server.useHttps(handshakeCertificates.sslSocketFactory(), false);
     server.setProtocols(List.of(okhttp3.Protocol.HTTP_1_1));

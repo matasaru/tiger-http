@@ -23,7 +23,6 @@ import java.net.ProxySelector;
 import java.net.SocketAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import javax.net.SocketFactory;
@@ -36,7 +35,6 @@ import linktiger.http.Authenticator;
 import linktiger.http.ConnectionSpec;
 import linktiger.http.EventListener;
 import linktiger.http.FakeDns;
-import linktiger.http.Protocol;
 import linktiger.http.Route;
 
 import okhttp3.tls.HandshakeCertificates;
@@ -71,7 +69,6 @@ public final class RouteSelectorTest {
   private HostnameVerifier hostnameVerifier;
 
   private final Authenticator authenticator = Authenticator.NONE;
-  private final List<Protocol> protocols = Arrays.asList(Protocol.HTTP_1_1);
   private final FakeDns dns = new FakeDns();
   private final RecordingProxySelector proxySelector = new RecordingProxySelector();
   private RouteDatabase routeDatabase = new RouteDatabase();
@@ -137,7 +134,7 @@ public final class RouteSelectorTest {
 
   @Test public void explicitProxyTriesThatProxysAddressesOnly() throws Exception {
     Address address = new Address(uriHost, uriPort, dns, socketFactory, null, null,
-        authenticator, proxyA, protocols, connectionSpecs, proxySelector);
+        authenticator, proxyA, connectionSpecs, proxySelector);
     RouteSelector routeSelector = new RouteSelector(address, routeDatabase, null,
         EventListener.NONE);
 
@@ -155,7 +152,7 @@ public final class RouteSelectorTest {
 
   @Test public void explicitDirectProxy() throws Exception {
     Address address = new Address(uriHost, uriPort, dns, socketFactory, null, null,
-        authenticator, NO_PROXY, protocols, connectionSpecs, proxySelector);
+        authenticator, NO_PROXY, connectionSpecs, proxySelector);
     RouteSelector routeSelector = new RouteSelector(address, routeDatabase, null,
         EventListener.NONE);
 
@@ -185,7 +182,7 @@ public final class RouteSelectorTest {
     };
 
     Address address = new Address(uriHost, uriPort, dns, socketFactory, null, null,
-        authenticator, null, protocols, connectionSpecs, nullProxySelector);
+        authenticator, null, connectionSpecs, nullProxySelector);
     RouteSelector routeSelector = new RouteSelector(address, routeDatabase, null,
         EventListener.NONE);
     assertThat(routeSelector.hasNext()).isTrue();
@@ -441,11 +438,11 @@ public final class RouteSelectorTest {
   /** Returns an address that's without an SSL socket factory or hostname verifier. */
   private Address httpAddress() {
     return new Address(uriHost, uriPort, dns, socketFactory, null, null, authenticator, null,
-        protocols, connectionSpecs, proxySelector);
+        connectionSpecs, proxySelector);
   }
 
   private Address httpsAddress() {
     return new Address(uriHost, uriPort, dns, socketFactory, sslSocketFactory,
-        hostnameVerifier, authenticator, null, protocols, connectionSpecs, proxySelector);
+        hostnameVerifier, authenticator, null, connectionSpecs, proxySelector);
   }
 }

@@ -112,15 +112,6 @@ public final class HttpClientTest {
     assertThat(b.sslSocketFactory()).isSameAs(a.sslSocketFactory());
   }
 
-  @Test public void setProtocolsRejectsHttp10() throws Exception {
-    HttpClient.Builder builder = new HttpClient.Builder();
-    try {
-      builder.protocols(Arrays.asList(Protocol.HTTP_1_0, Protocol.HTTP_1_1));
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
-  }
-
   @Test public void nullDefaultProxySelector() throws Exception {
     server.enqueue(new MockResponse().setBody("abc"));
 

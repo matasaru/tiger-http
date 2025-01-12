@@ -200,7 +200,7 @@ public final class ConnectionPoolTest {
 
   private Address newAddress(String name) {
     return new Address(name, 1, Dns.SYSTEM, SocketFactory.getDefault(), null, null,
-        new RecordingOkAuthenticator("password", null), null, Collections.emptyList(),
+        new RecordingOkAuthenticator("password", null), null,
         Collections.emptyList(), ProxySelector.getDefault());
   }
 

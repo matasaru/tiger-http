@@ -36,7 +36,6 @@ public final class Address {
   final Dns dns;
   final SocketFactory socketFactory;
   final Authenticator proxyAuthenticator;
-  final List<Protocol> protocols;
   final List<ConnectionSpec> connectionSpecs;
   final ProxySelector proxySelector;
   final Proxy proxy;
@@ -46,7 +45,7 @@ public final class Address {
   public Address(String uriHost, int uriPort, Dns dns, SocketFactory socketFactory,
       SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier,
       Authenticator proxyAuthenticator,
-      Proxy proxy, List<Protocol> protocols, List<ConnectionSpec> connectionSpecs,
+      Proxy proxy, List<ConnectionSpec> connectionSpecs,
       ProxySelector proxySelector) {
     this.url = new Url.Builder()
         .scheme(sslSocketFactory != null ? "https" : "http")
@@ -64,9 +63,6 @@ public final class Address {
       throw new NullPointerException("proxyAuthenticator == null");
     }
     this.proxyAuthenticator = proxyAuthenticator;
-
-    if (protocols == null) throw new NullPointerException("protocols == null");
-    this.protocols = List.copyOf(protocols);
 
     if (connectionSpecs == null) throw new NullPointerException("connectionSpecs == null");
     this.connectionSpecs = List.copyOf(connectionSpecs);
@@ -100,14 +96,6 @@ public final class Address {
   /** Returns the client's proxy authenticator. */
   public Authenticator proxyAuthenticator() {
     return proxyAuthenticator;
-  }
-
-  /**
-   * Returns the protocols the client supports. This method always returns a non-null list that
-   * contains minimally {@link Protocol#HTTP_1_1}.
-   */
-  public List<Protocol> protocols() {
-    return protocols;
   }
 
   public List<ConnectionSpec> connectionSpecs() {
@@ -151,7 +139,6 @@ public final class Address {
     result = 31 * result + url.hashCode();
     result = 31 * result + dns.hashCode();
     result = 31 * result + proxyAuthenticator.hashCode();
-    result = 31 * result + protocols.hashCode();
     result = 31 * result + connectionSpecs.hashCode();
     result = 31 * result + proxySelector.hashCode();
     result = 31 * result + Objects.hashCode(proxy);
@@ -163,7 +150,6 @@ public final class Address {
   public boolean equalsNonHost(Address that) {
     return this.dns.equals(that.dns)
         && this.proxyAuthenticator.equals(that.proxyAuthenticator)
-        && this.protocols.equals(that.protocols)
         && this.connectionSpecs.equals(that.connectionSpecs)
         && this.proxySelector.equals(that.proxySelector)
         && Objects.equals(this.proxy, that.proxy)

@@ -2227,24 +2227,6 @@ public final class URLConnectionTest {
     Assertions.assertThat(zeroLengthPayload.getBodySize()).isEqualTo(0L);
   }
 
-  @Test public void setProtocols() throws Exception {
-    server.enqueue(new MockResponse()
-        .setBody("A"));
-    client = client.newBuilder()
-        .protocols(Arrays.asList(Protocol.HTTP_1_1))
-        .build();
-    assertContent("A", getResponse(newRequest("/")));
-  }
-
-  @Test public void setProtocolsWithNull() {
-    try {
-      new HttpClient.Builder()
-          .protocols(Arrays.asList(Protocol.HTTP_1_1, null));
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
-  }
-
   @Test public void veryLargeFixedLengthRequest() throws Exception {
     server.setBodyLimit(0);
     server.enqueue(new MockResponse());

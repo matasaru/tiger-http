@@ -140,7 +140,6 @@ public final class EventListenerTest {
         .setSocketPolicy(SocketPolicy.DISCONNECT_DURING_RESPONSE_BODY));
 
     client = client.newBuilder()
-        .protocols(Collections.singletonList(Protocol.HTTP_1_1))
         .readTimeout(250, TimeUnit.MILLISECONDS)
         .build();
 

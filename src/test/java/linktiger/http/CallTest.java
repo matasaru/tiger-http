@@ -1737,7 +1737,6 @@ public final class CallTest {
         .sslSocketFactory(
             handshakeCertificates.sslSocketFactory(), handshakeCertificates.trustManager())
         .hostnameVerifier(new RecordingHostnameVerifier())
-        .protocols(Collections.singletonList(Protocol.HTTP_1_1))
         .build();
 
     // Make a request.
