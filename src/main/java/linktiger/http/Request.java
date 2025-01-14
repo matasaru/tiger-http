@@ -20,8 +20,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import linktiger.http.impl.HttpMethod;
-
 /**
  * An HTTP request. Instances of this class are immutable if their {@link #body} is null or itself
  * immutable.

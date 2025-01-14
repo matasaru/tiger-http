@@ -33,9 +33,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import linktiger.http.impl.NamedRunnable;
-import linktiger.http.impl.Util;
-
 import okio.Buffer;
 import okio.BufferedSink;
 import okio.BufferedSource;

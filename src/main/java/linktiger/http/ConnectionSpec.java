@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.Objects;
 import javax.net.ssl.SSLSocket;
 
-import linktiger.http.impl.Util;
-
 /**
  * Specifies configuration for the socket connection that HTTP traffic travels through. For {@code
  * https:} URLs, this includes the TLS version and cipher suites to use when negotiating a secure

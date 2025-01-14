@@ -25,8 +25,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import linktiger.http.impl.Util;
-
 /** A cookie jar that delegates to a {@link CookieHandler}. */
 public final class JavaNetCookieJar implements CookieJar {
 

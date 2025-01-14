@@ -21,8 +21,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import linktiger.http.impl.ConnectionPool;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 public final class TestUtil {

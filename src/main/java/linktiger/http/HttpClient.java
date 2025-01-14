@@ -36,11 +36,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import linktiger.http.impl.ConnectionPool;
-import linktiger.http.impl.NullProxySelector;
-import linktiger.http.impl.OkHostnameVerifier;
-import linktiger.http.impl.Util;
-
 import okio.Sink;
 import okio.Source;
 

@@ -53,10 +53,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import linktiger.http.impl.ConnectionPool;
-import linktiger.http.impl.Util;
-import linktiger.http.impl.Version;
-
 import okhttp3.internal.Internal;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;

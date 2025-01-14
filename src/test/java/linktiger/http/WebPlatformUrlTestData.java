@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import linktiger.http.impl.Util;
-
 import okio.Buffer;
 import okio.BufferedSource;
 

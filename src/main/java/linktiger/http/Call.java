@@ -26,15 +26,6 @@ import java.util.List;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLPeerUnverifiedException;
 
-import linktiger.http.impl.Exchange;
-import linktiger.http.impl.HttpHeaders;
-import linktiger.http.impl.HttpMethod;
-import linktiger.http.impl.RealResponseBody;
-import linktiger.http.impl.RouteException;
-import linktiger.http.impl.Transmitter;
-import linktiger.http.impl.Util;
-import linktiger.http.impl.Version;
-
 import okio.BufferedSink;
 import okio.GzipSource;
 import okio.Okio;

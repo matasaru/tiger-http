@@ -23,8 +23,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import linktiger.http.impl.HttpHeaders;
-
 import org.junit.Ignore;
 import org.junit.Test;
 

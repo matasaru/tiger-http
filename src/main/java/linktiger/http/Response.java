@@ -20,10 +20,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import linktiger.http.impl.Exchange;
-import linktiger.http.impl.HttpHeaders;
-import linktiger.http.impl.StatusLine;
-
 import okio.Buffer;
 import okio.BufferedSource;
 

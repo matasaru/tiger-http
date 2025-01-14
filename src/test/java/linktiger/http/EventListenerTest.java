@@ -40,8 +40,6 @@ import linktiger.http.RecordingEventListener.ResponseFailed;
 import linktiger.http.RecordingEventListener.ResponseHeadersEnd;
 import linktiger.http.RecordingEventListener.SecureConnectEnd;
 import linktiger.http.RecordingEventListener.SecureConnectStart;
-import linktiger.http.impl.DoubleInetAddressDns;
-import linktiger.http.impl.RecordingOkAuthenticator;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;

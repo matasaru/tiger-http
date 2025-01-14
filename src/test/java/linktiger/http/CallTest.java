@@ -46,12 +46,7 @@ import linktiger.http.RecordingEventListener.CallEnd;
 import linktiger.http.RecordingEventListener.ConnectionAcquired;
 import linktiger.http.RecordingEventListener.ConnectionReleased;
 import linktiger.http.RecordingEventListener.ResponseFailed;
-import linktiger.http.impl.ConnectionPool;
-import linktiger.http.impl.DoubleInetAddressDns;
-import linktiger.http.impl.RecordingProxySelector;
-import linktiger.http.impl.Util;
-import linktiger.http.impl.Version;
-import linktiger.http.impl.io.InMemoryFileSystem;
+import linktiger.http.io.InMemoryFileSystem;
 
 import okhttp3.internal.Internal;
 import okhttp3.mockwebserver.Dispatcher;

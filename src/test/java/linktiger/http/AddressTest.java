@@ -19,8 +19,6 @@ import java.net.Proxy;
 import java.util.List;
 import javax.net.SocketFactory;
 
-import linktiger.http.impl.RecordingProxySelector;
-
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

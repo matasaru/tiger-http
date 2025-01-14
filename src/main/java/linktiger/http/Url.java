@@ -25,9 +25,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import linktiger.http.impl.PublicSuffixDatabase;
-import linktiger.http.impl.Util;
-
 import okio.Buffer;
 
 /**

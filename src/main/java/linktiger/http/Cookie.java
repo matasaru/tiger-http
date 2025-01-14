@@ -25,10 +25,6 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import linktiger.http.impl.HttpDate;
-import linktiger.http.impl.PublicSuffixDatabase;
-import linktiger.http.impl.Util;
-
 /**
  * An <a href="http://tools.ietf.org/html/rfc6265">RFC 6265</a> Cookie.
  *

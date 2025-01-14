@@ -29,10 +29,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import linktiger.http.impl.HttpDate;
-import linktiger.http.impl.Util;
-import linktiger.http.impl.Header;
-
 /**
  * The header fields of a single HTTP message. Values are uninterpreted strings; use {@code Request}
  * and {@code Response} for interpreted headers. This class maintains the order of the header fields
