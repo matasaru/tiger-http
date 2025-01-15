@@ -85,15 +85,7 @@ public final class ResponseBodyTest {
 
   @Test public void stringClosesUnderlyingSource() throws IOException {
     final AtomicBoolean closed = new AtomicBoolean();
-    ResponseBody body = new ResponseBody() {
-      @Override public MediaType contentType() {
-        return null;
-      }
-
-      @Override public long contentLength() {
-        return 5;
-      }
-
+    ResponseBody body = new ResponseBody(null, 5, null) {
       @Override public BufferedSource source() {
         Buffer source = new Buffer().writeUtf8("hello");
         return Okio.buffer(new ForwardingSource(source) {
@@ -155,15 +147,7 @@ public final class ResponseBodyTest {
 
   @Test public void readerClosedBeforeBomClosesUnderlyingSource() throws IOException {
     final AtomicBoolean closed = new AtomicBoolean();
-    ResponseBody body = new ResponseBody() {
-      @Override public MediaType contentType() {
-        return null;
-      }
-
-      @Override public long contentLength() {
-        return 5;
-      }
-
+    ResponseBody body = new ResponseBody(null, 5, null) {
       @Override public BufferedSource source() {
         ResponseBody body = body("fffe680065006c006c006f00");
         return Okio.buffer(new ForwardingSource(body.source()) {
@@ -180,15 +164,7 @@ public final class ResponseBodyTest {
 
   @Test public void readerClosedAfterBomClosesUnderlyingSource() throws IOException {
     final AtomicBoolean closed = new AtomicBoolean();
-    ResponseBody body = new ResponseBody() {
-      @Override public MediaType contentType() {
-        return null;
-      }
-
-      @Override public long contentLength() {
-        return 5;
-      }
-
+    ResponseBody body = new ResponseBody(null, 5, null) {
       @Override public BufferedSource source() {
         ResponseBody body = body("fffe680065006c006c006f00");
         return Okio.buffer(new ForwardingSource(body.source()) {
@@ -223,15 +199,7 @@ public final class ResponseBodyTest {
 
   @Test public void sourceClosesUnderlyingSource() throws IOException {
     final AtomicBoolean closed = new AtomicBoolean();
-    ResponseBody body = new ResponseBody() {
-      @Override public MediaType contentType() {
-        return null;
-      }
-
-      @Override public long contentLength() {
-        return 5;
-      }
-
+    ResponseBody body = new ResponseBody(null, 5, null) {
       @Override public BufferedSource source() {
         Buffer source = new Buffer().writeUtf8("hello");
         return Okio.buffer(new ForwardingSource(source) {
@@ -262,15 +230,7 @@ public final class ResponseBodyTest {
 
   @Test public void bytesClosesUnderlyingSource() throws IOException {
     final AtomicBoolean closed = new AtomicBoolean();
-    ResponseBody body = new ResponseBody() {
-      @Override public MediaType contentType() {
-        return null;
-      }
-
-      @Override public long contentLength() {
-        return 5;
-      }
-
+    ResponseBody body = new ResponseBody(null, 5, null) {
       @Override public BufferedSource source() {
         Buffer source = new Buffer().writeUtf8("hello");
         return Okio.buffer(new ForwardingSource(source) {
@@ -286,19 +246,7 @@ public final class ResponseBodyTest {
   }
 
   @Test public void bytesThrowsWhenLengthsDisagree() {
-    ResponseBody body = new ResponseBody() {
-      @Override public MediaType contentType() {
-        return null;
-      }
-
-      @Override public long contentLength() {
-        return 10;
-      }
-
-      @Override public BufferedSource source() {
-        return new Buffer().writeUtf8("hello");
-      }
-    };
+    ResponseBody body = new ResponseBody(null, 10, new Buffer().writeUtf8("hello"));
     try {
       body.bytes();
       fail();
@@ -309,15 +257,7 @@ public final class ResponseBodyTest {
   }
 
   @Test public void bytesThrowsMoreThanIntMaxValue() {
-    ResponseBody body = new ResponseBody() {
-      @Override public MediaType contentType() {
-        return null;
-      }
-
-      @Override public long contentLength() {
-        return Integer.MAX_VALUE + 1L;
-      }
-
+    ResponseBody body = new ResponseBody(null, Integer.MAX_VALUE + 1L, null) {
       @Override public BufferedSource source() {
         throw new AssertionError();
       }
@@ -348,15 +288,7 @@ public final class ResponseBodyTest {
 
   @Test public void byteStreamClosesUnderlyingSource() throws IOException {
     final AtomicBoolean closed = new AtomicBoolean();
-    ResponseBody body = new ResponseBody() {
-      @Override public MediaType contentType() {
-        return null;
-      }
-
-      @Override public long contentLength() {
-        return 5;
-      }
-
+    ResponseBody body = new ResponseBody(null, 5, null) {
       @Override public BufferedSource source() {
         Buffer source = new Buffer().writeUtf8("hello");
         return Okio.buffer(new ForwardingSource(source) {
@@ -372,15 +304,7 @@ public final class ResponseBodyTest {
   }
 
   @Test public void throwingUnderlyingSourceClosesQuietly() throws IOException {
-    ResponseBody body = new ResponseBody() {
-      @Override public MediaType contentType() {
-        return null;
-      }
-
-      @Override public long contentLength() {
-        return 5;
-      }
-
+    ResponseBody body = new ResponseBody(null, 5, null) {
       @Override public BufferedSource source() {
         Buffer source = new Buffer().writeUtf8("hello");
         return Okio.buffer(new ForwardingSource(source) {
@@ -399,8 +323,9 @@ public final class ResponseBodyTest {
   }
 
   static ResponseBody body(String hex, String charset) {
-    MediaType mediaType = charset == null ? null : MediaType.get("any/thing; charset=" + charset);
-    return ResponseBody.create(mediaType, ByteString.decodeHex(hex));
+    String mediaType = charset == null ? null : MediaType.get("any/thing; charset=" + charset).toString();
+    ByteString content = ByteString.decodeHex(hex);
+    return new ResponseBody(mediaType, content.size(), new Buffer().write(content));
   }
 
   static String exhaust(Reader reader) throws IOException {

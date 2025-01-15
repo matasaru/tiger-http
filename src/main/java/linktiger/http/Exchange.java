@@ -117,7 +117,7 @@ public final class Exchange {
       long contentLength = codec.reportedContentLength(response);
       Source rawSource = codec.openResponseBodySource(response);
       ResponseBodySource source = new ResponseBodySource(rawSource, contentLength);
-      return new RealResponseBody(contentType, contentLength, Okio.buffer(source));
+      return new ResponseBody(contentType, contentLength, Okio.buffer(source));
     } catch (IOException e) {
       eventListener.responseFailed(call, e);
       trackFailure(e);

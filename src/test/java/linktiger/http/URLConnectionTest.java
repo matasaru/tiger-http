@@ -1853,7 +1853,7 @@ public final class URLConnectionTest {
         .setBody("ABC"));
     Response response = getResponse(newRequest("/"));
     Assertions.assertThat(response.body().contentType()).isEqualTo(
-        MediaType.get("text/plain"));
+        MediaType.get("text/plain").toString());
     response.body().close();
   }
 

@@ -24,7 +24,6 @@ import java.nio.charset.Charset;
 
 import okio.Buffer;
 import okio.BufferedSource;
-import okio.ByteString;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -81,26 +80,46 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * {@link #bytes()} or {@link #string()}. Or stream the response with either {@link #source()},
  * {@link #byteStream()}, or {@link #charStream()}.
  */
-public abstract class ResponseBody implements Closeable {
+public class ResponseBody implements Closeable {
 
-  public static final ResponseBody EMPTY = ResponseBody.create(null, Util.EMPTY_BYTE_ARRAY);
+  public static final ResponseBody EMPTY = new ResponseBody(null, 0, new Buffer().write(Util.EMPTY_BYTE_ARRAY));
+
+  /**
+   * Use a string to avoid parsing the content type until needed. This also defers problems caused
+   * by malformed content types.
+   */
+  private final String contentType;
+  private final long contentLength;
+  private final BufferedSource source;
 
   /** Multiple calls to {@link #charStream()} must return the same instance. */
   private Reader reader;
 
-  public abstract MediaType contentType();
+  public ResponseBody(String contentType, long contentLength, BufferedSource source) {
+    this.contentType = contentType;
+    this.contentLength = contentLength;
+    this.source = source;
+  }
+
+  public String contentType() {
+    return contentType;
+  }
 
   /**
    * Returns the number of bytes in that will returned by {@link #bytes}, or {@link #byteStream}, or
    * -1 if unknown.
    */
-  public abstract long contentLength();
+  public long contentLength() {
+    return contentLength;
+  }
 
   public final InputStream byteStream() {
     return source().inputStream();
   }
 
-  public abstract BufferedSource source();
+  public BufferedSource source() {
+    return source;
+  }
 
   /**
    * Returns the response as a byte array.
@@ -168,8 +187,15 @@ public abstract class ResponseBody implements Closeable {
   }
 
   private Charset charset() {
-    MediaType contentType = contentType();
-    return contentType != null ? contentType.charset(UTF_8) : UTF_8;
+    var contentType = contentType();
+    if (contentType == null) {
+      return UTF_8;
+    }
+    var mediaType = MediaType.parse(contentType);
+    if (mediaType == null) {
+      return UTF_8;
+    }
+    return mediaType.charset(UTF_8);
   }
 
   @Override public void close() {
@@ -179,54 +205,6 @@ public abstract class ResponseBody implements Closeable {
       } catch (IOException _) {
       }
     }
-  }
-
-  /**
-   * Returns a new response body that transmits {@code content}. If {@code contentType} is non-null
-   * and lacks a charset, this will use UTF-8.
-   */
-  public static ResponseBody create(MediaType contentType, String content) {
-    Charset charset = UTF_8;
-    if (contentType != null) {
-      charset = contentType.charset();
-      if (charset == null) {
-        charset = UTF_8;
-        contentType = MediaType.parse(contentType + "; charset=utf-8");
-      }
-    }
-    Buffer buffer = new Buffer().writeString(content, charset);
-    return create(contentType, buffer.size(), buffer);
-  }
-
-  /** Returns a new response body that transmits {@code content}. */
-  public static ResponseBody create(final MediaType contentType, byte[] content) {
-    Buffer buffer = new Buffer().write(content);
-    return create(contentType, content.length, buffer);
-  }
-
-  /** Returns a new response body that transmits {@code content}. */
-  public static ResponseBody create(MediaType contentType, ByteString content) {
-    Buffer buffer = new Buffer().write(content);
-    return create(contentType, content.size(), buffer);
-  }
-
-  /** Returns a new response body that transmits {@code content}. */
-  public static ResponseBody create(final MediaType contentType,
-      final long contentLength, final BufferedSource content) {
-    if (content == null) throw new NullPointerException("source == null");
-    return new ResponseBody() {
-      @Override public MediaType contentType() {
-        return contentType;
-      }
-
-      @Override public long contentLength() {
-        return contentLength;
-      }
-
-      @Override public BufferedSource source() {
-        return content;
-      }
-    };
   }
 
   static final class BomAwareReader extends Reader {

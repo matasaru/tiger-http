@@ -257,7 +257,7 @@ public class Call {
                       .build();
               responseBuilder.headers(strippedHeaders);
               String contentType = networkResponse.header("Content-Type");
-              responseBuilder.body(new RealResponseBody(contentType, -1L, Okio.buffer(responseBody)));
+              responseBuilder.body(new ResponseBody(contentType, -1L, Okio.buffer(responseBody)));
             }
 
             response = responseBuilder.build();
