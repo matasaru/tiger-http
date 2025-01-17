@@ -46,7 +46,6 @@ import linktiger.http.RecordingEventListener.CallEnd;
 import linktiger.http.RecordingEventListener.ConnectionAcquired;
 import linktiger.http.RecordingEventListener.ConnectionReleased;
 import linktiger.http.RecordingEventListener.ResponseFailed;
-import linktiger.http.io.InMemoryFileSystem;
 
 import okhttp3.internal.Internal;
 import okhttp3.mockwebserver.Dispatcher;
@@ -80,7 +79,6 @@ public final class CallTest {
   @Rule public final TestRule timeout = new Timeout(30_000, TimeUnit.MILLISECONDS);
   @Rule public final MockWebServer server = new MockWebServer();
   @Rule public final MockWebServer server2 = new MockWebServer();
-  @Rule public final InMemoryFileSystem fileSystem = new InMemoryFileSystem();
   @Rule public final HttpClientTestRule clientTestRule = new HttpClientTestRule();
 
   private final RecordingEventListener listener = new RecordingEventListener();
