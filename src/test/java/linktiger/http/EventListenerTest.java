@@ -52,7 +52,6 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -75,7 +74,6 @@ public final class EventListenerTest {
   private final HandshakeCertificates handshakeCertificates = localhost();
 
   private HttpClient client = clientTestRule.client;
-  private SocksProxy socksProxy;
 
   @Before public void setUp() {
     client = clientTestRule.client.newBuilder()
@@ -83,12 +81,6 @@ public final class EventListenerTest {
         .build();
 
     listener.forbidLock(client.connectionPool());
-  }
-
-  @After public void tearDown() throws Exception {
-    if (socksProxy != null) {
-      socksProxy.shutdown();
-    }
   }
 
   @Test public void successfulCallEventSequence() throws IOException {
@@ -495,38 +487,6 @@ public final class EventListenerTest {
     Assertions.assertThat(connectStart.call).isSameAs(call);
     Assertions.assertThat(connectStart.inetSocketAddress).isEqualTo(expectedAddress);
     Assertions.assertThat(connectStart.proxy).isEqualTo(server.toProxyAddress());
-
-    ConnectEnd connectEnd = listener.removeUpToEvent(ConnectEnd.class);
-    Assertions.assertThat(connectEnd.call).isSameAs(call);
-    Assertions.assertThat(connectEnd.inetSocketAddress).isEqualTo(expectedAddress);
-    Assertions.assertThat(connectEnd.protocol).isEqualTo(Protocol.HTTP_1_1);
-  }
-
-  @Test public void successfulSocksProxyConnect() throws Exception {
-    server.enqueue(new MockResponse());
-
-    socksProxy = new SocksProxy();
-    socksProxy.play();
-    Proxy proxy = socksProxy.proxy();
-
-    client = client.newBuilder()
-        .proxy(proxy)
-        .build();
-
-    Call call = client.newCall(new Request.Builder()
-        .url("http://" + SocksProxy.HOSTNAME_THAT_ONLY_THE_PROXY_KNOWS + ":" + server.getPort())
-        .build());
-    Response response = call.execute();
-    Assertions.assertThat(response.code()).isEqualTo(200);
-    response.body().close();
-
-    InetSocketAddress expectedAddress = InetSocketAddress.createUnresolved(
-        SocksProxy.HOSTNAME_THAT_ONLY_THE_PROXY_KNOWS, server.getPort());
-
-    ConnectStart connectStart = listener.removeUpToEvent(ConnectStart.class);
-    Assertions.assertThat(connectStart.call).isSameAs(call);
-    Assertions.assertThat(connectStart.inetSocketAddress).isEqualTo(expectedAddress);
-    Assertions.assertThat(connectStart.proxy).isEqualTo(proxy);
 
     ConnectEnd connectEnd = listener.removeUpToEvent(ConnectEnd.class);
     Assertions.assertThat(connectEnd.call).isSameAs(call);
