@@ -2,7 +2,6 @@ package kio;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 
 /**
@@ -10,17 +9,11 @@ import java.nio.charset.Charset;
  * penalty. It also allows clients to read ahead, buffering as much as necessary before consuming
  * input.
  */
-public interface BufferedSource extends Source, ReadableByteChannel {
+public interface BufferedSource extends Source  {
   /**
    * Returns this source's internal buffer.
-   *
-   * @deprecated use getBuffer() instead.
    */
-  @Deprecated
   Buffer buffer();
-
-  /** This source's internal buffer. */
-  Buffer getBuffer();
 
   /**
    * Returns true if there are no more bytes in this source. This will block until there are bytes
@@ -128,87 +121,6 @@ public interface BufferedSource extends Source, ReadableByteChannel {
   int readIntLe() throws IOException;
 
   /**
-   * Removes eight bytes from this source and returns a big-endian long. <pre>{@code
-   *
-   *   Buffer buffer = new Buffer()
-   *       .writeByte(0x7f)
-   *       .writeByte(0xff)
-   *       .writeByte(0xff)
-   *       .writeByte(0xff)
-   *       .writeByte(0xff)
-   *       .writeByte(0xff)
-   *       .writeByte(0xff)
-   *       .writeByte(0xff)
-   *       .writeByte(0x00)
-   *       .writeByte(0x00)
-   *       .writeByte(0x00)
-   *       .writeByte(0x00)
-   *       .writeByte(0x00)
-   *       .writeByte(0x00)
-   *       .writeByte(0x00)
-   *       .writeByte(0x0f);
-   *   assertEquals(16, buffer.size());
-   *
-   *   assertEquals(9223372036854775807L, buffer.readLong());
-   *   assertEquals(8, buffer.size());
-   *
-   *   assertEquals(15, buffer.readLong());
-   *   assertEquals(0, buffer.size());
-   * }</pre>
-   */
-  long readLong() throws IOException;
-
-  /**
-   * Removes eight bytes from this source and returns a little-endian long. <pre>{@code
-   *
-   *   Buffer buffer = new Buffer()
-   *       .writeByte(0xff)
-   *       .writeByte(0xff)
-   *       .writeByte(0xff)
-   *       .writeByte(0xff)
-   *       .writeByte(0xff)
-   *       .writeByte(0xff)
-   *       .writeByte(0xff)
-   *       .writeByte(0x7f)
-   *       .writeByte(0x0f)
-   *       .writeByte(0x00)
-   *       .writeByte(0x00)
-   *       .writeByte(0x00)
-   *       .writeByte(0x00)
-   *       .writeByte(0x00)
-   *       .writeByte(0x00)
-   *       .writeByte(0x00);
-   *   assertEquals(16, buffer.size());
-   *
-   *   assertEquals(9223372036854775807L, buffer.readLongLe());
-   *   assertEquals(8, buffer.size());
-   *
-   *   assertEquals(15, buffer.readLongLe());
-   *   assertEquals(0, buffer.size());
-   * }</pre>
-   */
-  long readLongLe() throws IOException;
-
-  /**
-   * Reads a long from this source in signed decimal form (i.e., as a string in base 10 with
-   * optional leading '-'). This will iterate until a non-digit character is found. <pre>{@code
-   *
-   *   Buffer buffer = new Buffer()
-   *       .writeUtf8("8675309 -123 00001");
-   *
-   *   assertEquals(8675309L, buffer.readDecimalLong());
-   *   assertEquals(' ', buffer.readByte());
-   *   assertEquals(-123L, buffer.readDecimalLong());
-   *   assertEquals(' ', buffer.readByte());
-   *   assertEquals(1L, buffer.readDecimalLong());
-   * }</pre>
-   *
-   * @throws NumberFormatException if the found digits do not fit into a {@code long} or a decimal
-   * number was not present.
-   */
-  long readDecimalLong() throws IOException;
-
-  /**
    * Reads a long form this source in hexadecimal form (i.e., as a string in base 16). This will
    * iterate until a non-hexadecimal character is found. <pre>{@code
    *
@@ -234,20 +146,11 @@ public interface BufferedSource extends Source, ReadableByteChannel {
    */
   void skip(long byteCount) throws IOException;
 
-  /** Removes all bytes bytes from this and returns them as a byte string. */
-  ByteString readByteString() throws IOException;
-
-  /** Removes {@code byteCount} bytes from this and returns them as a byte string. */
-  ByteString readByteString(long byteCount) throws IOException;
-
   /**
    * Finds the first string in {@code options} that is a prefix of this buffer, consumes it from
    * this buffer, and returns its index. If no byte string in {@code options} is a prefix of this
    * buffer this returns -1 and no bytes are consumed.
-   *
-   * <p>This can be used as an alternative to {@link #readByteString} or even {@link #readUtf8} if
-   * the set of expected values is known in advance. <pre>{@code
-   *
+   * <pre>{@code
    *   Options FIELDS = Options.of(
    *       ByteString.encodeUtf8("depth="),
    *       ByteString.encodeUtf8("height="),
@@ -270,38 +173,11 @@ public interface BufferedSource extends Source, ReadableByteChannel {
   /** Removes all bytes from this and returns them as a byte array. */
   byte[] readByteArray() throws IOException;
 
-  /** Removes {@code byteCount} bytes from this and returns them as a byte array. */
-  byte[] readByteArray(long byteCount) throws IOException;
-
-  /**
-   * Removes up to {@code sink.length} bytes from this and copies them into {@code sink}. Returns
-   * the number of bytes read, or -1 if this source is exhausted.
-   */
-  int read(byte[] sink) throws IOException;
-
   /**
    * Removes exactly {@code sink.length} bytes from this and copies them into {@code sink}. Throws
    * an {@link java.io.EOFException} if the requested number of bytes cannot be read.
    */
   void readFully(byte[] sink) throws IOException;
-
-  /**
-   * Removes up to {@code byteCount} bytes from this and copies them into {@code sink} at {@code
-   * offset}. Returns the number of bytes read, or -1 if this source is exhausted.
-   */
-  int read(byte[] sink, int offset, int byteCount) throws IOException;
-
-  /**
-   * Removes exactly {@code byteCount} bytes from this and appends them to {@code sink}. Throws an
-   * {@link java.io.EOFException} if the requested number of bytes cannot be read.
-   */
-  void readFully(Buffer sink, long byteCount) throws IOException;
-
-  /**
-   * Removes all bytes from this and appends them to {@code sink}. Returns the total number of bytes
-   * written to {@code sink} which will be 0 if this is exhausted.
-   */
-  long readAll(Sink sink) throws IOException;
 
   /**
    * Removes all bytes from this, decodes them as UTF-8, and returns the string. Returns the empty
@@ -346,37 +222,6 @@ public interface BufferedSource extends Source, ReadableByteChannel {
   /**
    * Removes and returns characters up to but not including the next line break. A line break is
    * either {@code "\n"} or {@code "\r\n"}; these characters are not included in the result.
-   * <pre>{@code
-   *
-   *   Buffer buffer = new Buffer()
-   *       .writeUtf8("I'm a hacker!\n")
-   *       .writeUtf8("That's what I said: you're a nerd.\n")
-   *       .writeUtf8("I prefer to be called a hacker!\n");
-   *   assertEquals(81, buffer.size());
-   *
-   *   assertEquals("I'm a hacker!", buffer.readUtf8Line());
-   *   assertEquals(67, buffer.size());
-   *
-   *   assertEquals("That's what I said: you're a nerd.", buffer.readUtf8Line());
-   *   assertEquals(32, buffer.size());
-   *
-   *   assertEquals("I prefer to be called a hacker!", buffer.readUtf8Line());
-   *   assertEquals(0, buffer.size());
-   *
-   *   assertEquals(null, buffer.readUtf8Line());
-   *   assertEquals(0, buffer.size());
-   * }</pre>
-   *
-   * <p><strong>On the end of the stream this method returns null,</strong> just like {@link
-   * java.io.BufferedReader}. If the source doesn't end with a line break then an implicit line
-   * break is assumed. Null is returned once the source is exhausted. Use this for human-generated
-   * data, where a trailing line break is optional.
-   */
-  String readUtf8Line() throws IOException;
-
-  /**
-   * Removes and returns characters up to but not including the next line break. A line break is
-   * either {@code "\n"} or {@code "\r\n"}; these characters are not included in the result.
    *
    * <p><strong>On the end of the stream this method throws.</strong> Every call must consume either
    * '\r\n' or '\n'. If these characters are absent in the stream, an {@link java.io.EOFException}
@@ -409,20 +254,6 @@ public interface BufferedSource extends Source, ReadableByteChannel {
    */
   String readUtf8LineStrict(long limit) throws IOException;
 
-  /**
-   * Removes and returns a single UTF-8 code point, reading between 1 and 4 bytes as necessary.
-   *
-   * <p>If this source is exhausted before a complete code point can be read, this throws an {@link
-   * java.io.EOFException} and consumes no input.
-   *
-   * <p>If this source doesn't start with a properly-encoded UTF-8 code point, this method will
-   * remove 1 or more non-UTF-8 bytes and return the replacement character ({@code U+FFFD}). This
-   * covers encoding problems (the input is not properly-encoded UTF-8), characters out of range
-   * (beyond the 0x10ffff limit of Unicode), code points for UTF-16 surrogates (U+d800..U+dfff) and
-   * overlong encodings (such as {@code 0xc080} for the NUL character in modified UTF-8).
-   */
-  int readUtf8CodePoint() throws IOException;
-
   /** Removes all bytes from this, decodes them as {@code charset}, and returns the string. */
   String readString(Charset charset) throws IOException;
 
@@ -436,22 +267,6 @@ public interface BufferedSource extends Source, ReadableByteChannel {
   long indexOf(byte b) throws IOException;
 
   /**
-   * Returns the index of the first {@code b} in the buffer at or after {@code fromIndex}. This
-   * expands the buffer as necessary until {@code b} is found. This reads an unbounded number of
-   * bytes into the buffer. Returns -1 if the stream is exhausted before the requested byte is
-   * found. <pre>{@code
-   *
-   *   Buffer buffer = new Buffer();
-   *   buffer.writeUtf8("Don't move! He can't see us if we don't move.");
-   *
-   *   byte m = 'm';
-   *   assertEquals(6,  buffer.indexOf(m));
-   *   assertEquals(40, buffer.indexOf(m, 12));
-   * }</pre>
-   */
-  long indexOf(byte b, long fromIndex) throws IOException;
-
-  /**
    * Returns the index of {@code b} if it is found in the range of {@code fromIndex} inclusive
    * to {@code toIndex} exclusive. If {@code b} isn't found, or if {@code fromIndex == toIndex},
    * then -1 is returned.
@@ -460,26 +275,6 @@ public interface BufferedSource extends Source, ReadableByteChannel {
    * first. The maximum number of bytes scanned is {@code toIndex-fromIndex}.
    */
   long indexOf(byte b, long fromIndex, long toIndex) throws IOException;
-
-  /** Equivalent to {@link #indexOf(ByteString, long) indexOf(bytes, 0)}. */
-  long indexOf(ByteString bytes) throws IOException;
-
-  /**
-   * Returns the index of the first match for {@code bytes} in the buffer at or after {@code
-   * fromIndex}. This expands the buffer as necessary until {@code bytes} is found. This reads an
-   * unbounded number of bytes into the buffer. Returns -1 if the stream is exhausted before the
-   * requested bytes are found. <pre>{@code
-   *
-   *   ByteString MOVE = ByteString.encodeUtf8("move");
-   *
-   *   Buffer buffer = new Buffer();
-   *   buffer.writeUtf8("Don't move! He can't see us if we don't move.");
-   *
-   *   assertEquals(6,  buffer.indexOf(MOVE));
-   *   assertEquals(40, buffer.indexOf(MOVE, 12));
-   * }</pre>
-   */
-  long indexOf(ByteString bytes, long fromIndex) throws IOException;
 
   /** Equivalent to {@link #indexOfElement(ByteString, long) indexOfElement(targetBytes, 0)}. */
   long indexOfElement(ByteString targetBytes) throws IOException;
@@ -500,30 +295,6 @@ public interface BufferedSource extends Source, ReadableByteChannel {
    * }</pre>
    */
   long indexOfElement(ByteString targetBytes, long fromIndex) throws IOException;
-
-  /**
-   * Returns true if the bytes at {@code offset} in this source equal {@code bytes}. This expands
-   * the buffer as necessary until a byte does not match, all bytes are matched, or if the stream
-   * is exhausted before enough bytes could determine a match.  <pre>{@code
-   *
-   *   ByteString simonSays = ByteString.encodeUtf8("Simon says:");
-   *
-   *   Buffer standOnOneLeg = new Buffer().writeUtf8("Simon says: Stand on one leg.");
-   *   assertTrue(standOnOneLeg.rangeEquals(0, simonSays));
-   *
-   *   Buffer payMeMoney = new Buffer().writeUtf8("Pay me $1,000,000.");
-   *   assertFalse(payMeMoney.rangeEquals(0, simonSays));
-   * }</pre>
-   */
-  boolean rangeEquals(long offset, ByteString bytes) throws IOException;
-
-  /**
-   * Returns true if {@code byteCount} bytes at {@code offset} in this source equal {@code bytes}
-   * at {@code bytesOffset}. This expands the buffer as necessary until a byte does not match, all
-   * bytes are matched, or if the stream is exhausted before enough bytes could determine a match.
-   */
-  boolean rangeEquals(long offset, ByteString bytes, int bytesOffset, int byteCount)
-      throws IOException;
 
   /**
    * Returns a new {@code BufferedSource} that can read data from this {@code BufferedSource}

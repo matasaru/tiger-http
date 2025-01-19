@@ -45,7 +45,7 @@ public final class GzipSource implements Source {
   public GzipSource(Source source) {
     if (source == null) throw new IllegalArgumentException("source == null");
     this.inflater = new Inflater(true);
-    this.source = Okio.buffer(source);
+    this.source = new RealBufferedSource(source);
     this.inflaterSource = new InflaterSource(this.source, inflater);
   }
 

@@ -21,10 +21,6 @@ public final class InflaterSource implements Source {
   private int bufferBytesHeldByInflater;
   private boolean closed;
 
-  public InflaterSource(Source source, Inflater inflater) {
-    this(Okio.buffer(source), inflater);
-  }
-
   /**
    * This package-private constructor shares a buffer with its trusted caller.
    * In general we can't share a BufferedSource because the inflater holds input
@@ -77,7 +73,7 @@ public final class InflaterSource implements Source {
    * it needs input). Returns true if the inflater required input but the source
    * was exhausted.
    */
-  public final boolean refill() throws IOException {
+  public boolean refill() throws IOException {
     if (!inflater.needsInput()) return false;
 
     releaseInflatedBytes();

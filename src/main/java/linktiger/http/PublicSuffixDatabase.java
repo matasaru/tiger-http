@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 import kio.BufferedSource;
 import kio.GzipSource;
 import kio.Okio;
+import kio.RealBufferedSource;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -316,7 +317,7 @@ public final class PublicSuffixDatabase {
     InputStream resource = PublicSuffixDatabase.class.getResourceAsStream(PUBLIC_SUFFIX_RESOURCE);
     if (resource == null) return;
 
-    try (BufferedSource bufferedSource = Okio.buffer(new GzipSource(Okio.source(resource)))) {
+    try (BufferedSource bufferedSource = new RealBufferedSource(new GzipSource(Okio.source(resource)))) {
       int totalBytes = bufferedSource.readInt();
       publicSuffixListBytes = new byte[totalBytes];
       bufferedSource.readFully(publicSuffixListBytes);

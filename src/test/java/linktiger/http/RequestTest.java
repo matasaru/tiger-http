@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
+import java.util.HexFormat;
 import java.util.UUID;
 
 import kio.Buffer;
@@ -338,6 +339,7 @@ public final class RequestTest {
   private String bodyToHex(RequestBody body) throws IOException {
     Buffer buffer = new Buffer();
     body.writeTo(buffer);
-    return buffer.readByteString().hex();
+    byte[] data = buffer.readByteArray();
+    return HexFormat.of().formatHex(data);
   }
 }

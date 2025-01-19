@@ -61,21 +61,16 @@ final class Segment {
    * are safe but writes are forbidden. This also marks the current segment as shared, which
    * prevents it from being pooled.
    */
-  final Segment sharedCopy() {
+  Segment sharedCopy() {
     shared = true;
     return new Segment(data, pos, limit, true, false);
-  }
-
-  /** Returns a new segment that its own private copy of the underlying byte array. */
-  final Segment unsharedCopy() {
-    return new Segment(data.clone(), pos, limit, false, true);
   }
 
   /**
    * Removes this segment of a circularly-linked list and returns its successor.
    * Returns null if the list is now empty.
    */
-  public final Segment pop() {
+  public Segment pop() {
     Segment result = next != this ? next : null;
     prev.next = next;
     next.prev = prev;
@@ -88,7 +83,7 @@ final class Segment {
    * Appends {@code segment} after this segment in the circularly-linked list.
    * Returns the pushed segment.
    */
-  public final Segment push(Segment segment) {
+  public Segment push(Segment segment) {
     segment.prev = this;
     segment.next = next;
     next.prev = segment;
@@ -104,7 +99,7 @@ final class Segment {
    *
    * <p>Returns the new head of the circularly-linked list.
    */
-  public final Segment split(int byteCount) {
+  public Segment split(int byteCount) {
     if (byteCount <= 0 || byteCount > limit - pos) throw new IllegalArgumentException();
     Segment prefix;
 
@@ -130,7 +125,7 @@ final class Segment {
    * Call this when the tail and its predecessor may both be less than half
    * full. This will copy data so that segments can be recycled.
    */
-  public final void compact() {
+  public void compact() {
     if (prev == this) throw new IllegalStateException();
     if (!prev.owner) return; // Cannot compact: prev isn't writable.
     int byteCount = limit - pos;
@@ -142,7 +137,7 @@ final class Segment {
   }
 
   /** Moves {@code byteCount} bytes from this segment to {@code sink}. */
-  public final void writeTo(Segment sink, int byteCount) {
+  public void writeTo(Segment sink, int byteCount) {
     if (!sink.owner) throw new IllegalArgumentException();
     if (sink.limit + byteCount > SIZE) {
       // We can't fit byteCount bytes at the sink's current position. Shift sink first.

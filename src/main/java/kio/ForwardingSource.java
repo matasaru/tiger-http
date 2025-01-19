@@ -29,6 +29,6 @@ public abstract class ForwardingSource implements Source {
   }
 
   @Override public String toString() {
-    return getClass().getSimpleName() + "(" + delegate.toString() + ")";
+    return getClass().getSimpleName() + "(" + delegate + ")";
   }
 }

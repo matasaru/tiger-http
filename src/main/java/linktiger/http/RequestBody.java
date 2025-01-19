@@ -16,6 +16,7 @@
 package linktiger.http;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
@@ -134,7 +135,7 @@ public abstract class RequestBody {
       }
 
       @Override public void writeTo(BufferedSink sink) throws IOException {
-        try (Source source = Okio.source(file)) {
+        try (Source source = Okio.source(new FileInputStream(file))) {
           sink.writeAll(source);
         }
       }

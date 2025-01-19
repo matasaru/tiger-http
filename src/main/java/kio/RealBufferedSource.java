@@ -3,24 +3,20 @@ package kio;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.HexFormat;
 
-final class RealBufferedSource implements BufferedSource {
+public final class RealBufferedSource implements BufferedSource {
   public final Buffer buffer = new Buffer();
   public final Source source;
   boolean closed;
 
-  RealBufferedSource(Source source) {
+  public RealBufferedSource(Source source) {
     if (source == null) throw new NullPointerException("source == null");
     this.source = source;
   }
 
   @Override public Buffer buffer() {
-    return buffer;
-  }
-
-  @Override public Buffer getBuffer() {
     return buffer;
   }
 
@@ -61,16 +57,6 @@ final class RealBufferedSource implements BufferedSource {
     return buffer.readByte();
   }
 
-  @Override public ByteString readByteString() throws IOException {
-    buffer.writeAll(source);
-    return buffer.readByteString();
-  }
-
-  @Override public ByteString readByteString(long byteCount) throws IOException {
-    require(byteCount);
-    return buffer.readByteString(byteCount);
-  }
-
   @Override public int select(Options options) throws IOException {
     if (closed) throw new IllegalStateException("closed");
 
@@ -94,15 +80,6 @@ final class RealBufferedSource implements BufferedSource {
     return buffer.readByteArray();
   }
 
-  @Override public byte[] readByteArray(long byteCount) throws IOException {
-    require(byteCount);
-    return buffer.readByteArray(byteCount);
-  }
-
-  @Override public int read(byte[] sink) throws IOException {
-    return read(sink, 0, sink.length);
-  }
-
   @Override public void readFully(byte[] sink) throws IOException {
     try {
       require(sink.length);
@@ -117,56 +94,6 @@ final class RealBufferedSource implements BufferedSource {
       throw e;
     }
     buffer.readFully(sink);
-  }
-
-  @Override public int read(byte[] sink, int offset, int byteCount) throws IOException {
-    Util.checkOffsetAndCount(sink.length, offset, byteCount);
-
-    if (buffer.size == 0) {
-      long read = source.read(buffer, Segment.SIZE);
-      if (read == -1) return -1;
-    }
-
-    int toRead = (int) Math.min(byteCount, buffer.size);
-    return buffer.read(sink, offset, toRead);
-  }
-
-  @Override public int read(ByteBuffer sink) throws IOException {
-    if (buffer.size == 0) {
-      long read = source.read(buffer, Segment.SIZE);
-      if (read == -1) return -1;
-    }
-
-    return buffer.read(sink);
-  }
-
-  @Override public void readFully(Buffer sink, long byteCount) throws IOException {
-    try {
-      require(byteCount);
-    } catch (EOFException e) {
-      // The underlying source is exhausted. Copy the bytes we got before rethrowing.
-      sink.writeAll(buffer);
-      throw e;
-    }
-    buffer.readFully(sink, byteCount);
-  }
-
-  @Override public long readAll(Sink sink) throws IOException {
-    if (sink == null) throw new IllegalArgumentException("sink == null");
-
-    long totalBytesWritten = 0;
-    while (source.read(buffer, Segment.SIZE) != -1) {
-      long emitByteCount = buffer.completeSegmentByteCount();
-      if (emitByteCount > 0) {
-        totalBytesWritten += emitByteCount;
-        sink.write(buffer, emitByteCount);
-      }
-    }
-    if (buffer.size() > 0) {
-      totalBytesWritten += buffer.size();
-      sink.write(buffer, buffer.size());
-    }
-    return totalBytesWritten;
   }
 
   @Override public String readUtf8() throws IOException {
@@ -192,16 +119,6 @@ final class RealBufferedSource implements BufferedSource {
     return buffer.readString(byteCount, charset);
   }
 
-  @Override public String readUtf8Line() throws IOException {
-    long newline = indexOf((byte) '\n');
-
-    if (newline == -1) {
-      return buffer.size != 0 ? readUtf8(buffer.size) : null;
-    }
-
-    return buffer.readUtf8Line(newline);
-  }
-
   @Override public String readUtf8LineStrict() throws IOException {
     return readUtf8LineStrict(Long.MAX_VALUE);
   }
@@ -219,22 +136,7 @@ final class RealBufferedSource implements BufferedSource {
     Buffer data = new Buffer();
     buffer.copyTo(data, 0, Math.min(32, buffer.size()));
     throw new EOFException("\\n not found: limit=" + Math.min(buffer.size(), limit)
-        + " content=" + data.readByteString().hex() + '…');
-  }
-
-  @Override public int readUtf8CodePoint() throws IOException {
-    require(1);
-
-    byte b0 = buffer.getByte(0);
-    if ((b0 & 0xe0) == 0xc0) {
-      require(2);
-    } else if ((b0 & 0xf0) == 0xe0) {
-      require(3);
-    } else if ((b0 & 0xf8) == 0xf0) {
-      require(4);
-    }
-
-    return buffer.readUtf8CodePoint();
+        + " content=" + HexFormat.of().formatHex(data.readByteArray()) + '…');
   }
 
   @Override public short readShort() throws IOException {
@@ -255,34 +157,6 @@ final class RealBufferedSource implements BufferedSource {
   @Override public int readIntLe() throws IOException {
     require(4);
     return buffer.readIntLe();
-  }
-
-  @Override public long readLong() throws IOException {
-    require(8);
-    return buffer.readLong();
-  }
-
-  @Override public long readLongLe() throws IOException {
-    require(8);
-    return buffer.readLongLe();
-  }
-
-  @Override public long readDecimalLong() throws IOException {
-    require(1);
-
-    for (int pos = 0; request(pos + 1); pos++) {
-      byte b = buffer.getByte(pos);
-      if ((b < '0' || b > '9') && (pos != 0 || b != '-')) {
-        // Non-digit, or non-leading negative sign.
-        if (pos == 0) {
-          throw new NumberFormatException(String.format(
-              "Expected leading [0-9] or '-' character but was %#x", b));
-        }
-        break;
-      }
-    }
-
-    return buffer.readDecimalLong();
   }
 
   @Override public long readHexadecimalUnsignedLong() throws IOException {
@@ -319,10 +193,6 @@ final class RealBufferedSource implements BufferedSource {
     return indexOf(b, 0, Long.MAX_VALUE);
   }
 
-  @Override public long indexOf(byte b, long fromIndex) throws IOException {
-    return indexOf(b, fromIndex, Long.MAX_VALUE);
-  }
-
   @Override public long indexOf(byte b, long fromIndex, long toIndex) throws IOException {
     if (closed) throw new IllegalStateException("closed");
     if (fromIndex < 0 || toIndex < fromIndex) {
@@ -345,25 +215,6 @@ final class RealBufferedSource implements BufferedSource {
     return -1L;
   }
 
-  @Override public long indexOf(ByteString bytes) throws IOException {
-    return indexOf(bytes, 0);
-  }
-
-  @Override public long indexOf(ByteString bytes, long fromIndex) throws IOException {
-    if (closed) throw new IllegalStateException("closed");
-
-    while (true) {
-      long result = buffer.indexOf(bytes, fromIndex);
-      if (result != -1) return result;
-
-      long lastBufferSize = buffer.size;
-      if (source.read(buffer, Segment.SIZE) == -1) return -1L;
-
-      // Keep searching, picking up from where we left off.
-      fromIndex = Math.max(fromIndex, lastBufferSize - bytes.size() + 1);
-    }
-  }
-
   @Override public long indexOfElement(ByteString targetBytes) throws IOException {
     return indexOfElement(targetBytes, 0);
   }
@@ -383,31 +234,8 @@ final class RealBufferedSource implements BufferedSource {
     }
   }
 
-  @Override public boolean rangeEquals(long offset, ByteString bytes) throws IOException {
-    return rangeEquals(offset, bytes, 0, bytes.size());
-  }
-
-  @Override
-  public boolean rangeEquals(long offset, ByteString bytes, int bytesOffset, int byteCount)
-      throws IOException {
-    if (closed) throw new IllegalStateException("closed");
-
-    if (offset < 0
-        || bytesOffset < 0
-        || byteCount < 0
-        || bytes.size() - bytesOffset < byteCount) {
-      return false;
-    }
-    for (int i = 0; i < byteCount; i++) {
-      long bufferOffset = offset + i;
-      if (!request(bufferOffset + 1)) return false;
-      if (buffer.getByte(bufferOffset) != bytes.getByte(bytesOffset + i)) return false;
-    }
-    return true;
-  }
-
   @Override public BufferedSource peek() {
-    return Okio.buffer(new PeekSource(this));
+    return new RealBufferedSource(new PeekSource(this));
   }
 
   @Override public InputStream inputStream() {
@@ -446,10 +274,6 @@ final class RealBufferedSource implements BufferedSource {
         return RealBufferedSource.this + ".inputStream()";
       }
     };
-  }
-
-  @Override public boolean isOpen() {
-    return !closed;
   }
 
   @Override public void close() throws IOException {

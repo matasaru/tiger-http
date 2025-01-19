@@ -11,8 +11,7 @@ import java.io.IOException;
  * protocol framing.
  *
  * <p>Most application code shouldn't operate on a sink directly, but rather on a
- * {@link BufferedSink} which is both more efficient and more convenient. Use
- * {@link Okio#buffer(Sink)} to wrap any sink with a buffer.
+ * {@link BufferedSink} which is both more efficient and more convenient.
  *
  * <p>Sinks are easy to test: just use a {@link Buffer} in your tests, and
  * read from it to confirm it received the data that was expected.
@@ -28,10 +27,6 @@ import java.io.IOException;
  * <p>Sink is also easier to layer: there is no {@linkplain
  * java.io.OutputStream#write(int) single-byte write} method that is awkward to
  * implement efficiently.
- *
- * <h3>Interop with OutputStream</h3>
- * Use {@link Okio#sink} to adapt an {@code OutputStream} to a sink. Use {@link
- * BufferedSink#outputStream} to adapt a sink to an {@code OutputStream}.
  */
 public interface Sink extends Closeable, Flushable {
   /** Removes {@code byteCount} bytes from {@code source} and appends them to this. */

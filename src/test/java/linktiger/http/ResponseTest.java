@@ -19,7 +19,7 @@ import java.io.IOException;
 
 import kio.Buffer;
 import kio.BufferedSource;
-import kio.Okio;
+import kio.RealBufferedSource;
 import kio.Source;
 import kio.Timeout;
 import org.junit.Test;
@@ -86,7 +86,7 @@ public final class ResponseTest {
       }
     };
 
-    return new ResponseBody(null, -1, Okio.buffer(source));
+    return new ResponseBody(null, -1, new RealBufferedSource(source));
   }
 
   private Response newResponse(ResponseBody responseBody) {

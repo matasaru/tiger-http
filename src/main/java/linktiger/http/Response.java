@@ -151,7 +151,7 @@ public final class Response implements Closeable {
     BufferedSource peeked = body.source().peek();
     Buffer buffer = new Buffer();
     peeked.request(byteCount);
-    buffer.write(peeked, Math.min(byteCount, peeked.getBuffer().size()));
+    buffer.write(peeked, Math.min(byteCount, peeked.buffer().size()));
     return new ResponseBody(body.contentType(), buffer.size(), buffer);
   }
 

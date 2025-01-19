@@ -25,7 +25,7 @@ import kio.Buffer;
 import kio.BufferedSource;
 import kio.ByteString;
 import kio.ForwardingSource;
-import kio.Okio;
+import kio.RealBufferedSource;
 import org.junit.Test;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -88,7 +88,7 @@ public final class ResponseBodyTest {
     ResponseBody body = new ResponseBody(null, 5, null) {
       @Override public BufferedSource source() {
         Buffer source = new Buffer().writeUtf8("hello");
-        return Okio.buffer(new ForwardingSource(source) {
+        return new RealBufferedSource(new ForwardingSource(source) {
           @Override public void close() throws IOException {
             closed.set(true);
             super.close();
@@ -150,7 +150,7 @@ public final class ResponseBodyTest {
     ResponseBody body = new ResponseBody(null, 5, null) {
       @Override public BufferedSource source() {
         ResponseBody body = body("fffe680065006c006c006f00");
-        return Okio.buffer(new ForwardingSource(body.source()) {
+        return new RealBufferedSource(new ForwardingSource(body.source()) {
           @Override public void close() throws IOException {
             closed.set(true);
             super.close();
@@ -167,7 +167,7 @@ public final class ResponseBodyTest {
     ResponseBody body = new ResponseBody(null, 5, null) {
       @Override public BufferedSource source() {
         ResponseBody body = body("fffe680065006c006c006f00");
-        return Okio.buffer(new ForwardingSource(body.source()) {
+        return new RealBufferedSource(new ForwardingSource(body.source()) {
           @Override public void close() throws IOException {
             closed.set(true);
             super.close();
@@ -202,7 +202,7 @@ public final class ResponseBodyTest {
     ResponseBody body = new ResponseBody(null, 5, null) {
       @Override public BufferedSource source() {
         Buffer source = new Buffer().writeUtf8("hello");
-        return Okio.buffer(new ForwardingSource(source) {
+        return new RealBufferedSource(new ForwardingSource(source) {
           @Override public void close() throws IOException {
             closed.set(true);
             super.close();
@@ -233,7 +233,7 @@ public final class ResponseBodyTest {
     ResponseBody body = new ResponseBody(null, 5, null) {
       @Override public BufferedSource source() {
         Buffer source = new Buffer().writeUtf8("hello");
-        return Okio.buffer(new ForwardingSource(source) {
+        return new RealBufferedSource(new ForwardingSource(source) {
           @Override public void close() throws IOException {
             closed.set(true);
             super.close();
@@ -291,7 +291,7 @@ public final class ResponseBodyTest {
     ResponseBody body = new ResponseBody(null, 5, null) {
       @Override public BufferedSource source() {
         Buffer source = new Buffer().writeUtf8("hello");
-        return Okio.buffer(new ForwardingSource(source) {
+        return new RealBufferedSource(new ForwardingSource(source) {
           @Override public void close() throws IOException {
             closed.set(true);
             super.close();
@@ -307,7 +307,7 @@ public final class ResponseBodyTest {
     ResponseBody body = new ResponseBody(null, 5, null) {
       @Override public BufferedSource source() {
         Buffer source = new Buffer().writeUtf8("hello");
-        return Okio.buffer(new ForwardingSource(source) {
+        return new RealBufferedSource(new ForwardingSource(source) {
           @Override public void close() throws IOException {
             throw new IOException("Broken!");
           }

@@ -16,7 +16,7 @@
 package linktiger.http;
 
 import java.nio.charset.Charset;
-import kio.ByteString;
+import java.util.Base64;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
@@ -32,7 +32,7 @@ public final class Credentials {
 
   public static String basic(String username, String password, Charset charset) {
     String usernameAndPassword = username + ":" + password;
-    String encoded = ByteString.encodeString(usernameAndPassword, charset).base64();
+    String encoded = Base64.getEncoder().encodeToString(usernameAndPassword.getBytes(charset));
     return "Basic " + encoded;
   }
 }

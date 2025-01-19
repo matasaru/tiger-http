@@ -35,7 +35,7 @@ public final class Options extends AbstractList<ByteString> implements RandomAcc
       int sortedIndex = Collections.binarySearch(list, byteStrings[i]);
       indexes.set(sortedIndex, i);
     }
-    if (list.get(0).size() == 0) {
+    if (list.getFirst().size() == 0) {
       throw new IllegalArgumentException("the empty byte string is not a supported option");
     }
 
@@ -226,7 +226,7 @@ public final class Options extends AbstractList<ByteString> implements RandomAcc
     return byteStrings[i];
   }
 
-  @Override public final int size() {
+  @Override public int size() {
     return byteStrings.length;
   }
 

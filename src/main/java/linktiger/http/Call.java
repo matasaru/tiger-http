@@ -28,7 +28,8 @@ import javax.net.ssl.SSLPeerUnverifiedException;
 
 import kio.BufferedSink;
 import kio.GzipSource;
-import kio.Okio;
+import kio.RealBufferedSink;
+import kio.RealBufferedSource;
 import kio.Timeout;
 
 /**
@@ -187,7 +188,7 @@ public class Call {
 
               if (networkResponseBuilder == null) {
                 // Write the request body if the "Expect: 100-continue" expectation was met.
-                BufferedSink bufferedRequestBody = Okio.buffer(exchange.createRequestBody(networkRequest));
+                BufferedSink bufferedRequestBody = new RealBufferedSink(exchange.createRequestBody(networkRequest));
                 networkRequest.body().writeTo(bufferedRequestBody);
                 bufferedRequestBody.close();
               }
@@ -257,7 +258,7 @@ public class Call {
                       .build();
               responseBuilder.headers(strippedHeaders);
               String contentType = networkResponse.header("Content-Type");
-              responseBuilder.body(new ResponseBody(contentType, -1L, Okio.buffer(responseBody)));
+              responseBuilder.body(new ResponseBody(contentType, -1L, new RealBufferedSource(responseBody)));
             }
 
             response = responseBuilder.build();

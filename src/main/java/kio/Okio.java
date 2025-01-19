@@ -1,18 +1,11 @@
 package kio;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.nio.file.Files;
-import java.nio.file.OpenOption;
-import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,29 +14,6 @@ public final class Okio {
   static final Logger logger = Logger.getLogger(Okio.class.getName());
 
   private Okio() {
-  }
-
-  /**
-   * Returns a new source that buffers reads from {@code source}. The returned
-   * source will perform bulk reads into its in-memory buffer. Use this wherever
-   * you read a source to get an ergonomic and efficient access to data.
-   */
-  public static BufferedSource buffer(Source source) {
-    return new RealBufferedSource(source);
-  }
-
-  /**
-   * Returns a new sink that buffers writes to {@code sink}. The returned sink
-   * will batch writes to {@code sink}. Use this wherever you write to a sink to
-   * get an ergonomic and efficient access to data.
-   */
-  public static BufferedSink buffer(Sink sink) {
-    return new RealBufferedSink(sink);
-  }
-
-  /** Returns a sink that writes to {@code out}. */
-  public static Sink sink(OutputStream out) {
-    return sink(out, new Timeout());
   }
 
   private static Sink sink(final OutputStream out, final Timeout timeout) {
@@ -89,8 +59,7 @@ public final class Okio {
   }
 
   /**
-   * Returns a sink that writes to {@code socket}. Prefer this over {@link
-   * #sink(OutputStream)} because this method honors timeouts. When the socket
+   * Returns a sink that writes to {@code socket}. When the socket
    * write times out, the socket is asynchronously closed by a watchdog thread.
    */
   public static Sink sink(Socket socket) throws IOException {
@@ -114,26 +83,21 @@ public final class Okio {
       @Override public long read(Buffer sink, long byteCount) throws IOException {
         if (byteCount < 0) throw new IllegalArgumentException("byteCount < 0: " + byteCount);
         if (byteCount == 0) return 0;
-        try {
-          timeout.throwIfReached();
-          Segment tail = sink.writableSegment(1);
-          int maxToCopy = (int) Math.min(byteCount, Segment.SIZE - tail.limit);
-          int bytesRead = in.read(tail.data, tail.limit, maxToCopy);
-          if (bytesRead == -1) {
-            if (tail.pos == tail.limit) {
-              // We allocated a tail segment, but didn't end up needing it. Recycle!
-              sink.head = tail.pop();
-              SegmentPool.recycle(tail);
-            }
-            return -1;
+        timeout.throwIfReached();
+        Segment tail = sink.writableSegment(1);
+        int maxToCopy = (int) Math.min(byteCount, Segment.SIZE - tail.limit);
+        int bytesRead = in.read(tail.data, tail.limit, maxToCopy);
+        if (bytesRead == -1) {
+          if (tail.pos == tail.limit) {
+            // We allocated a tail segment, but didn't end up needing it. Recycle!
+            sink.head = tail.pop();
+            SegmentPool.recycle(tail);
           }
-          tail.limit += bytesRead;
-          sink.size += bytesRead;
-          return bytesRead;
-        } catch (AssertionError e) {
-          if (isAndroidGetsocknameError(e)) throw new IOException(e);
-          throw e;
+          return -1;
         }
+        tail.limit += bytesRead;
+        sink.size += bytesRead;
+        return bytesRead;
       }
 
       @Override public void close() throws IOException {
@@ -146,55 +110,6 @@ public final class Okio {
 
       @Override public String toString() {
         return "source(" + in + ")";
-      }
-    };
-  }
-
-  /** Returns a source that reads from {@code file}. */
-  public static Source source(File file) throws FileNotFoundException {
-    if (file == null) throw new IllegalArgumentException("file == null");
-    return source(new FileInputStream(file));
-  }
-
-  /** Returns a source that reads from {@code path}. */
-  public static Source source(Path path, OpenOption... options) throws IOException {
-    if (path == null) throw new IllegalArgumentException("path == null");
-    return source(Files.newInputStream(path, options));
-  }
-
-  /** Returns a sink that writes to {@code file}. */
-  public static Sink sink(File file) throws FileNotFoundException {
-    if (file == null) throw new IllegalArgumentException("file == null");
-    return sink(new FileOutputStream(file));
-  }
-
-  /** Returns a sink that appends to {@code file}. */
-  public static Sink appendingSink(File file) throws FileNotFoundException {
-    if (file == null) throw new IllegalArgumentException("file == null");
-    return sink(new FileOutputStream(file, true));
-  }
-
-  /** Returns a sink that writes to {@code path}. */
-  public static Sink sink(Path path, OpenOption... options) throws IOException {
-    if (path == null) throw new IllegalArgumentException("path == null");
-    return sink(Files.newOutputStream(path, options));
-  }
-
-  /** Returns a sink that writes nowhere. */
-  public static Sink blackhole() {
-    return new Sink() {
-      @Override public void write(Buffer source, long byteCount) throws IOException {
-        source.skip(byteCount);
-      }
-
-      @Override public void flush() throws IOException {
-      }
-
-      @Override public Timeout timeout() {
-        return Timeout.NONE;
-      }
-
-      @Override public void close() throws IOException {
       }
     };
   }
@@ -227,25 +142,8 @@ public final class Okio {
           socket.close();
         } catch (Exception e) {
           logger.log(Level.WARNING, "Failed to close timed out socket " + socket, e);
-        } catch (AssertionError e) {
-          if (isAndroidGetsocknameError(e)) {
-            // Catch this exception due to a Firmware issue up to android 4.2.2
-            // https://code.google.com/p/android/issues/detail?id=54072
-            logger.log(Level.WARNING, "Failed to close timed out socket " + socket, e);
-          } else {
-            throw e;
-          }
         }
       }
     };
-  }
-
-  /**
-   * Returns true if {@code e} is due to a firmware bug fixed after Android 4.2.2.
-   * https://code.google.com/p/android/issues/detail?id=54072
-   */
-  static boolean isAndroidGetsocknameError(AssertionError e) {
-    return e.getCause() != null && e.getMessage() != null
-        && e.getMessage().contains("getsockname failed");
   }
 }

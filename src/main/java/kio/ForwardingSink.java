@@ -11,11 +11,6 @@ public abstract class ForwardingSink implements Sink {
     this.delegate = delegate;
   }
 
-  /** {@link Sink} to which this instance is delegating. */
-  public final Sink delegate() {
-    return delegate;
-  }
-
   @Override public void write(Buffer source, long byteCount) throws IOException {
     delegate.write(source, byteCount);
   }
@@ -33,6 +28,6 @@ public abstract class ForwardingSink implements Sink {
   }
 
   @Override public String toString() {
-    return getClass().getSimpleName() + "(" + delegate.toString() + ")";
+    return getClass().getSimpleName() + "(" + delegate + ")";
   }
 }

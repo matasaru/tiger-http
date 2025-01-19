@@ -22,6 +22,7 @@ import kio.Buffer;
 import kio.BufferedSource;
 import kio.GzipSource;
 import kio.Okio;
+import kio.RealBufferedSource;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -108,7 +109,7 @@ public final class PublicSuffixDatabaseTest {
   @Test public void allPublicSuffixes() throws IOException {
     InputStream resource = PublicSuffixDatabaseTest.class
         .getResourceAsStream(PublicSuffixDatabase.PUBLIC_SUFFIX_RESOURCE);
-    BufferedSource source = Okio.buffer(new GzipSource(Okio.source(resource)));
+    BufferedSource source = new RealBufferedSource(new GzipSource(Okio.source(resource)));
     int length = source.readInt();
     Buffer buffer = new Buffer();
     buffer.write(source, length);
@@ -130,7 +131,7 @@ public final class PublicSuffixDatabaseTest {
   @Test public void publicSuffixExceptions() throws IOException {
     InputStream resource = PublicSuffixDatabaseTest.class
         .getResourceAsStream(PublicSuffixDatabase.PUBLIC_SUFFIX_RESOURCE);
-    BufferedSource source = Okio.buffer(new GzipSource(Okio.source(resource)));
+    BufferedSource source = new RealBufferedSource(new GzipSource(Okio.source(resource)));
     int length = source.readInt();
     source.skip(length);
 

@@ -39,7 +39,7 @@ public class Timeout {
       return this;
     }
 
-    @Override public void throwIfReached() throws IOException {
+    @Override public void throwIfReached() {
     }
   };
 
@@ -102,10 +102,10 @@ public class Timeout {
   }
 
   /** Set a deadline of now plus {@code duration} time. */
-  public final Timeout deadline(long duration, TimeUnit unit) {
+  public final void deadline(long duration, TimeUnit unit) {
     if (duration <= 0) throw new IllegalArgumentException("duration <= 0: " + duration);
     if (unit == null) throw new IllegalArgumentException("unit == null");
-    return deadlineNanoTime(System.nanoTime() + unit.toNanos(duration));
+    deadlineNanoTime(System.nanoTime() + unit.toNanos(duration));
   }
 
   /** Clears the timeout. Operating system timeouts may still apply. */
@@ -134,88 +134,5 @@ public class Timeout {
     if (hasDeadline && deadlineNanoTime - System.nanoTime() <= 0) {
       throw new InterruptedIOException("deadline reached");
     }
-  }
-
-  /**
-   * Waits on {@code monitor} until it is notified. Throws {@link InterruptedIOException} if either
-   * the thread is interrupted or if this timeout elapses before {@code monitor} is notified. The
-   * caller must be synchronized on {@code monitor}.
-   *
-   * <p>Here's a sample class that uses {@code waitUntilNotified()} to await a specific state. Note
-   * that the call is made within a loop to avoid unnecessary waiting and to mitigate spurious
-   * notifications. <pre>{@code
-   *
-   *   class Dice {
-   *     Random random = new Random();
-   *     int latestTotal;
-   *
-   *     public synchronized void roll() {
-   *       latestTotal = 2 + random.nextInt(6) + random.nextInt(6);
-   *       System.out.println("Rolled " + latestTotal);
-   *       notifyAll();
-   *     }
-   *
-   *     public void rollAtFixedRate(int period, TimeUnit timeUnit) {
-   *       Executors.newScheduledThreadPool(0).scheduleAtFixedRate(new Runnable() {
-   *         public void run() {
-   *           roll();
-   *          }
-   *       }, 0, period, timeUnit);
-   *     }
-   *
-   *     public synchronized void awaitTotal(Timeout timeout, int total)
-   *         throws InterruptedIOException {
-   *       while (latestTotal != total) {
-   *         timeout.waitUntilNotified(this);
-   *       }
-   *     }
-   *   }
-   * }</pre>
-   */
-  public final void waitUntilNotified(Object monitor) throws InterruptedIOException {
-    try {
-      boolean hasDeadline = hasDeadline();
-      long timeoutNanos = timeoutNanos();
-
-      if (!hasDeadline && timeoutNanos == 0L) {
-        monitor.wait(); // There is no timeout: wait forever.
-        return;
-      }
-
-      // Compute how long we'll wait.
-      long waitNanos;
-      long start = System.nanoTime();
-      if (hasDeadline && timeoutNanos != 0) {
-        long deadlineNanos = deadlineNanoTime() - start;
-        waitNanos = Math.min(timeoutNanos, deadlineNanos);
-      } else if (hasDeadline) {
-        waitNanos = deadlineNanoTime() - start;
-      } else {
-        waitNanos = timeoutNanos;
-      }
-
-      // Attempt to wait that long. This will break out early if the monitor is notified.
-      long elapsedNanos = 0L;
-      if (waitNanos > 0L) {
-        long waitMillis = waitNanos / 1000000L;
-        monitor.wait(waitMillis, (int) (waitNanos - waitMillis * 1000000L));
-        elapsedNanos = System.nanoTime() - start;
-      }
-
-      // Throw if the timeout elapsed before the monitor was notified.
-      if (elapsedNanos >= waitNanos) {
-        throw new InterruptedIOException("timeout");
-      }
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt(); // Retain interrupted status.
-      throw new InterruptedIOException("interrupted");
-    }
-  }
-
-  static long minTimeout(long aNanos, long bNanos) {
-    if (aNanos == 0L) return bNanos;
-    if (bNanos == 0L) return aNanos;
-    if (aNanos < bNanos) return aNanos;
-    return bNanos;
   }
 }

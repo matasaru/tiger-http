@@ -39,6 +39,8 @@ import javax.net.ssl.SSLSocketFactory;
 import kio.BufferedSink;
 import kio.BufferedSource;
 import kio.Okio;
+import kio.RealBufferedSink;
+import kio.RealBufferedSource;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 import static java.net.HttpURLConnection.HTTP_PROXY_AUTH;
@@ -273,8 +275,8 @@ public final class Connection {
       throw ce;
     }
 
-    source = Okio.buffer(Okio.source(rawSocket));
-    sink = Okio.buffer(Okio.sink(rawSocket));
+    source = new RealBufferedSource(Okio.source(rawSocket));
+    sink = new RealBufferedSink(Okio.sink(rawSocket));
   }
 
   private void connectTls(ConnectionSpecSelector connectionSpecSelector) throws IOException {
@@ -318,8 +320,8 @@ public final class Connection {
 
       // Success! Save the handshake and the ALPN protocol.
       socket = sslSocket;
-      source = Okio.buffer(Okio.source(socket));
-      sink = Okio.buffer(Okio.sink(socket));
+      source = new RealBufferedSource(Okio.source(socket));
+      sink = new RealBufferedSink(Okio.sink(socket));
       handshake = unverifiedHandshake;
       protocol = Protocol.HTTP_1_1;
       String maybeProtocol = sslSocket.getApplicationProtocol();
@@ -365,7 +367,7 @@ public final class Connection {
           // that happens, then we will have buffered bytes that are needed by the SSLSocket!
           // This check is imperfect: it doesn't tell us whether a handshake will succeed, just
           // that it will almost certainly fail because the proxy has sent unexpected data.
-          if (!source.getBuffer().exhausted() || !sink.buffer().exhausted()) {
+          if (!source.buffer().exhausted() || !sink.buffer().exhausted()) {
             throw new IOException("TLS tunnel buffered too many bytes!");
           }
           return null;

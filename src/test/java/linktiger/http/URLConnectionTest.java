@@ -53,6 +53,8 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import kio.Buffer;
+import kio.ByteString;
 import okhttp3.internal.Internal;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -61,7 +63,6 @@ import okhttp3.mockwebserver.SocketPolicy;
 import okhttp3.tls.HandshakeCertificates;
 import kio.BufferedSink;
 import kio.BufferedSource;
-import kio.Utf8;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.AssumptionViolatedException;
@@ -2461,7 +2462,7 @@ public final class URLConnectionTest {
       @Override RequestBody newRequestBody(String body) {
         return new RequestBody() {
           @Override public long contentLength() {
-            return Utf8.size(body);
+            return utf8size(body);
           }
 
           @Override public MediaType contentType() {
@@ -2584,5 +2585,49 @@ public final class URLConnectionTest {
    */
   private FallbackTestClientSocketFactory suppressTlsFallbackClientSocketFactory() {
     return new FallbackTestClientSocketFactory(handshakeCertificates.sslSocketFactory());
+  }
+
+  /**
+   * Returns the number of bytes used to encode {@code string} as UTF-8 when using {@link
+   * ByteString#encodeUtf8} or {@link Buffer#writeUtf8(String)}.
+   */
+  public static long utf8size(String string) {
+    int endIndex = string.length();
+
+    long result = 0;
+    for (int i = 0; i < endIndex;) {
+      int c = string.charAt(i);
+
+      if (c < 0x80) {
+        // A 7-bit character with 1 byte.
+        result++;
+        i++;
+
+      } else if (c < 0x800) {
+        // An 11-bit character with 2 bytes.
+        result += 2;
+        i++;
+
+      } else if (c < 0xd800 || c > 0xdfff) {
+        // A 16-bit character with 3 bytes.
+        result += 3;
+        i++;
+
+      } else {
+        int low = i + 1 < endIndex ? string.charAt(i + 1) : 0;
+        if (c > 0xdbff || low < 0xdc00 || low > 0xdfff) {
+          // A malformed surrogate, which yields '?'.
+          result++;
+          i++;
+
+        } else {
+          // A 21-bit character with 4 bytes.
+          result += 4;
+          i += 2;
+        }
+      }
+    }
+
+    return result;
   }
 }

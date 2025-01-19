@@ -10,8 +10,7 @@ import java.io.IOException;
  * remove protocol framing.
  *
  * <p>Most applications shouldn't operate on a source directly, but rather on a
- * {@link BufferedSource} which is both more efficient and more convenient. Use
- * {@link Okio#buffer(Source)} to wrap any source with a buffer.
+ * {@link BufferedSource} which is both more efficient and more convenient.
  *
  * <p>Sources are easy to test: just use a {@link Buffer} in your tests, and
  * fill it with the data your application is to read.
@@ -40,9 +39,7 @@ import java.io.IOException;
  * won't return prematurely.
  *
  * <h3>Interop with InputStream</h3>
- * Use {@link Okio#source} to adapt an {@code InputStream} to a source. Use
- * {@link BufferedSource#inputStream} to adapt a source to an {@code
- * InputStream}.
+ * Use {@link BufferedSource#inputStream} to adapt a source to an {@code InputStream}.
  */
 public interface Source extends Closeable {
   /**
