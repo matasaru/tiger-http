@@ -45,8 +45,7 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.SocketPolicy;
 import okhttp3.tls.HandshakeCertificates;
-import okio.Buffer;
-import okio.BufferedSink;
+import kio.BufferedSink;
 import org.assertj.core.api.Assertions;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.CoreMatchers;
@@ -702,7 +701,7 @@ public final class EventListenerTest {
     // Use a 2 MiB body so the disconnect won't happen until the client has read some data.
     int responseBodySize = 2 * 1024 * 1024; // 2 MiB
     server.enqueue(new MockResponse()
-        .setBody(new Buffer().write(new byte[responseBodySize]))
+        .setBody(new okio.Buffer().write(new byte[responseBodySize]))
         .setSocketPolicy(SocketPolicy.DISCONNECT_DURING_RESPONSE_BODY));
 
     Call call = client.newCall(new Request.Builder()

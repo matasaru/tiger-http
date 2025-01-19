@@ -20,9 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import okio.Buffer;
-import okio.BufferedSink;
-import okio.ByteString;
+import kio.Buffer;
+import kio.BufferedSink;
+import kio.ByteString;
 
 /** An <a href="http://www.ietf.org/rfc/rfc2387.txt">RFC 2387</a>-compliant request body. */
 public final class MultipartBody extends RequestBody {

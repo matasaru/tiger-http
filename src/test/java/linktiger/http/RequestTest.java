@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.UUID;
 
-import okio.Buffer;
+import kio.Buffer;
 import org.junit.Test;
 
 import static java.nio.charset.StandardCharsets.UTF_8;

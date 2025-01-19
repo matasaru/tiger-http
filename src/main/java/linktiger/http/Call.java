@@ -26,10 +26,10 @@ import java.util.List;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLPeerUnverifiedException;
 
-import okio.BufferedSink;
-import okio.GzipSource;
-import okio.Okio;
-import okio.Timeout;
+import kio.BufferedSink;
+import kio.GzipSource;
+import kio.Okio;
+import kio.Timeout;
 
 /**
  * A call is a request that has been prepared for execution. A call can be canceled. As this object

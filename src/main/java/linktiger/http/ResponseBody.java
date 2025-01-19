@@ -22,8 +22,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
 
-import okio.Buffer;
-import okio.BufferedSource;
+import kio.Buffer;
+import kio.BufferedSource;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 

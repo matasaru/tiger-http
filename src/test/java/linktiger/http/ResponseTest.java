@@ -17,11 +17,11 @@ package linktiger.http;
 
 import java.io.IOException;
 
-import okio.Buffer;
-import okio.BufferedSource;
-import okio.Okio;
-import okio.Source;
-import okio.Timeout;
+import kio.Buffer;
+import kio.BufferedSource;
+import kio.Okio;
+import kio.Source;
+import kio.Timeout;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

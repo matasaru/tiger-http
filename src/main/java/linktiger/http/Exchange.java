@@ -18,12 +18,12 @@ package linktiger.http;
 import java.io.IOException;
 import java.net.ProtocolException;
 
-import okio.Buffer;
-import okio.ForwardingSink;
-import okio.ForwardingSource;
-import okio.Okio;
-import okio.Sink;
-import okio.Source;
+import kio.Buffer;
+import kio.ForwardingSink;
+import kio.ForwardingSource;
+import kio.Okio;
+import kio.Sink;
+import kio.Source;
 
 /**
  * Transmits a single HTTP request and a response pair. This layers connection management and events

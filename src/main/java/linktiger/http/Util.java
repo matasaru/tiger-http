@@ -29,11 +29,11 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-import okio.Buffer;
-import okio.BufferedSource;
-import okio.ByteString;
-import okio.Options;
-import okio.Source;
+import kio.Buffer;
+import kio.BufferedSource;
+import kio.ByteString;
+import kio.Options;
+import kio.Source;
 
 import static java.nio.charset.StandardCharsets.UTF_16BE;
 import static java.nio.charset.StandardCharsets.UTF_16LE;

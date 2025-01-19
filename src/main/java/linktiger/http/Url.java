@@ -25,7 +25,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import okio.Buffer;
+import kio.Buffer;
 
 /**
  * A uniform resource locator (URL) with a scheme of either {@code http} or {@code https}. Use this

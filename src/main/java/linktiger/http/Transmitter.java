@@ -24,8 +24,8 @@ import java.util.logging.Level;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
 
-import okio.AsyncTimeout;
-import okio.Timeout;
+import kio.AsyncTimeout;
+import kio.Timeout;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 

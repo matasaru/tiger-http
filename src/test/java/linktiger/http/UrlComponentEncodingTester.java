@@ -20,8 +20,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import okio.Buffer;
-import okio.ByteString;
+import kio.Buffer;
+import kio.ByteString;
 
 import static org.junit.Assert.fail;
 

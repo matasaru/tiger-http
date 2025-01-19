@@ -20,8 +20,8 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import okio.Buffer;
-import okio.BufferedSource;
+import kio.Buffer;
+import kio.BufferedSource;
 
 import static java.net.HttpURLConnection.HTTP_MOVED_PERM;
 import static java.net.HttpURLConnection.HTTP_MOVED_TEMP;

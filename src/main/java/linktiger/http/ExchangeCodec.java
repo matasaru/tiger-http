@@ -17,8 +17,8 @@ package linktiger.http;
 
 import java.io.IOException;
 
-import okio.Sink;
-import okio.Source;
+import kio.Sink;
+import kio.Source;
 
 /** Encodes HTTP requests and decodes HTTP responses. */
 public interface ExchangeCodec {

@@ -59,12 +59,9 @@ import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import okhttp3.mockwebserver.SocketPolicy;
 import okhttp3.tls.HandshakeCertificates;
-import okio.Buffer;
-import okio.BufferedSink;
-import okio.BufferedSource;
-import okio.GzipSink;
-import okio.Okio;
-import okio.Utf8;
+import kio.BufferedSink;
+import kio.BufferedSource;
+import kio.Utf8;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.AssumptionViolatedException;
@@ -769,7 +766,7 @@ public final class URLConnectionTest {
   @Test public void contentDisagreesWithChunkedHeaderBodyTooLong() throws IOException {
     MockResponse mockResponse = new MockResponse()
         .setChunkedBody("abc", 3);
-    Buffer buffer = mockResponse.getBody();
+    okio.Buffer buffer = mockResponse.getBody();
     buffer.writeUtf8("\r\nYOU SHOULD NOT SEE THIS");
     mockResponse.setBody(buffer);
     mockResponse.clearHeaders();
@@ -784,8 +781,8 @@ public final class URLConnectionTest {
     MockResponse mockResponse = new MockResponse()
         .setChunkedBody("abcdefg", 5);
 
-    Buffer truncatedBody = new Buffer();
-    Buffer fullBody = mockResponse.getBody();
+    okio.Buffer truncatedBody = new okio.Buffer();
+    okio.Buffer fullBody = mockResponse.getBody();
     truncatedBody.write(fullBody, 4);
     mockResponse.setBody(truncatedBody);
 
@@ -1191,7 +1188,7 @@ public final class URLConnectionTest {
   }
 
   @Test public void clientConfiguredGzipContentEncoding() throws Exception {
-    Buffer bodyBytes = gzip("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    okio.Buffer bodyBytes = gzip("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
     server.enqueue(new MockResponse()
         .setBody(bodyBytes)
         .addHeader("Content-Encoding: gzip"));
@@ -1356,7 +1353,7 @@ public final class URLConnectionTest {
   @Test public void streamDiscardingIsTimely() throws Exception {
     // This response takes at least a full second to serve: 10,000 bytes served 100 bytes at a time.
     server.enqueue(new MockResponse()
-        .setBody(new Buffer().write(new byte[10000]))
+        .setBody(new okio.Buffer().write(new byte[10000]))
         .throttleBody(100, 10, MILLISECONDS));
     server.enqueue(new MockResponse()
         .setBody("A"));
@@ -1693,7 +1690,7 @@ public final class URLConnectionTest {
 
   @Test public void singleByteReadIsSigned() throws IOException {
     server.enqueue(new MockResponse()
-        .setBody(new Buffer()
+        .setBody(new okio.Buffer()
             .writeByte(-2)
             .writeByte(-1)));
 
@@ -2412,9 +2409,9 @@ public final class URLConnectionTest {
   }
 
   /** Returns a gzipped copy of {@code bytes}. */
-  public Buffer gzip(String data) throws IOException {
-    Buffer result = new Buffer();
-    BufferedSink gzipSink = Okio.buffer(new GzipSink(result));
+  public okio.Buffer gzip(String data) throws IOException {
+    okio.Buffer result = new okio.Buffer();
+    okio.BufferedSink gzipSink = okio.Okio.buffer(new okio.GzipSink(result));
     gzipSink.writeUtf8(data);
     gzipSink.close();
     return result;
@@ -2436,7 +2433,7 @@ public final class URLConnectionTest {
 
   enum TransferKind {
     CHUNKED {
-      @Override void setBody(MockResponse response, Buffer content, int chunkSize) {
+      @Override void setBody(MockResponse response, okio.Buffer content, int chunkSize) {
         response.setChunkedBody(content, chunkSize);
       }
 
@@ -2457,7 +2454,7 @@ public final class URLConnectionTest {
       }
     },
     FIXED_LENGTH {
-      @Override void setBody(MockResponse response, Buffer content, int chunkSize) {
+      @Override void setBody(MockResponse response, okio.Buffer content, int chunkSize) {
         response.setBody(content);
       }
 
@@ -2478,7 +2475,7 @@ public final class URLConnectionTest {
       }
     },
     END_OF_STREAM {
-      @Override void setBody(MockResponse response, Buffer content, int chunkSize) {
+      @Override void setBody(MockResponse response, okio.Buffer content, int chunkSize) {
         response.setBody(content);
         response.setSocketPolicy(DISCONNECT_AT_END);
         response.removeHeader("Content-Length");
@@ -2489,12 +2486,12 @@ public final class URLConnectionTest {
       }
     };
 
-    abstract void setBody(MockResponse response, Buffer content, int chunkSize) throws IOException;
+    abstract void setBody(MockResponse response, okio.Buffer content, int chunkSize) throws IOException;
 
     abstract RequestBody newRequestBody(String body);
 
     void setBody(MockResponse response, String content, int chunkSize) throws IOException {
-      setBody(response, new Buffer().writeUtf8(content), chunkSize);
+      setBody(response, new okio.Buffer().writeUtf8(content), chunkSize);
     }
   }
 

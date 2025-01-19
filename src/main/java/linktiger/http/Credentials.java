@@ -16,7 +16,7 @@
 package linktiger.http;
 
 import java.nio.charset.Charset;
-import okio.ByteString;
+import kio.ByteString;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 

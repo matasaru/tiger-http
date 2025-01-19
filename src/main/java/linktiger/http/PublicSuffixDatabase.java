@@ -24,9 +24,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import okio.BufferedSource;
-import okio.GzipSource;
-import okio.Okio;
+import kio.BufferedSource;
+import kio.GzipSource;
+import kio.Okio;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 

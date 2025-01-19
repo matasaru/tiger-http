@@ -25,8 +25,7 @@ import javax.net.SocketFactory;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import okio.Buffer;
-import okio.BufferedSink;
+import kio.BufferedSink;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -106,7 +105,7 @@ public final class ThreadInterruptTest {
     int responseBodySize = 8 * 1024 * 1024; // 8 MiB.
 
     server.enqueue(new MockResponse()
-        .setBody(new Buffer().write(new byte[responseBodySize]))
+        .setBody(new okio.Buffer().write(new byte[responseBodySize]))
         .throttleBody(64 * 1024, 125, TimeUnit.MILLISECONDS)); // 500 Kbps
     server.start();
 

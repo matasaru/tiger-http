@@ -36,9 +36,9 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
-import okio.BufferedSink;
-import okio.BufferedSource;
-import okio.Okio;
+import kio.BufferedSink;
+import kio.BufferedSource;
+import kio.Okio;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 import static java.net.HttpURLConnection.HTTP_PROXY_AUTH;

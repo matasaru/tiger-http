@@ -23,8 +23,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import okio.Buffer;
-import okio.ByteString;
+import kio.Buffer;
+import kio.ByteString;
 
 import static java.net.HttpURLConnection.HTTP_NOT_MODIFIED;
 import static java.net.HttpURLConnection.HTTP_NO_CONTENT;

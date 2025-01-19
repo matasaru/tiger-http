@@ -18,10 +18,10 @@ package linktiger.http;
 import java.io.IOException;
 import java.io.InputStream;
 
-import okio.Buffer;
-import okio.BufferedSource;
-import okio.GzipSource;
-import okio.Okio;
+import kio.Buffer;
+import kio.BufferedSource;
+import kio.GzipSource;
+import kio.Okio;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

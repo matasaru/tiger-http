@@ -17,8 +17,8 @@ package linktiger.http;
 
 import java.io.IOException;
 
-import okio.Buffer;
-import okio.BufferedSink;
+import kio.Buffer;
+import kio.BufferedSink;
 import org.junit.Test;
 
 import static java.nio.charset.StandardCharsets.UTF_8;

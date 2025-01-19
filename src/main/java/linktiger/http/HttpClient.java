@@ -36,8 +36,8 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import okio.Sink;
-import okio.Source;
+import kio.Sink;
+import kio.Source;
 
 /**
  * Factory for {@linkplain Call calls}, which can be used to send HTTP requests and read their

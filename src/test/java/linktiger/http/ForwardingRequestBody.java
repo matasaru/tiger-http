@@ -17,7 +17,7 @@ package linktiger.http;
 
 import java.io.IOException;
 
-import okio.BufferedSink;
+import kio.BufferedSink;
 
 public class ForwardingRequestBody extends RequestBody {
   private final RequestBody delegate;

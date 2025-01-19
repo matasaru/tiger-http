@@ -20,13 +20,13 @@ import java.io.IOException;
 import java.net.ProtocolException;
 import java.util.concurrent.TimeUnit;
 
-import okio.Buffer;
-import okio.BufferedSink;
-import okio.BufferedSource;
-import okio.ForwardingTimeout;
-import okio.Sink;
-import okio.Source;
-import okio.Timeout;
+import kio.Buffer;
+import kio.BufferedSink;
+import kio.BufferedSource;
+import kio.ForwardingTimeout;
+import kio.Sink;
+import kio.Source;
+import kio.Timeout;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 

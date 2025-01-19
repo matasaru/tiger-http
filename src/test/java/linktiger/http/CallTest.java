@@ -55,11 +55,8 @@ import okhttp3.mockwebserver.RecordedRequest;
 import okhttp3.mockwebserver.SocketPolicy;
 import okhttp3.tls.HandshakeCertificates;
 import okhttp3.tls.HeldCertificate;
-import okio.Buffer;
-import okio.BufferedSink;
-import okio.BufferedSource;
-import okio.GzipSink;
-import okio.Okio;
+import kio.BufferedSink;
+import kio.BufferedSource;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -1072,7 +1069,7 @@ public final class CallTest {
   }
 
   @Test public void gzip() throws Exception {
-    Buffer gzippedBody = gzip("abcabcabc");
+    okio.Buffer gzippedBody = gzip("abcabcabc");
 
     server.enqueue(new MockResponse()
         .setBody(gzippedBody)
@@ -1089,7 +1086,7 @@ public final class CallTest {
   }
 
   @Test public void rangeHeaderPreventsAutomaticGzip() throws Exception {
-    Buffer gzippedBody = gzip("abcabcabc");
+    okio.Buffer gzippedBody = gzip("abcabcabc");
 
     // Enqueue a gzipped response. Our request isn't expecting it, but that's okay.
     server.enqueue(new MockResponse()
@@ -1108,7 +1105,7 @@ public final class CallTest {
     // The response is not decompressed.
     Response response = call.execute();
     assertThat(response.header("Content-Encoding")).isEqualTo("gzip");
-    assertThat(response.body().source().readByteString()).isEqualTo(gzippedBody.snapshot());
+    assertThat(response.body().source().readByteArray()).isEqualTo(gzippedBody.snapshot().toByteArray());
 
     // The request did not offer gzip support.
     RecordedRequest recordedRequest = server.takeRequest();
@@ -1881,9 +1878,9 @@ public final class CallTest {
     server.useHttps(handshakeCertificates.sslSocketFactory(), false);
   }
 
-  private Buffer gzip(String data) throws IOException {
-    Buffer result = new Buffer();
-    BufferedSink sink = Okio.buffer(new GzipSink(result));
+  private okio.Buffer gzip(String data) throws IOException {
+    okio.Buffer result = new okio.Buffer();
+    okio.BufferedSink sink = okio.Okio.buffer(new okio.GzipSink(result));
     sink.writeUtf8(data);
     sink.close();
     return result;

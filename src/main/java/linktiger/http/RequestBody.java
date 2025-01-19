@@ -19,10 +19,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import okio.BufferedSink;
-import okio.ByteString;
-import okio.Okio;
-import okio.Source;
+import kio.BufferedSink;
+import kio.ByteString;
+import kio.Okio;
+import kio.Source;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
