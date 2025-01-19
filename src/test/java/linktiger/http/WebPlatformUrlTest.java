@@ -19,8 +19,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import okio.BufferedSource;
-import okio.Okio;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -35,7 +33,7 @@ public final class WebPlatformUrlTest {
   public static List<Object[]> parameters() {
     try {
       List<Object[]> result = new ArrayList<>();
-      for (WebPlatformUrlTestData urlTestData : loadTests()) {
+      for (WebPlatformUrlTestData urlTestData : WebPlatformUrlTestData.load()) {
         result.add(new Object[] {urlTestData});
       }
       return result;
@@ -119,11 +117,5 @@ public final class WebPlatformUrlTest {
       assertThat(effectiveFragment).overridingErrorMessage("fragment").isEqualTo(
           testData.fragment);
     }
-  }
-
-  private static List<WebPlatformUrlTestData> loadTests() throws IOException {
-    BufferedSource source = Okio.buffer(Okio.source(
-        WebPlatformUrlTest.class.getResourceAsStream("/web-platform-test-urltestdata.txt")));
-    return WebPlatformUrlTestData.load(source);
   }
 }

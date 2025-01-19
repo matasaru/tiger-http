@@ -15,13 +15,11 @@
  */
 package linktiger.http;
 
-import java.io.EOFException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-
-import okio.Buffer;
-import okio.BufferedSource;
 
 /**
  * A test from the <a href="https://github.com/w3c/web-platform-tests/tree/master/url">Web Platform
@@ -85,9 +83,12 @@ public final class WebPlatformUrlTestData {
     return Util.format("Parsing: <%s> against <%s>", input, base);
   }
 
-  public static List<WebPlatformUrlTestData> load(BufferedSource source) throws IOException {
+  public static List<WebPlatformUrlTestData> load() throws IOException {
     List<WebPlatformUrlTestData> list = new ArrayList<>();
-    for (String line; (line = source.readUtf8Line()) != null; ) {
+
+    @SuppressWarnings("DataFlowIssue")
+    var lines = Files.readAllLines(Path.of(WebPlatformUrlTest.class.getResource("/web-platform-test-urltestdata.txt").getFile()));
+    for (var line : lines) {
       if (line.isEmpty() || line.startsWith("#")) continue;
 
       int i = 0;
@@ -97,7 +98,7 @@ public final class WebPlatformUrlTestData {
 
       String base = i < parts.length ? parts[i++] : null;
       element.base = (base == null || base.isEmpty())
-          ? list.get(list.size() - 1).base
+          ? list.getLast().base
           : unescape(base);
 
       for (; i < parts.length; i++) {
@@ -112,44 +113,48 @@ public final class WebPlatformUrlTestData {
     return list;
   }
 
-  private static String unescape(String s) throws EOFException {
-    Buffer in = new Buffer().writeUtf8(s);
-    StringBuilder result = new StringBuilder();
-    while (!in.exhausted()) {
-      int c = in.readUtf8CodePoint();
+  private static String unescape(String s) {
+    var result = new StringBuilder();
+    int i = 0;
+    while (i < s.length()) {
+      int c = s.codePointAt(i);
       if (c != '\\') {
         result.append((char) c);
-        continue;
+      } else {
+        i += Character.charCount(c);
+        c = s.codePointAt(i);
+        switch (c) {
+          case '\\':
+            result.append('\\');
+            break;
+          case '#':
+            result.append('#');
+            break;
+          case 'n':
+            result.append('\n');
+            break;
+          case 'r':
+            result.append('\r');
+            break;
+          case 's':
+            result.append(' ');
+            break;
+          case 't':
+            result.append('\t');
+            break;
+          case 'f':
+            result.append('\f');
+            break;
+          case 'u':
+            result.append((char) Integer.parseInt(s.substring(i + 1, i + 5), 16));
+            i += 4;
+            break;
+          default:
+            throw new IllegalArgumentException("unexpected escape character in " + s);
+        }
       }
 
-      switch (in.readUtf8CodePoint()) {
-        case '\\':
-          result.append('\\');
-          break;
-        case '#':
-          result.append('#');
-          break;
-        case 'n':
-          result.append('\n');
-          break;
-        case 'r':
-          result.append('\r');
-          break;
-        case 's':
-          result.append(' ');
-          break;
-        case 't':
-          result.append('\t');
-          break;
-        case 'f':
-          result.append('\f');
-          break;
-        case 'u':
-          result.append((char) Integer.parseInt(in.readUtf8(4), 16));
-          break;
-        default:
-          throw new IllegalArgumentException("unexpected escape character in " + s);
-      }
+      i += Character.charCount(c);
     }
 
     return result.toString();
