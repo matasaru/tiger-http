@@ -18,8 +18,6 @@ package linktiger.http;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.nio.charset.Charset;
 
 import kio.Buffer;
@@ -78,7 +76,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * <p>Because this class does not buffer the full response in memory, the application may not
  * re-read the bytes of the response. Use this one shot to read the entire response into memory with
  * {@link #bytes()} or {@link #string()}. Or stream the response with either {@link #source()},
- * {@link #byteStream()}, or {@link #charStream()}.
+ * {@link #byteStream()}.
  */
 public class ResponseBody implements Closeable {
 
@@ -91,9 +89,6 @@ public class ResponseBody implements Closeable {
   private final String contentType;
   private final long contentLength;
   private final BufferedSource source;
-
-  /** Multiple calls to {@link #charStream()} must return the same instance. */
-  private Reader reader;
 
   public ResponseBody(String contentType, long contentLength, BufferedSource source) {
     this.contentType = contentType;
@@ -149,22 +144,6 @@ public class ResponseBody implements Closeable {
   }
 
   /**
-   * Returns the response as a character stream.
-   *
-   * <p>If the response starts with a <a href="https://en.wikipedia.org/wiki/Byte_order_mark">Byte
-   * Order Mark (BOM)</a>, it is consumed and used to determine the charset of the response bytes.
-   *
-   * <p>Otherwise if the response has a Content-Type header that specifies a charset, that is used
-   * to determine the charset of the response bytes.
-   *
-   * <p>Otherwise the response bytes are decoded as UTF-8.
-   */
-  public final Reader charStream() {
-    Reader r = reader;
-    return r != null ? r : (reader = new BomAwareReader(source(), charset()));
-  }
-
-  /**
    * Returns the response as a string.
    *
    * <p>If the response starts with a <a href="https://en.wikipedia.org/wiki/Byte_order_mark">Byte
@@ -203,39 +182,6 @@ public class ResponseBody implements Closeable {
       try {
         source().close();
       } catch (IOException _) {
-      }
-    }
-  }
-
-  static final class BomAwareReader extends Reader {
-    private final BufferedSource source;
-    private final Charset charset;
-
-    private boolean closed;
-    private Reader delegate;
-
-    BomAwareReader(BufferedSource source, Charset charset) {
-      this.source = source;
-      this.charset = charset;
-    }
-
-    @Override public int read(char[] cbuf, int off, int len) throws IOException {
-      if (closed) throw new IOException("Stream closed");
-
-      Reader delegate = this.delegate;
-      if (delegate == null) {
-        Charset charset = Util.bomAwareCharset(source, this.charset);
-        delegate = this.delegate = new InputStreamReader(source.inputStream(), charset);
-      }
-      return delegate.read(cbuf, off, len);
-    }
-
-    @Override public void close() throws IOException {
-      closed = true;
-      if (delegate != null) {
-        delegate.close();
-      } else {
-        source.close();
       }
     }
   }
