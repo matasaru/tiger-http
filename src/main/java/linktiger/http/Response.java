@@ -20,9 +20,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import kio.Buffer;
-import kio.BufferedSource;
-
 import static java.net.HttpURLConnection.HTTP_MOVED_PERM;
 import static java.net.HttpURLConnection.HTTP_MOVED_TEMP;
 import static java.net.HttpURLConnection.HTTP_MULT_CHOICE;
@@ -134,25 +131,6 @@ public final class Response implements Closeable {
   public Headers trailers() throws IOException {
     if (exchange == null) throw new IllegalStateException("trailers not available");
     return exchange.trailers();
-  }
-
-  /**
-   * Peeks up to {@code byteCount} bytes from the response body and returns them as a new response
-   * body. If fewer than {@code byteCount} bytes are in the response body, the full response body is
-   * returned. If more than {@code byteCount} bytes are in the response body, the returned value
-   * will be truncated to {@code byteCount} bytes.
-   *
-   * <p>It is an error to call this method after the body has been consumed.
-   *
-   * <p><strong>Warning:</strong> this method loads the requested bytes into memory. Most
-   * applications should set a modest limit on {@code byteCount}, such as 1 MiB.
-   */
-  public ResponseBody peekBody(long byteCount) throws IOException {
-    BufferedSource peeked = body.source().peek();
-    Buffer buffer = new Buffer();
-    peeked.request(byteCount);
-    buffer.write(peeked, Math.min(byteCount, peeked.buffer().size()));
-    return new ResponseBody(body.contentType(), buffer.size(), buffer);
   }
 
   /**

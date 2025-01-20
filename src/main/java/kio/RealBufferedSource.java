@@ -234,10 +234,6 @@ public final class RealBufferedSource implements BufferedSource {
     }
   }
 
-  @Override public BufferedSource peek() {
-    return new RealBufferedSource(new PeekSource(this));
-  }
-
   @Override public InputStream inputStream() {
     return new InputStream() {
       @Override public int read() throws IOException {

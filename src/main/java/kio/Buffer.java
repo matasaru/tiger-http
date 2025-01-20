@@ -62,10 +62,6 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
     return size >= byteCount;
   }
 
-  @Override public BufferedSource peek() {
-    return new RealBufferedSource(new PeekSource(this));
-  }
-
   @Override public InputStream inputStream() {
     return new InputStream() {
       @Override public int read() {

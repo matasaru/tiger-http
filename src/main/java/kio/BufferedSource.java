@@ -296,29 +296,6 @@ public interface BufferedSource extends Source  {
    */
   long indexOfElement(ByteString targetBytes, long fromIndex) throws IOException;
 
-  /**
-   * Returns a new {@code BufferedSource} that can read data from this {@code BufferedSource}
-   * without consuming it. The returned source becomes invalid once this source is next read or
-   * closed.
-   *
-   * For example, we can use {@code peek()} to lookahead and read the same data multiple times.
-   *
-   * <pre> {@code
-   *
-   *   Buffer buffer = new Buffer();
-   *   buffer.writeUtf8("abcdefghi");
-   *
-   *   buffer.readUtf8(3) // returns "abc", buffer contains "defghi"
-   *
-   *   BufferedSource peek = buffer.peek();
-   *   peek.readUtf8(3); // returns "def", buffer contains "defghi"
-   *   peek.readUtf8(3); // returns "ghi", buffer contains "defghi"
-   *
-   *   buffer.readUtf8(3); // returns "def", buffer contains "ghi"
-   * }</pre>
-   */
-  BufferedSource peek();
-
   /** Returns an input stream that reads from this source. */
   InputStream inputStream();
 }
