@@ -15,6 +15,7 @@
  */
 package linktiger.http;
 
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
@@ -111,7 +112,7 @@ public final class ClientAuthTest {
         new X500Principal("CN=Local Host"));
     assertThat(response.handshake().localPrincipal()).isEqualTo(
         new X500Principal("CN=Jethro Willis"));
-    assertThat(response.body().string()).isEqualTo("abc");
+    assertThat(response.body().bytes()).isEqualTo("abc".getBytes(StandardCharsets.UTF_8));
   }
 
   @Test public void clientAuthForNeeds() throws Exception {
@@ -129,7 +130,7 @@ public final class ClientAuthTest {
         new X500Principal("CN=Local Host"));
     assertThat(response.handshake().localPrincipal()).isEqualTo(
         new X500Principal("CN=Jethro Willis"));
-    assertThat(response.body().string()).isEqualTo("abc");
+    assertThat(response.body().bytes()).isEqualTo("abc".getBytes(StandardCharsets.UTF_8));
   }
 
   @Test public void clientAuthSkippedForNone() throws Exception {
@@ -146,7 +147,7 @@ public final class ClientAuthTest {
     assertThat(response.handshake().peerPrincipal()).isEqualTo(
         new X500Principal("CN=Local Host"));
     assertThat(response.handshake().localPrincipal()).isNull();
-    assertThat(response.body().string()).isEqualTo("abc");
+    assertThat(response.body().bytes()).isEqualTo("abc".getBytes(StandardCharsets.UTF_8));
   }
 
   @Test public void missingClientAuthSkippedForWantsOnly() throws Exception {
@@ -163,7 +164,7 @@ public final class ClientAuthTest {
     assertThat(response.handshake().peerPrincipal()).isEqualTo(
         new X500Principal("CN=Local Host"));
     assertThat(response.handshake().localPrincipal()).isNull();
-    assertThat(response.body().string()).isEqualTo("abc");
+    assertThat(response.body().bytes()).isEqualTo("abc".getBytes(StandardCharsets.UTF_8));
   }
 
   @Test public void commonNameIsNotTrusted() throws Exception {

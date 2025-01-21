@@ -24,6 +24,7 @@ import java.net.Proxy;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.net.UnknownServiceException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -883,14 +884,14 @@ public final class CallTest {
     // Seed the connection pool so we have something that can fail.
     Request request1 = new Request.Builder().url(server.url("/").toString()).build();
     Response response1 = client.newCall(request1).execute();
-    assertThat(response1.body().string()).isEqualTo("abc");
+    assertThat(response1.body().bytes()).isEqualTo("abc".getBytes(StandardCharsets.UTF_8));
 
     Request request2 = new Request.Builder()
         .url(server.url("/").toString())
         .post(RequestBody.create(MediaType.get("text/plain"), "body!"))
         .build();
     Response response2 = client.newCall(request2).execute();
-    assertThat(response2.body().string()).isEqualTo("def");
+    assertThat(response2.body().bytes()).isEqualTo("def".getBytes(StandardCharsets.UTF_8));
 
     RecordedRequest get = server.takeRequest();
     assertThat(get.getSequenceNumber()).isEqualTo(0);
@@ -1326,8 +1327,8 @@ public final class CallTest {
         .header("User-Agent", "App 1.0")
         .build();
     Response response = client.newCall(request).execute();
-    assertThat(response.body().string()).isEqualTo(
-        "encrypted response from the origin server");
+    assertThat(response.body().bytes()).isEqualTo(
+        "encrypted response from the origin server".getBytes(StandardCharsets.UTF_8));
 
     RecordedRequest connect = server.takeRequest();
     assertThat(connect.getHeader("Private")).isNull();
@@ -1367,7 +1368,7 @@ public final class CallTest {
         .header("Proxy-Authorization", "password")
         .build();
     Response response = client.newCall(request).execute();
-    assertThat(response.body().string()).isEqualTo("response body");
+    assertThat(response.body().bytes()).isEqualTo("response body".getBytes(StandardCharsets.UTF_8));
 
     RecordedRequest connect1 = server.takeRequest();
     assertThat(connect1.getHeader("Proxy-Authorization")).isNull();
@@ -1638,7 +1639,7 @@ public final class CallTest {
         .url("https://[::1]/")
         .build();
     Response response = client.newCall(request).execute();
-    assertThat(response.body().string()).isEqualTo("response body");
+    assertThat(response.body().bytes()).isEqualTo("response body".getBytes(StandardCharsets.UTF_8));
 
     RecordedRequest connect = server.takeRequest();
     assertThat(connect.getRequestLine()).isEqualTo("CONNECT [::1]:443 HTTP/1.1");
@@ -1862,10 +1863,9 @@ public final class CallTest {
     Call call = client.newCall(request);
     try {
       Response response = call.execute();
-      String bodyString = response.body().string();
-      return new RecordedResponse(request, response, bodyString, null);
+      return new RecordedResponse(request, response, null);
     } catch (IOException e) {
-      return new RecordedResponse(request, null, null, e);
+      return new RecordedResponse(request, null, e);
     }
   }
 

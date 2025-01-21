@@ -19,11 +19,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.util.HexFormat;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import kio.Buffer;
 import kio.BufferedSource;
-import kio.ByteString;
 import kio.ForwardingSource;
 import kio.RealBufferedSource;
 import org.junit.Test;
@@ -35,52 +36,7 @@ import static org.junit.Assert.fail;
 public final class ResponseBodyTest {
   @Test public void stringEmpty() throws IOException {
     ResponseBody body = body("");
-    assertThat(body.string()).isEqualTo("");
-  }
-
-  @Test public void stringLooksLikeBomButTooShort() throws IOException {
-    ResponseBody body = body("000048");
-    assertThat(body.string()).isEqualTo("\0\0H");
-  }
-
-  @Test public void stringDefaultsToUtf8() throws IOException {
-    ResponseBody body = body("68656c6c6f");
-    assertThat(body.string()).isEqualTo("hello");
-  }
-
-  @Test public void stringExplicitCharset() throws IOException {
-    ResponseBody body = body("00000068000000650000006c0000006c0000006f", "utf-32be");
-    assertThat(body.string()).isEqualTo("hello");
-  }
-
-  @Test public void stringBomOverridesExplicitCharset() throws IOException {
-    ResponseBody body = body("0000ffff00000068000000650000006c0000006c0000006f", "utf-8");
-    assertThat(body.string()).isEqualTo("hello");
-  }
-
-  @Test public void stringBomUtf8() throws IOException {
-    ResponseBody body = body("efbbbf68656c6c6f");
-    assertThat(body.string()).isEqualTo("hello");
-  }
-
-  @Test public void stringBomUtf16Be() throws IOException {
-    ResponseBody body = body("feff00680065006c006c006f");
-    assertThat(body.string()).isEqualTo("hello");
-  }
-
-  @Test public void stringBomUtf16Le() throws IOException {
-    ResponseBody body = body("fffe680065006c006c006f00");
-    assertThat(body.string()).isEqualTo("hello");
-  }
-
-  @Test public void stringBomUtf32Be() throws IOException {
-    ResponseBody body = body("0000ffff00000068000000650000006c0000006c0000006f");
-    assertThat(body.string()).isEqualTo("hello");
-  }
-
-  @Test public void stringBomUtf32Le() throws IOException {
-    ResponseBody body = body("ffff000068000000650000006c0000006c0000006f000000");
-    assertThat(body.string()).isEqualTo("hello");
+    assertThat(body.bytes()).isEqualTo("".getBytes(UTF_8));
   }
 
   @Test public void stringClosesUnderlyingSource() throws IOException {
@@ -96,7 +52,7 @@ public final class ResponseBodyTest {
         });
       }
     };
-    assertThat(body.string()).isEqualTo("hello");
+    assertThat(body.bytes()).isEqualTo("hello".getBytes(StandardCharsets.UTF_8));
     assertThat(closed.get()).isTrue();
   }
 
@@ -243,8 +199,8 @@ public final class ResponseBodyTest {
 
   static ResponseBody body(String hex, String charset) {
     String mediaType = charset == null ? null : MediaType.get("any/thing; charset=" + charset).toString();
-    ByteString content = ByteString.decodeHex(hex);
-    return new ResponseBody(mediaType, content.size(), new Buffer().write(content));
+    var bytes =HexFormat.of().parseHex(hex);
+    return new ResponseBody(mediaType, bytes.length, new Buffer().write(bytes));
   }
 
   static String exhaust(Reader reader) throws IOException {

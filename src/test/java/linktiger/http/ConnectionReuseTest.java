@@ -15,6 +15,7 @@
  */
 package linktiger.http;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLException;
@@ -115,11 +116,11 @@ public final class ConnectionReuseTest {
         .build();
 
     Response responseA = client.newCall(request).execute();
-    assertThat(responseA.body().string()).isEqualTo("a");
+    assertThat(responseA.body().bytes()).isEqualTo("a".getBytes(StandardCharsets.UTF_8));
     assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
 
     Response responseB = client.newCall(request).execute();
-    assertThat(responseB.body().string()).isEqualTo("b");
+    assertThat(responseB.body().bytes()).isEqualTo("b".getBytes(StandardCharsets.UTF_8));
     assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(1);
     assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
   }
@@ -133,7 +134,7 @@ public final class ConnectionReuseTest {
         .url(server.url("/").toString())
         .build();
     Response responseA = client.newCall(requestA).execute();
-    assertThat(responseA.body().string()).isEqualTo("a");
+    assertThat(responseA.body().bytes()).isEqualTo("a".getBytes(StandardCharsets.UTF_8));
     assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
 
     // Give the socket a chance to become stale.
@@ -144,7 +145,7 @@ public final class ConnectionReuseTest {
         .post(RequestBody.create(MediaType.get("text/plain"), "b"))
         .build();
     Response responseB = client.newCall(requestB).execute();
-    assertThat(responseB.body().string()).isEqualTo("b");
+    assertThat(responseB.body().bytes()).isEqualTo("b".getBytes(StandardCharsets.UTF_8));
     assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
   }
 
@@ -160,13 +161,13 @@ public final class ConnectionReuseTest {
         .build();
 
     Response response1 = client.newCall(request).execute();
-    assertThat(response1.body().string()).isEqualTo("a");
+    assertThat(response1.body().bytes()).isEqualTo("a".getBytes(StandardCharsets.UTF_8));
 
     // Give the thread pool a chance to evict.
     Thread.sleep(500);
 
     Response response2 = client.newCall(request).execute();
-    assertThat(response2.body().string()).isEqualTo("b");
+    assertThat(response2.body().bytes()).isEqualTo("b".getBytes(StandardCharsets.UTF_8));
 
     assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
     assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
@@ -236,7 +237,7 @@ public final class ConnectionReuseTest {
   private void assertConnectionReused(Request... requests) throws Exception {
     for (int i = 0; i < requests.length; i++) {
       Response response = client.newCall(requests[i]).execute();
-      response.body().string(); // Discard the response body.
+      response.body().bytes(); // Discard the response body.
       assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(i);
     }
   }
@@ -244,7 +245,7 @@ public final class ConnectionReuseTest {
   private void assertConnectionNotReused(Request... requests) throws Exception {
     for (Request request : requests) {
       Response response = client.newCall(request).execute();
-      response.body().string(); // Discard the response body.
+      response.body().bytes(); // Discard the response body.
       assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
     }
   }

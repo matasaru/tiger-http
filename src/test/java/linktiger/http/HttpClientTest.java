@@ -19,7 +19,7 @@ import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.ProxySelector;
 import java.net.ResponseCache;
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLSocketFactory;
 
@@ -122,7 +122,7 @@ public final class HttpClientTest {
 
     Request request = new Request.Builder().url(server.url("/").toString()).build();
     Response response = client.newCall(request).execute();
-    assertThat(response.body().string()).isEqualTo("abc");
+    assertThat(response.body().bytes()).isEqualTo("abc".getBytes(StandardCharsets.UTF_8));
   }
 
   @Test public void sslSocketFactorySetAsSocketFactory() throws Exception {

@@ -20,6 +20,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -91,7 +92,7 @@ public final class EventListenerTest {
         .build());
     Response response = call.execute();
     Assertions.assertThat(response.code()).isEqualTo(200);
-    Assertions.assertThat(response.body().string()).isEqualTo("abc");
+    Assertions.assertThat(response.body().bytes()).isEqualTo("abc".getBytes(StandardCharsets.UTF_8));
     response.body().close();
 
     List<String> expectedEvents = Arrays.asList("CallStart", "DnsStart", "DnsEnd",
@@ -138,7 +139,7 @@ public final class EventListenerTest {
 
     Response response = call.execute();
     try {
-      response.body().string();
+      response.body().bytes();
       fail();
     } catch (IOException expected) {
       assertThat(expected.getMessage(), equalTo("unexpected end of stream"));
@@ -176,7 +177,7 @@ public final class EventListenerTest {
         .build());
     Response response = call.execute();
     Assertions.assertThat(response.code()).isEqualTo(200);
-    response.body().string();
+    response.body().bytes();
     response.body().close();
 
     assumeThat(response, responseMatcher);
@@ -710,7 +711,7 @@ public final class EventListenerTest {
     Response response = call.execute();
     Assertions.assertThat(response.protocol()).isEqualTo(Protocol.HTTP_1_1);
     try {
-      response.body().string();
+      response.body().bytes();
       fail();
     } catch (IOException expected) {
     }
@@ -906,7 +907,7 @@ public final class EventListenerTest {
         .post(body)
         .build());
     Response response = call.execute();
-    Assertions.assertThat(response.body().string()).isEqualTo("World!");
+    Assertions.assertThat(response.body().bytes()).isEqualTo("World!".getBytes(StandardCharsets.UTF_8));
 
     assertBytesReadWritten(listener, any(Long.class), requestBodyBytes, responseHeaderLength,
         equalTo(6L));

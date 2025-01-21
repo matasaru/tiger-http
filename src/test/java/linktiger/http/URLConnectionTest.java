@@ -1125,7 +1125,7 @@ public final class URLConnectionTest {
         .addHeader("Transfer-encoding: chunked"));
 
     try (Response response = getResponse(newRequest("/"))) {
-      response.body().string();
+      response.body().bytes();
       fail();
     } catch (IOException expected) {
     }

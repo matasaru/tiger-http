@@ -28,14 +28,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 public final class RecordedResponse {
   public final Request request;
   public final Response response;
-  public final String body;
   public final IOException failure;
 
-  public RecordedResponse(Request request, Response response,
-      String body, IOException failure) {
+  public RecordedResponse(Request request, Response response, IOException failure) {
     this.request = request;
     this.response = response;
-    this.body = body;
     this.failure = failure;
   }
 
@@ -79,8 +76,9 @@ public final class RecordedResponse {
     return this;
   }
 
-  public RecordedResponse assertBody(String expectedBody) {
-    assertThat(body).isEqualTo(expectedBody);
+  public RecordedResponse assertBody(String expectedBody) throws IOException {
+    var body = response.body;
+    assertThat(response.body().bytes()).isEqualTo(expectedBody.getBytes(body.charset()));
     return this;
   }
 
@@ -142,9 +140,5 @@ public final class RecordedResponse {
 
   private String format(long time) {
     return new SimpleDateFormat("HH:mm:ss.SSS").format(new Date(time));
-  }
-
-  public String getBody() {
-    return body;
   }
 }

@@ -67,27 +67,6 @@ public class ByteString implements Serializable, Comparable<ByteString> {
     return new String(result);
   }
 
-  /** Decodes the hex-encoded bytes and returns their value a byte string. */
-  public static ByteString decodeHex(String hex) {
-    if (hex == null) throw new IllegalArgumentException("hex == null");
-    if (hex.length() % 2 != 0) throw new IllegalArgumentException("Unexpected hex string: " + hex);
-
-    byte[] result = new byte[hex.length() / 2];
-    for (int i = 0; i < result.length; i++) {
-      int d1 = decodeHexDigit(hex.charAt(i * 2)) << 4;
-      int d2 = decodeHexDigit(hex.charAt(i * 2 + 1));
-      result[i] = (byte) (d1 + d2);
-    }
-    return new ByteString(result.clone());
-  }
-
-  private static int decodeHexDigit(char c) {
-    if (c >= '0' && c <= '9') return c - '0';
-    if (c >= 'a' && c <= 'f') return c - 'a' + 10;
-    if (c >= 'A' && c <= 'F') return c - 'A' + 10;
-    throw new IllegalArgumentException("Unexpected hex digit: " + c);
-  }
-
   /**
    * Returns a byte string that is a substring of this byte string, beginning at the specified
    * {@code beginIndex} and ends at the specified {@code endIndex}. Returns this byte string if

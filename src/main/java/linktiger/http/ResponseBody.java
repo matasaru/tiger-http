@@ -75,7 +75,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  *
  * <p>Because this class does not buffer the full response in memory, the application may not
  * re-read the bytes of the response. Use this one shot to read the entire response into memory with
- * {@link #bytes()} or {@link #string()}. Or stream the response with either {@link #source()},
+ * {@link #bytes()}. Or stream the response with either {@link #source()},
  * {@link #byteStream()}.
  */
 public class ResponseBody implements Closeable {
@@ -143,29 +143,7 @@ public class ResponseBody implements Closeable {
     return bytes;
   }
 
-  /**
-   * Returns the response as a string.
-   *
-   * <p>If the response starts with a <a href="https://en.wikipedia.org/wiki/Byte_order_mark">Byte
-   * Order Mark (BOM)</a>, it is consumed and used to determine the charset of the response bytes.
-   *
-   * <p>Otherwise if the response has a Content-Type header that specifies a charset, that is used
-   * to determine the charset of the response bytes.
-   *
-   * <p>Otherwise the response bytes are decoded as UTF-8.
-   *
-   * <p>This method loads entire response body into memory. If the response body is very large this
-   * may trigger an {@link OutOfMemoryError}. Prefer to stream the response body if this is a
-   * possibility for your response.
-   */
-  public final String string() throws IOException {
-    try (BufferedSource source = source()) {
-      Charset charset = Util.bomAwareCharset(source, charset());
-      return source.readString(charset);
-    }
-  }
-
-  private Charset charset() {
+  public Charset charset() {
     var contentType = contentType();
     if (contentType == null) {
       return UTF_8;

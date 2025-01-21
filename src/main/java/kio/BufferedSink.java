@@ -70,27 +70,6 @@ public interface BufferedSink extends Sink {
   BufferedSink writeByte(int b) throws IOException;
 
   /**
-   * Writes a big-endian int to this sink using four bytes. <pre>{@code
-   *
-   *   Buffer buffer = new Buffer();
-   *   buffer.writeInt(2147483647);
-   *   buffer.writeInt(15);
-   *
-   *   assertEquals(8, buffer.size());
-   *   assertEquals((byte) 0x7f, buffer.readByte());
-   *   assertEquals((byte) 0xff, buffer.readByte());
-   *   assertEquals((byte) 0xff, buffer.readByte());
-   *   assertEquals((byte) 0xff, buffer.readByte());
-   *   assertEquals((byte) 0x00, buffer.readByte());
-   *   assertEquals((byte) 0x00, buffer.readByte());
-   *   assertEquals((byte) 0x00, buffer.readByte());
-   *   assertEquals((byte) 0x0f, buffer.readByte());
-   *   assertEquals(0, buffer.size());
-   * }</pre>
-   */
-  void writeInt(int i) throws IOException;
-
-  /**
    * Writes a long to this sink in signed decimal form (i.e., as a string in base 10). <pre>{@code
    *
    *   Buffer buffer = new Buffer();

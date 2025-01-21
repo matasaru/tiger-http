@@ -20,7 +20,6 @@ import java.io.InterruptedIOException;
 import java.net.IDN;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Locale;
@@ -30,30 +29,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import kio.Buffer;
-import kio.BufferedSource;
-import kio.ByteString;
-import kio.Options;
 import kio.Source;
-
-import static java.nio.charset.StandardCharsets.UTF_16BE;
-import static java.nio.charset.StandardCharsets.UTF_16LE;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 /** Junk drawer of utility methods. */
 public final class Util {
   public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
-
-  /** Byte order marks. */
-  private static final Options UNICODE_BOMS = Options.of(
-      ByteString.decodeHex("efbbbf"),   // UTF-8
-      ByteString.decodeHex("feff"),     // UTF-16BE
-      ByteString.decodeHex("fffe"),     // UTF-16LE
-      ByteString.decodeHex("0000ffff"), // UTF-32BE
-      ByteString.decodeHex("ffff0000")  // UTF-32LE
-  );
-
-  private static final Charset UTF_32BE = Charset.forName("UTF-32BE");
-  private static final Charset UTF_32LE = Charset.forName("UTF-32LE");
 
   /** GMT and UTC are equivalent for our purposes. */
   public static final TimeZone UTC = TimeZone.getTimeZone("GMT");
@@ -286,18 +266,6 @@ public final class Util {
   /** Returns a {@link Locale#US} formatted {@link String}. */
   public static String format(String format, Object... args) {
     return String.format(Locale.US, format, args);
-  }
-
-  public static Charset bomAwareCharset(BufferedSource source, Charset charset) throws IOException {
-    switch (source.select(UNICODE_BOMS)) {
-      case 0: return UTF_8;
-      case 1: return UTF_16BE;
-      case 2: return UTF_16LE;
-      case 3: return UTF_32BE;
-      case 4: return UTF_32LE;
-      case -1: return charset;
-      default: throw new AssertionError();
-    }
   }
 
   public static int checkDuration(String name, long duration, TimeUnit unit) {

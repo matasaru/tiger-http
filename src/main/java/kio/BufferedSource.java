@@ -146,30 +146,6 @@ public interface BufferedSource extends Source  {
    */
   void skip(long byteCount) throws IOException;
 
-  /**
-   * Finds the first string in {@code options} that is a prefix of this buffer, consumes it from
-   * this buffer, and returns its index. If no byte string in {@code options} is a prefix of this
-   * buffer this returns -1 and no bytes are consumed.
-   * <pre>{@code
-   *   Options FIELDS = Options.of(
-   *       ByteString.encodeUtf8("depth="),
-   *       ByteString.encodeUtf8("height="),
-   *       ByteString.encodeUtf8("width="));
-   *
-   *   Buffer buffer = new Buffer()
-   *       .writeUtf8("width=640\n")
-   *       .writeUtf8("height=480\n");
-   *
-   *   assertEquals(2, buffer.select(FIELDS));
-   *   assertEquals(640, buffer.readDecimalLong());
-   *   assertEquals('\n', buffer.readByte());
-   *   assertEquals(1, buffer.select(FIELDS));
-   *   assertEquals(480, buffer.readDecimalLong());
-   *   assertEquals('\n', buffer.readByte());
-   * }</pre>
-   */
-  int select(Options options) throws IOException;
-
   /** Removes all bytes from this and returns them as a byte array. */
   byte[] readByteArray() throws IOException;
 
