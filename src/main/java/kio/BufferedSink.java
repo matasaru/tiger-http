@@ -70,21 +70,6 @@ public interface BufferedSink extends Sink {
   BufferedSink writeByte(int b) throws IOException;
 
   /**
-   * Writes a long to this sink in signed decimal form (i.e., as a string in base 10). <pre>{@code
-   *
-   *   Buffer buffer = new Buffer();
-   *   buffer.writeDecimalLong(8675309L);
-   *   buffer.writeByte(' ');
-   *   buffer.writeDecimalLong(-123L);
-   *   buffer.writeByte(' ');
-   *   buffer.writeDecimalLong(1L);
-   *
-   *   assertEquals("8675309 -123 1", buffer.readUtf8());
-   * }</pre>
-   */
-  BufferedSink writeDecimalLong(long v) throws IOException;
-
-  /**
    * Writes a long to this sink in hexadecimal form (i.e., as a string in base 16). <pre>{@code
    *
    *   Buffer buffer = new Buffer();

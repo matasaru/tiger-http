@@ -84,12 +84,6 @@ public final class RealBufferedSink implements BufferedSink {
     return emitCompleteSegments();
   }
 
-  @Override public BufferedSink writeDecimalLong(long v) throws IOException {
-    if (closed) throw new IllegalStateException("closed");
-    buffer.writeDecimalLong(v);
-    return emitCompleteSegments();
-  }
-
   @Override public BufferedSink writeHexadecimalUnsignedLong(long v) throws IOException {
     if (closed) throw new IllegalStateException("closed");
     buffer.writeHexadecimalUnsignedLong(v);

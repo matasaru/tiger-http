@@ -651,62 +651,6 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
     return this;
   }
 
-  @Override public Buffer writeDecimalLong(long v) {
-    if (v == 0) {
-      // Both a shortcut and required since the following code can't handle zero.
-      return writeByte('0');
-    }
-
-    boolean negative = false;
-    if (v < 0) {
-      v = -v;
-      if (v < 0) { // Only true for Long.MIN_VALUE.
-        return writeUtf8("-9223372036854775808");
-      }
-      negative = true;
-    }
-
-    // Binary search for character width which favors matching lower numbers.
-    int width = //
-          v < 100000000L
-        ? v < 10000L
-        ? v < 100L
-        ? v < 10L ? 1 : 2
-        : v < 1000L ? 3 : 4
-        : v < 1000000L
-        ? v < 100000L ? 5 : 6
-        : v < 10000000L ? 7 : 8
-        : v < 1000000000000L
-        ? v < 10000000000L
-        ? v < 1000000000L ? 9 : 10
-        : v < 100000000000L ? 11 : 12
-        : v < 1000000000000000L
-        ? v < 10000000000000L ? 13
-        : v < 100000000000000L ? 14 : 15
-        : v < 100000000000000000L
-        ? v < 10000000000000000L ? 16 : 17
-        : v < 1000000000000000000L ? 18 : 19;
-    if (negative) {
-      ++width;
-    }
-
-    Segment tail = writableSegment(width);
-    byte[] data = tail.data;
-    int pos = tail.limit + width; // We write backwards from right to left.
-    while (v != 0) {
-      int digit = (int) (v % 10);
-      data[--pos] = DIGITS[digit];
-      v /= 10;
-    }
-    if (negative) {
-      data[--pos] = '-';
-    }
-
-    tail.limit += width;
-    this.size += width;
-    return this;
-  }
-
   @Override public Buffer writeHexadecimalUnsignedLong(long v) {
     if (v == 0) {
       // Both a shortcut and required since the following code can't handle zero.
