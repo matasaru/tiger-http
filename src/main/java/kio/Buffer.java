@@ -483,12 +483,6 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
     }
   }
 
-  @Override public Buffer write(ByteString byteString) {
-    if (byteString == null) throw new IllegalArgumentException("byteString == null");
-    write(byteString.internalArray(), 0, byteString.internalArray().length);
-    return this;
-  }
-
   @Override public Buffer writeUtf8(String string) {
     return writeUtf8(string, 0, string.length());
   }

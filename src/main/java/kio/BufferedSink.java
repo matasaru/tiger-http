@@ -11,8 +11,6 @@ public interface BufferedSink extends Sink {
   /** Returns this sink's internal buffer. */
   Buffer buffer();
 
-  BufferedSink write(ByteString byteString) throws IOException;
-
   /**
    * Like {@link OutputStream#write(byte[])}, this writes a complete byte array to
    * this sink.
