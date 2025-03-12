@@ -36,18 +36,7 @@ public final class RequestTest {
     assertThat(body.contentType()).isEqualTo(contentType);
     assertThat(body.contentLength()).isEqualTo(3);
     assertThat(bodyToHex(body)).isEqualTo("616263");
-    assertThat(bodyToHex(body)).overridingErrorMessage("Retransmit body").isEqualTo(
-        "616263");
-  }
-
-  @Test public void byteArrayRange() throws Exception {
-    MediaType contentType = MediaType.get("text/plain");
-    RequestBody body = RequestBody.create(contentType, ".abcd".getBytes(UTF_8), 1, 3);
-    assertThat(body.contentType()).isEqualTo(contentType);
-    assertThat(body.contentLength()).isEqualTo(3);
-    assertThat(bodyToHex(body)).isEqualTo("616263");
-    assertThat(bodyToHex(body)).overridingErrorMessage("Retransmit body").isEqualTo(
-        "616263");
+    assertThat(bodyToHex(body)).overridingErrorMessage("Retransmit body").isEqualTo("616263");
   }
 
   /** Common verbs used for apis such as GitHub, AWS, and Google Cloud. */

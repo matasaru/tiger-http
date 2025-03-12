@@ -55,27 +55,20 @@ public abstract class RequestBody {
 
   /** Returns a new request body that transmits {@code content}. */
   public static RequestBody create(final MediaType contentType, final byte[] content) {
-    return create(contentType, content, 0, content.length);
-  }
-
-  /** Returns a new request body that transmits {@code content}. */
-  public static RequestBody create(final MediaType contentType, final byte[] content,
-      final int offset, final int byteCount) {
     if (content == null) throw new NullPointerException("content == null");
-    Util.checkOffsetAndCount(content.length, offset, byteCount);
+    Util.checkOffsetAndCount(content.length, 0, content.length);
     return new RequestBody() {
       @Override public MediaType contentType() {
         return contentType;
       }
 
       @Override public long contentLength() {
-        return byteCount;
+        return content.length;
       }
 
       @Override public void writeTo(BufferedSink sink) throws IOException {
-        sink.write(content, offset, byteCount);
+        sink.write(content, 0, content.length);
       }
     };
   }
-
 }
