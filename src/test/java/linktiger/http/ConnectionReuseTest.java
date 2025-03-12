@@ -142,7 +142,7 @@ public final class ConnectionReuseTest {
 
     Request requestB = new Request.Builder()
         .url(server.url("/").toString())
-        .post(RequestBody.create(MediaType.get("text/plain"), "b"))
+        .post(RequestBody.create(MediaType.get("text/plain"), "b".getBytes(StandardCharsets.UTF_8)))
         .build();
     Response responseB = client.newCall(requestB).execute();
     assertThat(responseB.body().bytes()).isEqualTo("b".getBytes(StandardCharsets.UTF_8));

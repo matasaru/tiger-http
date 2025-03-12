@@ -177,7 +177,7 @@ public final class CallTest {
     server.enqueue(new MockResponse());
 
     try {
-      new Request.Builder().method("GET", RequestBody.create(MediaType.get("text/plain"), "abc"));
+      new Request.Builder().method("GET", RequestBody.create(MediaType.get("text/plain"), "abc".getBytes(StandardCharsets.UTF_8)));
       fail();
     } catch (IllegalArgumentException expected) {
     }
@@ -266,7 +266,7 @@ public final class CallTest {
 
     Request request = new Request.Builder()
         .url(server.url("/").toString())
-        .post(RequestBody.create(MediaType.get("text/plain"), "def"))
+        .post(RequestBody.create(MediaType.get("text/plain"), "def".getBytes(StandardCharsets.UTF_8)))
         .build();
 
     executeSynchronously(request)
@@ -277,8 +277,7 @@ public final class CallTest {
     assertThat(recordedRequest.getMethod()).isEqualTo("POST");
     assertThat(recordedRequest.getBody().readUtf8()).isEqualTo("def");
     assertThat(recordedRequest.getHeader("Content-Length")).isEqualTo("3");
-    assertThat(recordedRequest.getHeader("Content-Type")).isEqualTo(
-        "text/plain; charset=utf-8");
+    assertThat(recordedRequest.getHeader("Content-Type")).isEqualTo("text/plain");
   }
 
   @Test public void post_HTTPS() throws Exception {
@@ -339,7 +338,7 @@ public final class CallTest {
 
     Request request = new Request.Builder()
         .url(server.url("/").toString())
-        .method("DELETE", RequestBody.create(MediaType.get("text/plain"), "def"))
+        .method("DELETE", RequestBody.create(MediaType.get("text/plain"), "def".getBytes(StandardCharsets.UTF_8)))
         .build();
 
     executeSynchronously(request)
@@ -356,7 +355,7 @@ public final class CallTest {
 
     Request request = new Request.Builder()
         .url(server.url("/").toString())
-        .put(RequestBody.create(MediaType.get("text/plain"), "def"))
+        .put(RequestBody.create(MediaType.get("text/plain"), "def".getBytes(StandardCharsets.UTF_8)))
         .build();
 
     executeSynchronously(request)
@@ -367,8 +366,7 @@ public final class CallTest {
     assertThat(recordedRequest.getMethod()).isEqualTo("PUT");
     assertThat(recordedRequest.getBody().readUtf8()).isEqualTo("def");
     assertThat(recordedRequest.getHeader("Content-Length")).isEqualTo("3");
-    assertThat(recordedRequest.getHeader("Content-Type")).isEqualTo(
-        "text/plain; charset=utf-8");
+    assertThat(recordedRequest.getHeader("Content-Type")).isEqualTo("text/plain");
   }
 
   @Test public void put_HTTPS() throws Exception {
@@ -381,7 +379,7 @@ public final class CallTest {
 
     Request request = new Request.Builder()
         .url(server.url("/").toString())
-        .patch(RequestBody.create(MediaType.get("text/plain"), "def"))
+        .patch(RequestBody.create(MediaType.get("text/plain"), "def".getBytes(StandardCharsets.UTF_8)))
         .build();
 
     executeSynchronously(request)
@@ -392,8 +390,7 @@ public final class CallTest {
     assertThat(recordedRequest.getMethod()).isEqualTo("PATCH");
     assertThat(recordedRequest.getBody().readUtf8()).isEqualTo("def");
     assertThat(recordedRequest.getHeader("Content-Length")).isEqualTo("3");
-    assertThat(recordedRequest.getHeader("Content-Type")).isEqualTo(
-        "text/plain; charset=utf-8");
+    assertThat(recordedRequest.getHeader("Content-Type")).isEqualTo("text/plain");
   }
 
   @Test public void patch_HTTPS() throws Exception {
@@ -406,7 +403,7 @@ public final class CallTest {
 
     Request request = new Request.Builder()
         .url(server.url("/").toString())
-        .method("CUSTOM", RequestBody.create(MediaType.get("text/plain"), "def"))
+        .method("CUSTOM", RequestBody.create(MediaType.get("text/plain"), "def".getBytes(StandardCharsets.UTF_8)))
         .build();
 
     executeSynchronously(request)
@@ -417,8 +414,7 @@ public final class CallTest {
     assertThat(recordedRequest.getMethod()).isEqualTo("CUSTOM");
     assertThat(recordedRequest.getBody().readUtf8()).isEqualTo("def");
     assertThat(recordedRequest.getHeader("Content-Length")).isEqualTo("3");
-    assertThat(recordedRequest.getHeader("Content-Type")).isEqualTo(
-        "text/plain; charset=utf-8");
+    assertThat(recordedRequest.getHeader("Content-Type")).isEqualTo("text/plain");
   }
 
   @Test public void unspecifiedRequestBodyContentTypeDoesNotGetDefault() throws Exception {
@@ -426,7 +422,7 @@ public final class CallTest {
 
     Request request = new Request.Builder()
         .url(server.url("/").toString())
-        .method("POST", RequestBody.create(null, "abc"))
+        .method("POST", RequestBody.create(null, "abc".getBytes(StandardCharsets.UTF_8)))
         .build();
 
     executeSynchronously(request).assertCode(200);
@@ -886,7 +882,7 @@ public final class CallTest {
 
     Request request2 = new Request.Builder()
         .url(server.url("/").toString())
-        .post(RequestBody.create(MediaType.get("text/plain"), "body!"))
+        .post(RequestBody.create(MediaType.get("text/plain"), "body!".getBytes(StandardCharsets.UTF_8)))
         .build();
     Response response2 = client.newCall(request2).execute();
     assertThat(response2.body().bytes()).isEqualTo("def".getBytes(StandardCharsets.UTF_8));
@@ -1128,7 +1124,7 @@ public final class CallTest {
     Request request = new Request.Builder()
         .url(server.url("/").toString())
         .header("Expect", "100-continue")
-        .post(RequestBody.create(MediaType.get("text/plain"), "abc"))
+        .post(RequestBody.create(MediaType.get("text/plain"), "abc".getBytes(StandardCharsets.UTF_8)))
         .build();
 
     executeSynchronously(request)
@@ -1144,7 +1140,7 @@ public final class CallTest {
     Request request = new Request.Builder()
         .url(server.url("/").toString())
         .header("Expect", "100-continue")
-        .post(RequestBody.create(MediaType.get("text/plain"), ""))
+        .post(RequestBody.create(MediaType.get("text/plain"), "".getBytes(StandardCharsets.UTF_8)))
         .build();
 
     executeSynchronously(request)
@@ -1163,7 +1159,7 @@ public final class CallTest {
     Request request = new Request.Builder()
         .url(server.url("/").toString())
         .header("Expect", "100-continue")
-        .post(RequestBody.create(MediaType.get("text/plain"), "abc"))
+        .post(RequestBody.create(MediaType.get("text/plain"), "abc".getBytes(StandardCharsets.UTF_8)))
         .build();
 
     Call call = client.newCall(request);
@@ -1183,7 +1179,7 @@ public final class CallTest {
 
     Request request = new Request.Builder()
         .url(server.url("/").toString())
-        .post(RequestBody.create(MediaType.get("text/plain"), "abc"))
+        .post(RequestBody.create(MediaType.get("text/plain"), "abc".getBytes(StandardCharsets.UTF_8)))
         .build();
 
     executeSynchronously(request)
@@ -1204,7 +1200,7 @@ public final class CallTest {
 
     Request request = new Request.Builder()
         .url(server.url("/").toString())
-        .post(RequestBody.create(MediaType.get("text/plain"), "abc"))
+        .post(RequestBody.create(MediaType.get("text/plain"), "abc".getBytes(StandardCharsets.UTF_8)))
         .build();
 
     Call call = client.newCall(request);
@@ -1226,7 +1222,7 @@ public final class CallTest {
     executeSynchronously(new Request.Builder()
         .url(server.url("/").toString())
         .header("Expect", "100-continue")
-        .post(RequestBody.create(MediaType.get("text/plain"), "abc"))
+        .post(RequestBody.create(MediaType.get("text/plain"), "abc".getBytes(StandardCharsets.UTF_8)))
         .build());
     executeSynchronously(new Request.Builder()
         .url(server.url("/").toString())
@@ -1243,7 +1239,7 @@ public final class CallTest {
     executeSynchronously(new Request.Builder()
         .url(server.url("/").toString())
         .header("Expect", "100-continue")
-        .post(RequestBody.create(MediaType.get("text/plain"), "abc"))
+        .post(RequestBody.create(MediaType.get("text/plain"), "abc".getBytes(StandardCharsets.UTF_8)))
         .build());
     executeSynchronously(new Request.Builder()
         .url(server.url("/").toString())
@@ -1561,7 +1557,7 @@ public final class CallTest {
 
     Request request = new Request.Builder()
         .url(server.url("/").toString())
-        .post(RequestBody.create(MediaType.get("text/plain"), "abc"))
+        .post(RequestBody.create(MediaType.get("text/plain"), "abc".getBytes(StandardCharsets.UTF_8)))
         .build();
 
     executeSynchronously(request);

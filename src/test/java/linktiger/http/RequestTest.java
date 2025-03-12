@@ -17,6 +17,7 @@ package linktiger.http;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.HexFormat;
 import java.util.UUID;
 
@@ -28,31 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 public final class RequestTest {
-  @Test public void string() throws Exception {
-    MediaType contentType = MediaType.get("text/plain; charset=utf-8");
-    RequestBody body = RequestBody.create(contentType, "abc".getBytes(UTF_8));
-    assertThat(body.contentType()).isEqualTo(contentType);
-    assertThat(body.contentLength()).isEqualTo(3);
-    assertThat(bodyToHex(body)).isEqualTo("616263");
-    assertThat(bodyToHex(body)).overridingErrorMessage("Retransmit body").isEqualTo(
-        "616263");
-  }
-
-  @Test public void stringWithDefaultCharsetAdded() throws Exception {
-    MediaType contentType = MediaType.get("text/plain");
-    RequestBody body = RequestBody.create(contentType, "\u0800");
-    assertThat(body.contentType()).isEqualTo(MediaType.get("text/plain; charset=utf-8"));
-    assertThat(body.contentLength()).isEqualTo(3);
-    assertThat(bodyToHex(body)).isEqualTo("e0a080");
-  }
-
-  @Test public void stringWithNonDefaultCharsetSpecified() throws Exception {
-    MediaType contentType = MediaType.get("text/plain; charset=utf-16be");
-    RequestBody body = RequestBody.create(contentType, "\u0800");
-    assertThat(body.contentType()).isEqualTo(contentType);
-    assertThat(body.contentLength()).isEqualTo(2);
-    assertThat(bodyToHex(body)).isEqualTo("0800");
-  }
 
   @Test public void byteArray() throws Exception {
     MediaType contentType = MediaType.get("text/plain");
@@ -77,7 +53,7 @@ public final class RequestTest {
   /** Common verbs used for apis such as GitHub, AWS, and Google Cloud. */
   @Test public void crudVerbs() throws IOException {
     MediaType contentType = MediaType.get("application/json");
-    RequestBody body = RequestBody.create(contentType, "{}");
+    RequestBody body = RequestBody.create(contentType, "{}".getBytes(StandardCharsets.UTF_8));
 
     Request get = new Request.Builder().url("http://localhost/api").get().build();
     assertThat(get.method()).isEqualTo("GET");

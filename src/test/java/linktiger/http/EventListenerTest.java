@@ -869,12 +869,12 @@ public final class EventListenerTest {
   @Test public void requestBodySuccessHttp1OverHttps() throws IOException {
     enableTlsWithTunnel(false);
     server.setProtocols(Arrays.asList(okhttp3.Protocol.HTTP_1_1));
-    requestBodySuccess(RequestBody.create(MediaType.get("text/plain"), "Hello"), equalTo(5L),
+    requestBodySuccess(RequestBody.create(MediaType.get("text/plain"), "Hello".getBytes(StandardCharsets.UTF_8)), equalTo(5L),
         equalTo(19L));
   }
 
   @Test public void requestBodySuccessHttp() throws IOException {
-    requestBodySuccess(RequestBody.create(MediaType.get("text/plain"), "Hello"), equalTo(5L),
+    requestBodySuccess(RequestBody.create(MediaType.get("text/plain"), "Hello".getBytes(StandardCharsets.UTF_8)), equalTo(5L),
         equalTo(19L));
   }
 
@@ -894,7 +894,7 @@ public final class EventListenerTest {
   }
 
   @Test public void requestBodySuccessEmpty() throws IOException {
-    requestBodySuccess(RequestBody.create(MediaType.get("text/plain"), ""), equalTo(0L),
+    requestBodySuccess(RequestBody.create(MediaType.get("text/plain"), "".getBytes(StandardCharsets.UTF_8)), equalTo(0L),
         equalTo(19L));
   }
 
@@ -930,7 +930,7 @@ public final class EventListenerTest {
     Request request = new Request.Builder()
         .url(server.url("/").toString())
         .header("Expect", "100-continue")
-        .post(RequestBody.create(MediaType.get("text/plain"), "abc"))
+        .post(RequestBody.create(MediaType.get("text/plain"), "abc".getBytes(StandardCharsets.UTF_8)))
         .build();
 
     Call call = client.newCall(request);

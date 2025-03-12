@@ -29,6 +29,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -1418,7 +1419,7 @@ public final class URLConnectionTest {
   private void assertMethodPermitsRequestBody(String requestMethod) {
     Request request = new Request.Builder()
         .url(server.url("/").toString())
-        .method(requestMethod, RequestBody.create(null, "abc"))
+        .method(requestMethod, RequestBody.create(null, "abc".getBytes(StandardCharsets.UTF_8)))
         .build();
     Assertions.assertThat(request.method()).isEqualTo(requestMethod);
   }
@@ -1427,7 +1428,7 @@ public final class URLConnectionTest {
     try {
       new Request.Builder()
           .url(server.url("/").toString())
-          .method(requestMethod, RequestBody.create(null, "abc"))
+          .method(requestMethod, RequestBody.create(null, "abc".getBytes(StandardCharsets.UTF_8)))
           .build();
     } catch (IllegalArgumentException expected) {
     }
@@ -1816,7 +1817,7 @@ public final class URLConnectionTest {
     try {
       new Request.Builder()
           .url(server.url("/").toString())
-          .method("GET", RequestBody.create(null, "abc"))
+          .method("GET", RequestBody.create(null, "abc".getBytes(StandardCharsets.UTF_8)))
           .build();
       fail();
     } catch (IllegalArgumentException expected) {
@@ -1828,7 +1829,7 @@ public final class URLConnectionTest {
         .setBody("A"));
     Response response = getResponse(new Request.Builder()
         .url(server.url("/").toString())
-        .post(RequestBody.create(null, "ABC"))
+        .post(RequestBody.create(null, "ABC".getBytes(StandardCharsets.UTF_8)))
         .build());
     Assertions.assertThat(readAscii(response.body().byteStream(), Integer.MAX_VALUE)).isEqualTo(
         "A");
@@ -1880,7 +1881,7 @@ public final class URLConnectionTest {
     try {
       new Request.Builder()
           .url(server.url("/").toString())
-          .method("HEAD", RequestBody.create(null, ""))
+          .method("HEAD", RequestBody.create(null, "".getBytes(StandardCharsets.UTF_8)))
           .build();
       fail();
     } catch (IllegalArgumentException expected) {
@@ -1995,7 +1996,7 @@ public final class URLConnectionTest {
 
     Response post = getResponse(new Request.Builder()
         .url(server.url("/").toString())
-        .post(RequestBody.create(null, "body!"))
+        .post(RequestBody.create(null, "body!".getBytes(StandardCharsets.UTF_8)))
         .build());
     assertContent("def", post);
 
@@ -2212,7 +2213,7 @@ public final class URLConnectionTest {
 
     Response response = getResponse(new Request.Builder()
         .url(server.url("/").toString())
-        .method(method, RequestBody.create(null, ""))
+        .method(method, RequestBody.create(null, "".getBytes(StandardCharsets.UTF_8)))
         .build());
     assertContent("", response);
     RecordedRequest zeroLengthPayload = server.takeRequest();
@@ -2315,7 +2316,7 @@ public final class URLConnectionTest {
 
     Response response = getResponse(new Request.Builder()
         .url(server.url("/").toString())
-        .delete(RequestBody.create(null, "BODY"))
+        .delete(RequestBody.create(null, "BODY".getBytes(StandardCharsets.UTF_8)))
         .build());
     Assertions.assertThat(response.code()).isEqualTo(200);
 

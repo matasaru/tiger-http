@@ -16,11 +16,8 @@
 package linktiger.http;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 
 import kio.BufferedSink;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 public abstract class RequestBody {
 
@@ -54,23 +51,6 @@ public abstract class RequestBody {
    */
   public boolean isOneShot() {
     return false;
-  }
-
-  /**
-   * Returns a new request body that transmits {@code content}. If {@code contentType} is non-null
-   * and lacks a charset, this will use UTF-8.
-   */
-  public static RequestBody create(MediaType contentType, String content) {
-    Charset charset = UTF_8;
-    if (contentType != null) {
-      charset = contentType.charset();
-      if (charset == null) {
-        charset = UTF_8;
-        contentType = MediaType.parse(contentType + "; charset=utf-8");
-      }
-    }
-    byte[] bytes = content.getBytes(charset);
-    return create(contentType, bytes);
   }
 
   /** Returns a new request body that transmits {@code content}. */
