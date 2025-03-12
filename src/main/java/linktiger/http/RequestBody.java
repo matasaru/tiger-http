@@ -15,14 +15,10 @@
  */
 package linktiger.http;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
 import kio.BufferedSink;
-import kio.Okio;
-import kio.Source;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -102,24 +98,4 @@ public abstract class RequestBody {
     };
   }
 
-  /** Returns a new request body that transmits the content of {@code file}. */
-  public static RequestBody create(final MediaType contentType, final File file) {
-    if (file == null) throw new NullPointerException("file == null");
-
-    return new RequestBody() {
-      @Override public MediaType contentType() {
-        return contentType;
-      }
-
-      @Override public long contentLength() {
-        return file.length();
-      }
-
-      @Override public void writeTo(BufferedSink sink) throws IOException {
-        try (Source source = Okio.source(new FileInputStream(file))) {
-          sink.writeAll(source);
-        }
-      }
-    };
-  }
 }

@@ -15,8 +15,6 @@
  */
 package linktiger.http;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.util.HexFormat;
@@ -69,21 +67,6 @@ public final class RequestTest {
   @Test public void byteArrayRange() throws Exception {
     MediaType contentType = MediaType.get("text/plain");
     RequestBody body = RequestBody.create(contentType, ".abcd".getBytes(UTF_8), 1, 3);
-    assertThat(body.contentType()).isEqualTo(contentType);
-    assertThat(body.contentLength()).isEqualTo(3);
-    assertThat(bodyToHex(body)).isEqualTo("616263");
-    assertThat(bodyToHex(body)).overridingErrorMessage("Retransmit body").isEqualTo(
-        "616263");
-  }
-
-  @Test public void file() throws Exception {
-    File file = File.createTempFile("RequestTest", "tmp");
-    FileWriter writer = new FileWriter(file);
-    writer.write("abc");
-    writer.close();
-
-    MediaType contentType = MediaType.get("text/plain");
-    RequestBody body = RequestBody.create(contentType, file);
     assertThat(body.contentType()).isEqualTo(contentType);
     assertThat(body.contentLength()).isEqualTo(3);
     assertThat(bodyToHex(body)).isEqualTo("616263");

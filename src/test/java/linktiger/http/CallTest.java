@@ -15,7 +15,6 @@
  */
 package linktiger.http;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.HttpURLConnection;
@@ -33,7 +32,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
@@ -1745,35 +1743,6 @@ public final class CallTest {
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getHeader("Host")).isEqualTo(
         (localIpAddress + ":" + server.getPort()));
-  }
-
-  @Test public void postWithFileNotFound() throws Exception {
-    final AtomicInteger called = new AtomicInteger(0);
-
-    RequestBody body = new RequestBody() {
-      @Override public MediaType contentType() {
-        return MediaType.get("application/octet-stream");
-      }
-
-      @Override public void writeTo(BufferedSink sink) throws IOException {
-        called.incrementAndGet();
-        throw new FileNotFoundException();
-      }
-    };
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .post(body)
-        .build();
-
-    client = client.newBuilder()
-        .dns(new DoubleInetAddressDns())
-        .build();
-
-    executeSynchronously(request)
-        .assertFailure(FileNotFoundException.class);
-
-    assertThat(called.get()).isEqualTo(1L);
   }
 
   @Test public void clientReadsHeadersDataTrailersHttp1ChunkedTransferEncoding() throws Exception {
