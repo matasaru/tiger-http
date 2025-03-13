@@ -68,16 +68,6 @@ public final class Exchange {
     return new RequestBodySink(rawRequestBody, contentLength);
   }
 
-  public void flushRequest() throws IOException {
-    try {
-      codec.flushRequest();
-    } catch (IOException e) {
-      eventListener.requestFailed(call, e);
-      trackFailure(e);
-      throw e;
-    }
-  }
-
   public void finishRequest() throws IOException {
     try {
       codec.finishRequest();
@@ -92,9 +82,9 @@ public final class Exchange {
     eventListener.responseHeadersStart(call);
   }
 
-  public Response.Builder readResponseHeaders(boolean expectContinue) throws IOException {
+  public Response.Builder readResponseHeaders() throws IOException {
     try {
-      Response.Builder result = codec.readResponseHeaders(expectContinue);
+      Response.Builder result = codec.readResponseHeaders();
       if (result != null) {
         result.initExchange(this);
       }

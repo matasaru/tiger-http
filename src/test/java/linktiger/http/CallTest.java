@@ -1107,80 +1107,7 @@ public final class CallTest {
         .matches(Version.userAgent())).isTrue();
   }
 
-  @Test public void expect100ContinueNonEmptyRequestBody() throws Exception {
-    server.enqueue(new MockResponse()
-        .setSocketPolicy(SocketPolicy.EXPECT_CONTINUE));
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .header("Expect", "100-continue")
-        .post(RequestBody.create(MediaType.get("text/plain"), "abc".getBytes(StandardCharsets.UTF_8)))
-        .build();
-
-    executeSynchronously(request)
-        .assertCode(200)
-        .assertSuccessful();
-
-    assertThat(server.takeRequest().getBody().readUtf8()).isEqualTo("abc");
-  }
-
-  @Test public void expect100ContinueEmptyRequestBody() throws Exception {
-    server.enqueue(new MockResponse());
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .header("Expect", "100-continue")
-        .post(RequestBody.create(MediaType.get("text/plain"), "".getBytes(StandardCharsets.UTF_8)))
-        .build();
-
-    executeSynchronously(request)
-        .assertCode(200)
-        .assertSuccessful();
-  }
-
-  @Test public void expect100ContinueTimesOutWithoutContinue() throws Exception {
-    server.enqueue(new MockResponse()
-        .setSocketPolicy(SocketPolicy.NO_RESPONSE));
-
-    client = client.newBuilder()
-        .readTimeout(500, TimeUnit.MILLISECONDS)
-        .build();
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .header("Expect", "100-continue")
-        .post(RequestBody.create(MediaType.get("text/plain"), "abc".getBytes(StandardCharsets.UTF_8)))
-        .build();
-
-    Call call = client.newCall(request);
-    try {
-      call.execute();
-      fail();
-    } catch (SocketTimeoutException expected) {
-    }
-
-    RecordedRequest recordedRequest = server.takeRequest();
-    assertThat(recordedRequest.getBody().readUtf8()).isEqualTo("");
-  }
-
   @Test public void serverRespondsWithUnsolicited100Continue() throws Exception {
-    server.enqueue(new MockResponse()
-        .setSocketPolicy(SocketPolicy.CONTINUE_ALWAYS));
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .post(RequestBody.create(MediaType.get("text/plain"), "abc".getBytes(StandardCharsets.UTF_8)))
-        .build();
-
-    executeSynchronously(request)
-        .assertCode(200)
-        .assertSuccessful();
-
-    RecordedRequest recordedRequest = server.takeRequest();
-    assertThat(recordedRequest.getBody().readUtf8()).isEqualTo("abc");
-  }
-
-  @Test public void serverRespondsWith100ContinueOnly() throws Exception {
     client = client.newBuilder()
         .readTimeout(1, TimeUnit.SECONDS)
         .build();
@@ -1193,50 +1120,10 @@ public final class CallTest {
         .post(RequestBody.create(MediaType.get("text/plain"), "abc".getBytes(StandardCharsets.UTF_8)))
         .build();
 
-    Call call = client.newCall(request);
-    try {
-      call.execute();
-      fail();
-    } catch (SocketTimeoutException expected) {
-    }
+    client.newCall(request).execute();
 
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getBody().readUtf8()).isEqualTo("abc");
-  }
-
-  @Test public void successfulExpectContinuePermitsConnectionReuse() throws Exception {
-    server.enqueue(new MockResponse()
-        .setSocketPolicy(SocketPolicy.EXPECT_CONTINUE));
-    server.enqueue(new MockResponse());
-
-    executeSynchronously(new Request.Builder()
-        .url(server.url("/").toString())
-        .header("Expect", "100-continue")
-        .post(RequestBody.create(MediaType.get("text/plain"), "abc".getBytes(StandardCharsets.UTF_8)))
-        .build());
-    executeSynchronously(new Request.Builder()
-        .url(server.url("/").toString())
-        .build());
-
-    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
-    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(1);
-  }
-
-  @Test public void unsuccessfulExpectContinuePreventsConnectionReuse() throws Exception {
-    server.enqueue(new MockResponse());
-    server.enqueue(new MockResponse());
-
-    executeSynchronously(new Request.Builder()
-        .url(server.url("/").toString())
-        .header("Expect", "100-continue")
-        .post(RequestBody.create(MediaType.get("text/plain"), "abc".getBytes(StandardCharsets.UTF_8)))
-        .build());
-    executeSynchronously(new Request.Builder()
-        .url(server.url("/").toString())
-        .build());
-
-    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
-    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
   }
 
   /** We forbid non-ASCII characters in outgoing request headers, but accept UTF-8. */

@@ -173,47 +173,19 @@ public class Call {
 
             exchange.writeRequestHeaders(networkRequest);
 
-            boolean responseHeadersStarted = false;
-            Response.Builder networkResponseBuilder = null;
             if (!(networkRequest.method().equals("GET") || networkRequest.method().equals("HEAD")) && networkRequest.body() != null) {
-              // If there's a "Expect: 100-continue" header on the request, wait for a "HTTP/1.1 100 Continue" response
-              // before transmitting the request body. If we don't get that, return what we did get (such as a 4xx response)
-              // without ever transmitting the request body.
-              if ("100-continue".equalsIgnoreCase(networkRequest.header("Expect"))) {
-                exchange.flushRequest();
-                responseHeadersStarted = true;
-                exchange.responseHeadersStart();
-                networkResponseBuilder = exchange.readResponseHeaders(true);
-              }
-
-              if (networkResponseBuilder == null) {
-                // Write the request body if the "Expect: 100-continue" expectation was met.
-                BufferedSink bufferedRequestBody = new RealBufferedSink(exchange.createRequestBody(networkRequest));
-                networkRequest.body().writeTo(bufferedRequestBody);
-                bufferedRequestBody.close();
-              }
-              else {
-                exchange.noRequestBody();
-                exchange.connection();
-                // If the "Expect: 100-continue" expectation wasn't met, prevent the HTTP/1 connection
-                // from being reused. Otherwise we're still obligated to transmit the request body to
-                // leave the connection in a consistent state.
-                exchange.noNewExchangesOnConnection();
-              }
+              BufferedSink bufferedRequestBody = new RealBufferedSink(exchange.createRequestBody(networkRequest));
+              networkRequest.body().writeTo(bufferedRequestBody);
+              bufferedRequestBody.close();
             }
             else {
               exchange.noRequestBody();
             }
 
             exchange.finishRequest();
+            exchange.responseHeadersStart();
 
-            if (!responseHeadersStarted) {
-              exchange.responseHeadersStart();
-            }
-
-            if (networkResponseBuilder == null) {
-              networkResponseBuilder = exchange.readResponseHeaders(false);
-            }
+            var networkResponseBuilder = exchange.readResponseHeaders();
 
             Response networkResponse = networkResponseBuilder
                     .request(networkRequest)
@@ -221,18 +193,6 @@ public class Call {
                     .sentRequestAtMillis(sentRequestMillis)
                     .receivedResponseAtMillis(System.currentTimeMillis())
                     .build();
-
-            int code = networkResponse.code();
-            if (code == 100) {
-              // server sent a 100-continue even though we did not request one.
-              // try again to read the actual response
-              networkResponse = exchange.readResponseHeaders(false)
-                      .request(networkRequest)
-                      .handshake(exchange.connection().handshake())
-                      .sentRequestAtMillis(sentRequestMillis)
-                      .receivedResponseAtMillis(System.currentTimeMillis())
-                      .build();
-            }
 
             exchange.responseHeadersEnd(networkResponse);
 

@@ -39,7 +39,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  *     <li>Open a sink to write the request body. Either {@linkplain #newKnownLengthSink known
  *         length} or {@link #newChunkedSink chunked}.
  *     <li>Write to and then close that sink.
- *     <li>{@linkplain #readResponseHeaders Read response headers}.
+ *     <li>{@linkplain ExchangeCodec#readResponseHeaders Read response headers}.
  *     <li>Open a source to read the response body. Either {@linkplain #newFixedLengthSource
  *         fixed-length}, {@linkplain #newChunkedSource chunked} or {@linkplain
  *         #newUnknownLengthSource unknown length}.
@@ -165,10 +165,6 @@ public final class Http1ExchangeCodec implements ExchangeCodec {
     return state == STATE_CLOSED;
   }
 
-  @Override public void flushRequest() throws IOException {
-    sink.flush();
-  }
-
   @Override public void finishRequest() throws IOException {
     sink.flush();
   }
@@ -187,7 +183,7 @@ public final class Http1ExchangeCodec implements ExchangeCodec {
     state = STATE_OPEN_REQUEST_BODY;
   }
 
-  @Override public Response.Builder readResponseHeaders(boolean expectContinue) throws IOException {
+  @Override public Response.Builder readResponseHeaders() throws IOException {
     if (state != STATE_OPEN_REQUEST_BODY && state != STATE_READ_RESPONSE_HEADERS) {
       throw new IllegalStateException("state: " + state);
     }
@@ -200,13 +196,6 @@ public final class Http1ExchangeCodec implements ExchangeCodec {
           .code(statusLine.code)
           .message(statusLine.message)
           .headers(readHeaders());
-
-      if (expectContinue && statusLine.code == StatusLine.HTTP_CONTINUE) {
-        return null;
-      } else if (statusLine.code == StatusLine.HTTP_CONTINUE) {
-        state = STATE_READ_RESPONSE_HEADERS;
-        return responseBuilder;
-      }
 
       state = STATE_OPEN_RESPONSE_BODY;
       return responseBuilder;

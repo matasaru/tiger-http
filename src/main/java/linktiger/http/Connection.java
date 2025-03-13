@@ -356,7 +356,7 @@ public final class Connection {
       sink.timeout().timeout(writeTimeout, MILLISECONDS);
       tunnelCodec.writeRequest(tunnelRequest.headers(), requestLine);
       tunnelCodec.finishRequest();
-      Response response = tunnelCodec.readResponseHeaders(false)
+      Response response = tunnelCodec.readResponseHeaders()
           .request(tunnelRequest)
           .build();
       tunnelCodec.skipConnectBody(response);

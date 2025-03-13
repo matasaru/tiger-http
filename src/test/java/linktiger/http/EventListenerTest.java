@@ -921,25 +921,4 @@ public final class EventListenerTest {
         .build();
     server.useHttps(handshakeCertificates.sslSocketFactory(), tunnelProxy);
   }
-
-  /** Response headers start, then the entire request body, then response headers end. */
-  @Test public void expectContinueStartsResponseHeadersEarly() throws Exception {
-    server.enqueue(new MockResponse()
-        .setSocketPolicy(SocketPolicy.EXPECT_CONTINUE));
-
-    Request request = new Request.Builder()
-        .url(server.url("/").toString())
-        .header("Expect", "100-continue")
-        .post(RequestBody.create(MediaType.get("text/plain"), "abc".getBytes(StandardCharsets.UTF_8)))
-        .build();
-
-    Call call = client.newCall(request);
-    call.execute();
-
-    List<String> expectedEvents = Arrays.asList("CallStart", "DnsStart", "DnsEnd", "ConnectStart",
-        "ConnectEnd", "ConnectionAcquired", "RequestHeadersStart", "RequestHeadersEnd",
-        "ResponseHeadersStart", "RequestBodyStart", "RequestBodyEnd", "ResponseHeadersEnd",
-        "ResponseBodyStart", "ResponseBodyEnd", "ConnectionReleased", "CallEnd");
-    Assertions.assertThat(listener.recordedEventTypes()).isEqualTo(expectedEvents);
-  }
 }
