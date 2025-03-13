@@ -336,7 +336,7 @@ public class Call {
     if (!client.retryOnConnectionFailure()) return false;
 
     // We can't send the request body again.
-    if (requestSendStarted && requestIsOneShot(e)) return false;
+    if (requestSendStarted && e instanceof FileNotFoundException) return false;
 
     // This exception is fatal.
     if (!isRecoverable(e, requestSendStarted)) return false;
@@ -346,10 +346,6 @@ public class Call {
 
     // For failure recovery, use the same route selector with a new connection.
     return true;
-  }
-
-  private boolean requestIsOneShot(IOException e) {
-      return e instanceof FileNotFoundException;
   }
 
   private boolean isRecoverable(IOException e, boolean requestSendStarted) {
