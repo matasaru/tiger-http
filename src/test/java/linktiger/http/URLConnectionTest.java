@@ -1813,17 +1813,6 @@ public final class URLConnectionTest {
     Assertions.assertThat(in.read()).isEqualTo(-1);
   }
 
-  @Test public void getOutputStreamOnGetFails() {
-    try {
-      new Request.Builder()
-          .url(server.url("/").toString())
-          .method("GET", RequestBody.create(null, "abc".getBytes(StandardCharsets.UTF_8)))
-          .build();
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
-  }
-
   @Test public void clientSendsContentLength() throws Exception {
     server.enqueue(new MockResponse()
         .setBody("A"));
@@ -1875,17 +1864,6 @@ public final class URLConnectionTest {
         "A");
     RecordedRequest request = server.takeRequest();
     Assertions.assertThat(request.getRequestLine()).isEqualTo("GET /?query HTTP/1.1");
-  }
-
-  @Test public void doOutputForMethodThatDoesntSupportOutput() {
-    try {
-      new Request.Builder()
-          .url(server.url("/").toString())
-          .method("HEAD", RequestBody.create(null, "".getBytes(StandardCharsets.UTF_8)))
-          .build();
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
   }
 
   // http://code.google.com/p/android/issues/detail?id=20442

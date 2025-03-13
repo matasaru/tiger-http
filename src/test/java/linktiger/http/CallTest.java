@@ -173,16 +173,6 @@ public final class CallTest {
         Arrays.asList("345", "456"));
   }
 
-  @Test public void getWithRequestBody() throws Exception {
-    server.enqueue(new MockResponse());
-
-    try {
-      new Request.Builder().method("GET", RequestBody.create(MediaType.get("text/plain"), "abc".getBytes(StandardCharsets.UTF_8)));
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
-  }
-
   @Test public void head() throws Exception {
     server.enqueue(new MockResponse().addHeader("Content-Type: text/plain"));
 

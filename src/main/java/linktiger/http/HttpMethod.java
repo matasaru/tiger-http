@@ -17,12 +17,6 @@ package linktiger.http;
 
 public final class HttpMethod {
 
-  public static boolean requiresRequestBody(String method) {
-    return method.equals("POST")
-        || method.equals("PUT")
-        || method.equals("PATCH");
-  }
-
   public static boolean permitsRequestBody(String method) {
     return !(method.equals("GET") || method.equals("HEAD"));
   }
