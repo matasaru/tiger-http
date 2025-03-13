@@ -37,22 +37,6 @@ public abstract class RequestBody {
   /** Writes the content of this request to {@code sink}. */
   public abstract void writeTo(BufferedSink sink) throws IOException;
 
-  /**
-   * Returns true if this body expects at most one call to {@link #writeTo} and can be transmitted
-   * at most once. This is typically used when writing the request body is destructive and it is not
-   * possible to recreate the request body after it has been sent.
-   *
-   * <p>This method returns false unless it is overridden by a subclass.
-   *
-   * <p>By default OkHttp will attempt to retransmit request bodies when the original request fails
-   * due to a stale connection, a client timeout (HTTP 408), a satisfied authorization challenge
-   * (HTTP 401 and 407), or a retryable server failure (HTTP 503 with a {@code Retry-After: 0}
-   * header).
-   */
-  public boolean isOneShot() {
-    return false;
-  }
-
   /** Returns a new request body that transmits {@code content}. */
   public static RequestBody create(final MediaType contentType, final byte[] content) {
     if (content == null) throw new NullPointerException("content == null");

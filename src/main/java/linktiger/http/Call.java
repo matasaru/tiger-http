@@ -267,14 +267,14 @@ public class Call {
           }
           catch (RouteException e) {
             // The attempt to connect via a route failed. The request will not have been sent.
-            if (!recover(e.getLastConnectException(), transmitter, false, request)) {
+            if (!recover(e.getLastConnectException(), transmitter, false)) {
               throw e.getFirstConnectException();
             }
             continue;
           }
           catch (IOException e) {
             // An attempt to communicate with a server failed. The request may have been sent.
-              if (!recover(e, transmitter, true, request)) throw e;
+              if (!recover(e, transmitter, true)) throw e;
             continue;
           }
           finally {
@@ -331,12 +331,12 @@ public class Call {
    * be recovered if the body is buffered or if the failure occurred before the request has been
    * sent.
    */
-  private boolean recover(IOException e, Transmitter transmitter, boolean requestSendStarted, Request userRequest) {
+  private boolean recover(IOException e, Transmitter transmitter, boolean requestSendStarted) {
     // The application layer has forbidden retries.
     if (!client.retryOnConnectionFailure()) return false;
 
     // We can't send the request body again.
-    if (requestSendStarted && requestIsOneShot(e, userRequest)) return false;
+    if (requestSendStarted && requestIsOneShot(e)) return false;
 
     // This exception is fatal.
     if (!isRecoverable(e, requestSendStarted)) return false;
@@ -348,10 +348,8 @@ public class Call {
     return true;
   }
 
-  private boolean requestIsOneShot(IOException e, Request userRequest) {
-    RequestBody requestBody = userRequest.body();
-    return (requestBody != null && requestBody.isOneShot()) ||
-            e instanceof FileNotFoundException;
+  private boolean requestIsOneShot(IOException e) {
+      return e instanceof FileNotFoundException;
   }
 
   private boolean isRecoverable(IOException e, boolean requestSendStarted) {
