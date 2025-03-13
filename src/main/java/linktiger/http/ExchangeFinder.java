@@ -44,8 +44,6 @@ final class ExchangeFinder {
   private final Transmitter transmitter;
   private final Address address;
   private final ConnectionPool connectionPool;
-  private final Call call;
-  private final EventListener eventListener;
 
   private RouteSelector.Selection routeSelection;
 
@@ -55,15 +53,11 @@ final class ExchangeFinder {
   private boolean hasStreamFailure;
   private Route nextRouteToTry;
 
-  ExchangeFinder(Transmitter transmitter, ConnectionPool connectionPool,
-      Address address, Call call, EventListener eventListener) {
+  ExchangeFinder(Transmitter transmitter, ConnectionPool connectionPool, Address address) {
     this.transmitter = transmitter;
     this.connectionPool = connectionPool;
     this.address = address;
-    this.call = call;
-    this.eventListener = eventListener;
-    this.routeSelector = new RouteSelector(
-        address, connectionPool.routeDatabase, call, eventListener);
+    this.routeSelector = new RouteSelector(address, connectionPool.routeDatabase);
   }
 
   public ExchangeCodec find(HttpClient client, boolean doExtensiveHealthChecks) {
@@ -122,7 +116,6 @@ final class ExchangeFinder {
     boolean foundPooledConnection = false;
     Connection result = null;
     Route selectedRoute = null;
-    Connection releasedConnection;
     Socket toClose;
     synchronized (connectionPool) {
       if (transmitter.isCanceled()) throw new IOException("Canceled");
@@ -130,7 +123,6 @@ final class ExchangeFinder {
 
       // Attempt to use an already-allocated connection. We need to be careful here because our
       // already-allocated connection may have been restricted from creating new exchanges.
-      releasedConnection = transmitter.connection;
       toClose = transmitter.connection != null && transmitter.connection.noNewExchanges
               ? transmitter.releaseConnectionNoEvents()
               : null;
@@ -138,7 +130,6 @@ final class ExchangeFinder {
       if (transmitter.connection != null) {
         // We had an already-allocated connection and it's good.
         result = transmitter.connection;
-        releasedConnection = null;
       }
 
       if (result == null) {
@@ -161,12 +152,6 @@ final class ExchangeFinder {
       }
     }
 
-    if (releasedConnection != null) {
-      eventListener.connectionReleased(call, releasedConnection);
-    }
-    if (foundPooledConnection) {
-      eventListener.connectionAcquired(call, result);
-    }
     if (result != null) {
       // If we found an already-allocated or pooled connection, we're done.
       return result;
@@ -205,12 +190,11 @@ final class ExchangeFinder {
 
     // If we found a pooled connection on the 2nd time around, we're done.
     if (foundPooledConnection) {
-      eventListener.connectionAcquired(call, result);
       return result;
     }
 
     // Do TCP + TLS handshakes. This is a blocking operation.
-    result.connect(connectTimeout, readTimeout, writeTimeout, connectionRetryEnabled, call, eventListener);
+    result.connect(connectTimeout, readTimeout, writeTimeout, connectionRetryEnabled);
     connectionPool.routeDatabase.connected(result.route());
 
     synchronized (connectionPool) {
@@ -221,7 +205,6 @@ final class ExchangeFinder {
       transmitter.acquireConnectionNoEvents(result);
     }
 
-    eventListener.connectionAcquired(call, result);
     return result;
   }
 

@@ -39,8 +39,6 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 public final class Transmitter {
   private final HttpClient client;
   private final ConnectionPool connectionPool;
-  private final Call call;
-  private final EventListener eventListener;
   private final AsyncTimeout timeout = new AsyncTimeout() {
     @Override protected void timedOut() {
       cancel();
@@ -60,11 +58,9 @@ public final class Transmitter {
   private boolean canceled;
   private boolean noMoreExchanges;
 
-  public Transmitter(HttpClient client, Call call) {
+  public Transmitter(HttpClient client) {
     this.client = client;
     this.connectionPool = client.connectionPool();
-    this.call = call;
-    this.eventListener = client.eventListenerFactory().create(call);
     this.timeout.timeout(client.callTimeoutMillis(), MILLISECONDS);
   }
 
@@ -90,7 +86,6 @@ public final class Transmitter {
       // These are expensive to allocate
       this.callStackTrace = new Throwable("response.body().close()");
     }
-    eventListener.callStart(call);
   }
 
   /**
@@ -111,8 +106,7 @@ public final class Transmitter {
     }
 
     this.request = request;
-    this.exchangeFinder = new ExchangeFinder(this, connectionPool, createAddress(request.url()),
-        call, eventListener);
+    this.exchangeFinder = new ExchangeFinder(this, connectionPool, createAddress(request.url()));
   }
 
   private Address createAddress(Url url) {
@@ -141,7 +135,7 @@ public final class Transmitter {
     }
 
     ExchangeCodec codec = exchangeFinder.find(client, doExtensiveHealthChecks);
-    Exchange result = new Exchange(this, call, eventListener, exchangeFinder, codec);
+    Exchange result = new Exchange(this, exchangeFinder, codec);
 
     synchronized (connectionPool) {
       this.exchange = result;
@@ -252,17 +246,14 @@ public final class Transmitter {
    */
   private IOException maybeReleaseConnection(IOException e, boolean force) {
     Socket socket;
-    Connection releasedConnection;
     boolean callEnd;
     synchronized (connectionPool) {
       if (force && exchange != null) {
         throw new IllegalStateException("cannot release connection while it is in use");
       }
-      releasedConnection = this.connection;
       socket = this.connection != null && exchange == null && (force || noMoreExchanges)
           ? releaseConnectionNoEvents()
           : null;
-      if (this.connection != null) releasedConnection = null;
       callEnd = noMoreExchanges && exchange == null;
     }
     if (socket != null) {
@@ -272,18 +263,8 @@ public final class Transmitter {
       }
     }
 
-    if (releasedConnection != null) {
-      eventListener.connectionReleased(call, releasedConnection);
-    }
-
     if (callEnd) {
-      boolean callFailed = (e != null);
       e = timeoutExit(e);
-      if (callFailed) {
-        eventListener.callFailed(call, e);
-      } else {
-        eventListener.callEnd(call);
-      }
     }
     return e;
   }

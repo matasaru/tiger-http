@@ -31,16 +31,11 @@ import kio.Source;
  */
 public final class Exchange {
   final Transmitter transmitter;
-  final Call call;
-  final EventListener eventListener;
   final ExchangeFinder finder;
   final ExchangeCodec codec;
 
-  public Exchange(Transmitter transmitter, Call call, EventListener eventListener,
-      ExchangeFinder finder, ExchangeCodec codec) {
+  public Exchange(Transmitter transmitter, ExchangeFinder finder, ExchangeCodec codec) {
     this.transmitter = transmitter;
-    this.call = call;
-    this.eventListener = eventListener;
     this.finder = finder;
     this.codec = codec;
   }
@@ -51,11 +46,8 @@ public final class Exchange {
 
   public void writeRequestHeaders(Request request) throws IOException {
     try {
-      eventListener.requestHeadersStart(call);
       codec.writeRequestHeaders(request);
-      eventListener.requestHeadersEnd(call, request);
     } catch (IOException e) {
-      eventListener.requestFailed(call, e);
       trackFailure(e);
       throw e;
     }
@@ -63,7 +55,6 @@ public final class Exchange {
 
   public Sink createRequestBody(Request request) throws IOException {
     long contentLength = request.body().contentLength();
-    eventListener.requestBodyStart(call);
     Sink rawRequestBody = codec.createRequestBody(request, contentLength);
     return new RequestBodySink(rawRequestBody, contentLength);
   }
@@ -72,14 +63,9 @@ public final class Exchange {
     try {
       codec.finishRequest();
     } catch (IOException e) {
-      eventListener.requestFailed(call, e);
       trackFailure(e);
       throw e;
     }
-  }
-
-  public void responseHeadersStart() {
-    eventListener.responseHeadersStart(call);
   }
 
   public Response.Builder readResponseHeaders() throws IOException {
@@ -90,26 +76,19 @@ public final class Exchange {
       }
       return result;
     } catch (IOException e) {
-      eventListener.responseFailed(call, e);
       trackFailure(e);
       throw e;
     }
   }
 
-  public void responseHeadersEnd(Response response) {
-    eventListener.responseHeadersEnd(call, response);
-  }
-
   public ResponseBody openResponseBody(Response response) throws IOException {
     try {
-      eventListener.responseBodyStart(call);
       String contentType = response.header("Content-Type");
       long contentLength = codec.reportedContentLength(response);
       Source rawSource = codec.openResponseBodySource(response);
       ResponseBodySource source = new ResponseBodySource(rawSource, contentLength);
       return new ResponseBody(contentType, contentLength, new RealBufferedSource(source));
     } catch (IOException e) {
-      eventListener.responseFailed(call, e);
       trackFailure(e);
       throw e;
     }
@@ -132,24 +111,9 @@ public final class Exchange {
     codec.connection().trackFailure(e);
   }
 
-  IOException bodyComplete(
-      long bytesRead, boolean responseDone, boolean requestDone, IOException e) {
+  IOException bodyComplete(boolean responseDone, boolean requestDone, IOException e) {
     if (e != null) {
       trackFailure(e);
-    }
-    if (requestDone) {
-      if (e != null) {
-        eventListener.requestFailed(call, e);
-      } else {
-        eventListener.requestBodyEnd(call, bytesRead);
-      }
-    }
-    if (responseDone) {
-      if (e != null) {
-        eventListener.responseFailed(call, e);
-      } else {
-        eventListener.responseBodyEnd(call, bytesRead);
-      }
     }
     return transmitter.exchangeMessageDone(this, requestDone, responseDone, e);
   }
@@ -210,7 +174,7 @@ public final class Exchange {
     private IOException complete(IOException e) {
       if (completed) return e;
       completed = true;
-      return bodyComplete(bytesReceived, false, true, e);
+      return bodyComplete(false, true, e);
     }
   }
 
@@ -270,7 +234,7 @@ public final class Exchange {
     IOException complete(IOException e) {
       if (completed) return e;
       completed = true;
-      return bodyComplete(bytesReceived, true, false, e);
+      return bodyComplete(true, false, e);
     }
   }
 }

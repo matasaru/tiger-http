@@ -60,7 +60,7 @@ public class Call {
   public static Call newCall(HttpClient client, Request originalRequest) {
     // Safely publish the Call instance to the EventListener.
     Call call = new Call(client, originalRequest);
-    call.transmitter = new Transmitter(client, call);
+    call.transmitter = new Transmitter(client);
     return call;
   }
 
@@ -183,7 +183,6 @@ public class Call {
             }
 
             exchange.finishRequest();
-            exchange.responseHeadersStart();
 
             var networkResponseBuilder = exchange.readResponseHeaders();
 
@@ -193,8 +192,6 @@ public class Call {
                     .sentRequestAtMillis(sentRequestMillis)
                     .receivedResponseAtMillis(System.currentTimeMillis())
                     .build();
-
-            exchange.responseHeadersEnd(networkResponse);
 
             networkResponse = networkResponse.newBuilder()
                     .body(exchange.openResponseBody(networkResponse))

@@ -41,11 +41,6 @@ import javax.net.ssl.SSLProtocolException;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
-import linktiger.http.RecordingEventListener.CallEnd;
-import linktiger.http.RecordingEventListener.ConnectionAcquired;
-import linktiger.http.RecordingEventListener.ConnectionReleased;
-import linktiger.http.RecordingEventListener.ResponseFailed;
-
 import okhttp3.internal.Internal;
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
@@ -77,11 +72,8 @@ public final class CallTest {
   @Rule public final MockWebServer server2 = new MockWebServer();
   @Rule public final HttpClientTestRule clientTestRule = new HttpClientTestRule();
 
-  private final RecordingEventListener listener = new RecordingEventListener();
   private HandshakeCertificates handshakeCertificates = localhost();
-  private HttpClient client = clientTestRule.client.newBuilder()
-      .eventListener(listener)
-      .build();
+  private HttpClient client = clientTestRule.client.newBuilder().build();
   private TestLogHandler logHandler = new TestLogHandler();
   private Logger logger = Logger.getLogger(HttpClient.class.getName());
 
@@ -652,31 +644,6 @@ public final class CallTest {
     executeSynchronously("/").assertHandshake();
   }
 
-  @Test public void recoverWhenRetryOnConnectionFailureIsTrue() throws Exception {
-    server.enqueue(new MockResponse().setBody("seed connection pool"));
-    server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AFTER_REQUEST));
-    server.enqueue(new MockResponse().setBody("retry success"));
-
-    client = client.newBuilder()
-        .dns(new DoubleInetAddressDns())
-        .build();
-    assertThat(client.retryOnConnectionFailure()).isTrue();
-
-    executeSynchronously("/").assertBody("seed connection pool");
-    executeSynchronously("/").assertBody("retry success");
-
-    // The call that seeds the connection pool.
-    listener.removeUpToEvent(CallEnd.class);
-
-    // The ResponseFailed event is not necessarily fatal!
-    listener.removeUpToEvent(ConnectionAcquired.class);
-    listener.removeUpToEvent(ResponseFailed.class);
-    listener.removeUpToEvent(ConnectionReleased.class);
-    listener.removeUpToEvent(ConnectionAcquired.class);
-    listener.removeUpToEvent(ConnectionReleased.class);
-    listener.removeUpToEvent(CallEnd.class);
-  }
-
   @Test public void noRecoverWhenRetryOnConnectionFailureIsFalse() throws Exception {
     server.enqueue(new MockResponse().setBody("seed connection pool"));
     server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AFTER_REQUEST));
@@ -986,30 +953,6 @@ public final class CallTest {
     long elapsedNanos = System.nanoTime() - startNanos;
     assertThat((float) TimeUnit.NANOSECONDS.toMillis(elapsedNanos)).isCloseTo(
         (float) cancelDelayMillis, offset(100f));
-  }
-
-  @Test
-  public void cancelWhileRequestHeadersAreSent() throws Exception {
-    server.enqueue(new MockResponse().setBody("A"));
-
-    EventListener listener = new EventListener() {
-      @Override public void requestHeadersStart(Call call) {
-        try {
-          // Cancel call from another thread to avoid reentrance.
-          cancelLater(call, 0).join();
-        } catch (InterruptedException e) {
-          throw new AssertionError();
-        }
-      }
-    };
-    client = client.newBuilder().eventListener(listener).build();
-
-    Call call = client.newCall(new Request.Builder().url(server.url("/a").toString()).build());
-    try {
-      call.execute();
-      fail();
-    } catch (IOException expected) {
-    }
   }
 
   @Test public void cancelBeforeBodyIsRead() throws Exception {

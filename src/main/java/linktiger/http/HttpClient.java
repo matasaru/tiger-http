@@ -109,7 +109,6 @@ public class HttpClient {
 
   final Proxy proxy;
   final List<ConnectionSpec> connectionSpecs;
-  final EventListener.Factory eventListenerFactory;
   final ProxySelector proxySelector;
   final CookieJar cookieJar;
   final SocketFactory socketFactory;
@@ -132,7 +131,6 @@ public class HttpClient {
   HttpClient(Builder builder) {
     this.proxy = builder.proxy;
     this.connectionSpecs = builder.connectionSpecs;
-    this.eventListenerFactory = builder.eventListenerFactory;
     this.proxySelector = builder.proxySelector;
     this.cookieJar = builder.cookieJar;
     this.socketFactory = builder.socketFactory;
@@ -258,10 +256,6 @@ public class HttpClient {
     return connectionSpecs;
   }
 
-  public EventListener.Factory eventListenerFactory() {
-    return eventListenerFactory;
-  }
-
   /**
    * Prepares the {@code request} to be executed at some point in the future.
    */
@@ -276,7 +270,6 @@ public class HttpClient {
   public static final class Builder {
     Proxy proxy;
     List<ConnectionSpec> connectionSpecs;
-    EventListener.Factory eventListenerFactory;
     ProxySelector proxySelector;
     CookieJar cookieJar;
     SocketFactory socketFactory;
@@ -294,7 +287,6 @@ public class HttpClient {
 
     public Builder() {
       connectionSpecs = DEFAULT_CONNECTION_SPECS;
-      eventListenerFactory = EventListener.factory(EventListener.NONE);
       proxySelector = ProxySelector.getDefault();
       if (proxySelector == null) {
         proxySelector = new NullProxySelector();
@@ -316,7 +308,6 @@ public class HttpClient {
     Builder(HttpClient httpClient) {
       this.proxy = httpClient.proxy;
       this.connectionSpecs = httpClient.connectionSpecs;
-      this.eventListenerFactory = httpClient.eventListenerFactory;
       this.proxySelector = httpClient.proxySelector;
       this.cookieJar = httpClient.cookieJar;
       this.socketFactory = httpClient.socketFactory;
@@ -621,32 +612,6 @@ public class HttpClient {
 
     public Builder connectionSpecs(List<ConnectionSpec> connectionSpecs) {
       this.connectionSpecs = List.copyOf(connectionSpecs);
-      return this;
-    }
-
-    /**
-     * Configure a single client scoped listener that will receive all analytic events
-     * for this client.
-     *
-     * @see EventListener for semantics and restrictions on listener implementations.
-     */
-    public Builder eventListener(EventListener eventListener) {
-      if (eventListener == null) throw new NullPointerException("eventListener == null");
-      this.eventListenerFactory = EventListener.factory(eventListener);
-      return this;
-    }
-
-    /**
-     * Configure a factory to provide per-call scoped listeners that will receive analytic events
-     * for this client.
-     *
-     * @see EventListener for semantics and restrictions on listener implementations.
-     */
-    public Builder eventListenerFactory(EventListener.Factory eventListenerFactory) {
-      if (eventListenerFactory == null) {
-        throw new NullPointerException("eventListenerFactory == null");
-      }
-      this.eventListenerFactory = eventListenerFactory;
       return this;
     }
 

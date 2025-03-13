@@ -146,9 +146,7 @@ public final class Connection {
     }
   }
 
-  public void connect(int connectTimeout, int readTimeout, int writeTimeout,
-      boolean connectionRetryEnabled, Call call,
-      EventListener eventListener) {
+  public void connect(int connectTimeout, int readTimeout, int writeTimeout, boolean connectionRetryEnabled) {
     if (protocol != null) throw new IllegalStateException("already connected");
 
     RouteException routeException = null;
@@ -165,25 +163,22 @@ public final class Connection {
     while (true) {
       try {
         if (route.requiresTunnel()) {
-          connectTunnel(connectTimeout, readTimeout, writeTimeout, call, eventListener);
+          connectTunnel(connectTimeout, readTimeout, writeTimeout);
           if (rawSocket == null) {
             // We were unable to connect the tunnel but properly closed down our resources.
             break;
           }
         } else {
-          connectSocket(connectTimeout, readTimeout, call, eventListener);
+          connectSocket(connectTimeout, readTimeout);
         }
 
         if (route.address().sslSocketFactory() == null) {
           socket = rawSocket;
           protocol = Protocol.HTTP_1_1;
         } else {
-          eventListener.secureConnectStart(call);
           connectTls(connectionSpecSelector);
-          eventListener.secureConnectEnd(call, handshake);
         }
 
-        eventListener.connectEnd(call, route.socketAddress(), route.proxy(), protocol);
         break;
       } catch (IOException e) {
         if (socket != null) {
@@ -204,8 +199,6 @@ public final class Connection {
         sink = null;
         handshake = null;
         protocol = null;
-
-        eventListener.connectFailed(call, route.socketAddress(), route.proxy(), null, e);
 
         if (routeException == null) {
           routeException = new RouteException(e);
@@ -230,12 +223,11 @@ public final class Connection {
    * Does all the work to build an HTTPS connection over a proxy tunnel. The catch here is that a
    * proxy server can issue an auth challenge and then close the connection.
    */
-  private void connectTunnel(int connectTimeout, int readTimeout, int writeTimeout, Call call,
-      EventListener eventListener) throws IOException {
+  private void connectTunnel(int connectTimeout, int readTimeout, int writeTimeout) throws IOException {
     Request tunnelRequest = createTunnelRequest();
     Url url = tunnelRequest.url();
     for (int i = 0; i < MAX_TUNNEL_ATTEMPTS; i++) {
-      connectSocket(connectTimeout, readTimeout, call, eventListener);
+      connectSocket(connectTimeout, readTimeout);
       tunnelRequest = createTunnel(readTimeout, writeTimeout, tunnelRequest, url);
 
       if (tunnelRequest == null) break; // Tunnel successfully created.
@@ -251,13 +243,11 @@ public final class Connection {
       rawSocket = null;
       sink = null;
       source = null;
-      eventListener.connectEnd(call, route.socketAddress(), route.proxy(), null);
     }
   }
 
   /** Does all the work necessary to build a full HTTP or HTTPS connection on a raw socket. */
-  private void connectSocket(int connectTimeout, int readTimeout, Call call,
-      EventListener eventListener) throws IOException {
+  private void connectSocket(int connectTimeout, int readTimeout) throws IOException {
     Proxy proxy = route.proxy();
     Address address = route.address();
 
@@ -265,7 +255,6 @@ public final class Connection {
         ? address.socketFactory().createSocket()
         : new Socket(proxy);
 
-    eventListener.connectStart(call, route.socketAddress(), proxy);
     rawSocket.setSoTimeout(readTimeout);
     try {
       rawSocket.connect(route.socketAddress(), connectTimeout);

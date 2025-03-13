@@ -77,7 +77,7 @@ public final class ConnectionPoolTest {
           .connectionPool(pool)
           .build();
       Call call = client.newCall(newRequest(addressA));
-      Transmitter transmitter = new Transmitter(client, call);
+      Transmitter transmitter = new Transmitter(client);
       transmitter.prepareToConnect(call.request());
       transmitter.acquireConnectionNoEvents(c1);
     }
@@ -176,7 +176,7 @@ public final class ConnectionPoolTest {
           .connectionPool(pool)
           .build();
       Call call = client.newCall(newRequest(connection.route().address()));
-      Transmitter transmitter = new Transmitter(client, call);
+      Transmitter transmitter = new Transmitter(client);
       transmitter.prepareToConnect(call.request());
       transmitter.acquireConnectionNoEvents(connection);
     }

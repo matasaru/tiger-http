@@ -34,8 +34,6 @@ import java.util.NoSuchElementException;
 final class RouteSelector {
   private final Address address;
   private final RouteDatabase routeDatabase;
-  private final Call call;
-  private final EventListener eventListener;
 
   /* State for negotiating the next proxy to use. */
   private List<Proxy> proxies = Collections.emptyList();
@@ -47,12 +45,9 @@ final class RouteSelector {
   /* State for negotiating failed routes */
   private final List<Route> postponedRoutes = new ArrayList<>();
 
-  RouteSelector(Address address, RouteDatabase routeDatabase, Call call,
-      EventListener eventListener) {
+  RouteSelector(Address address, RouteDatabase routeDatabase) {
     this.address = address;
     this.routeDatabase = routeDatabase;
-    this.call = call;
-    this.eventListener = eventListener;
 
     resetNextProxy(address.url(), address.proxy());
   }
@@ -159,15 +154,11 @@ final class RouteSelector {
     if (proxy.type() == Proxy.Type.SOCKS) {
       inetSocketAddresses.add(InetSocketAddress.createUnresolved(socketHost, socketPort));
     } else {
-      eventListener.dnsStart(call, socketHost);
-
       // Try each address for best behavior in mixed IPv4/IPv6 environments.
       List<InetAddress> addresses = address.dns().lookup(socketHost);
       if (addresses.isEmpty()) {
         throw new UnknownHostException(address.dns() + " returned no addresses for " + socketHost);
       }
-
-      eventListener.dnsEnd(call, socketHost, addresses);
 
       for (int i = 0, size = addresses.size(); i < size; i++) {
         InetAddress inetAddress = addresses.get(i);
