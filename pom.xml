@@ -10,7 +10,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <okhttp3.version>3.14.9</okhttp3.version>
+    <okhttp3.version>4.12.0</okhttp3.version>
   </properties>
 
   <dependencies>

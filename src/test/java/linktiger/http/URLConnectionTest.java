@@ -570,7 +570,7 @@ public final class URLConnectionTest {
     assertContent("this response comes via SSL", response);
 
     RecordedRequest failHandshakeRequest = server.takeRequest();
-    Assertions.assertThat(failHandshakeRequest.getRequestLine()).isNull();
+    Assertions.assertThat(failHandshakeRequest.getRequestLine()).isEqualTo("");
 
     RecordedRequest fallbackRequest = server.takeRequest();
     Assertions.assertThat(fallbackRequest.getRequestLine()).isEqualTo("GET /foo HTTP/1.1");
@@ -2091,7 +2091,7 @@ public final class URLConnectionTest {
 
   @Test public void emptyResponseHeaderNameIsLenient() throws Exception {
     okhttp3.Headers.Builder headers = new okhttp3.Headers.Builder();
-    okhttp3.internal.Internal.instance.addLenient(headers, ":A");
+    okhttp3.internal.Internal.addHeaderLenient(headers, ":A");
     server.enqueue(new MockResponse()
         .setHeaders(headers.build())
         .setBody("body"));
@@ -2137,9 +2137,9 @@ public final class URLConnectionTest {
   @Test public void responseHeaderParsingIsLenient() throws Exception {
     okhttp3.Headers.Builder headers = new okhttp3.Headers.Builder();
     headers.add("Content-Length", "0");
-    Internal.instance.addLenient(headers, "a\tb: c\u007fd");
-    Internal.instance.addLenient(headers, ": ef");
-    Internal.instance.addLenient(headers, "\ud83c\udf69: \u2615\ufe0f");
+    Internal.addHeaderLenient(headers, "a\tb: c\u007fd");
+    Internal.addHeaderLenient(headers, ": ef");
+    Internal.addHeaderLenient(headers, "\ud83c\udf69: \u2615\ufe0f");
     server.enqueue(new MockResponse()
         .setHeaders(headers.build()));
 

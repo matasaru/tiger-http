@@ -1073,9 +1073,9 @@ public final class CallTest {
   @Test public void responseHeaderParsingIsLenient() throws Exception {
     okhttp3.Headers.Builder headersBuilder = new okhttp3.Headers.Builder();
     headersBuilder.add("Content-Length", "0");
-    Internal.instance.addLenient(headersBuilder, "a\tb: c\u007fd");
-    Internal.instance.addLenient(headersBuilder, ": ef");
-    Internal.instance.addLenient(headersBuilder, "\ud83c\udf69: \u2615\ufe0f");
+    Internal.addHeaderLenient(headersBuilder, "a\tb: c\u007fd");
+    Internal.addHeaderLenient(headersBuilder, ": ef");
+    Internal.addHeaderLenient(headersBuilder, "\ud83c\udf69: \u2615\ufe0f");
     server.enqueue(new MockResponse().setHeaders(headersBuilder.build()));
 
     executeSynchronously("/")

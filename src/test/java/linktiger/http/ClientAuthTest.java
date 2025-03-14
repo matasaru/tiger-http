@@ -20,6 +20,7 @@ import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.List;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLPeerUnverifiedException;
@@ -212,7 +213,7 @@ public final class ClientAuthTest {
       X509KeyManager keyManager = newKeyManager(
           null, serverCert, serverIntermediateCa.certificate());
       X509TrustManager trustManager = newTrustManager(
-          null, Arrays.asList(serverRootCa.certificate(), clientRootCa.certificate()));
+          null, Arrays.asList(serverRootCa.certificate(), clientRootCa.certificate()), List.of());
       SSLContext sslContext = SSLContext.getInstance("TLS");
       sslContext.init(new KeyManager[] {keyManager}, new TrustManager[] {trustManager},
           new SecureRandom());
