@@ -95,6 +95,19 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>2.18.0</version>
+        <configuration>
+          <ruleSet>
+            <ignoreVersion>
+              <type>regex</type>
+              <version>.*[-_\.](alpha|beta|rc|RC|jre6|jre7|M1|M2)[-_\.]?[0-9]?.*</version>
+            </ignoreVersion>
+          </ruleSet>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 </project>
