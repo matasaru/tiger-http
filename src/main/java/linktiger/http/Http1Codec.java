@@ -50,7 +50,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  * Exchanges that do not have a response body can call {@link #newFixedLengthSource(long)
  * newFixedLengthSource(0)} and may skip reading and closing that source.
  */
-public final class Http1ExchangeCodec implements ExchangeCodec {
+public final class Http1Codec implements ExchangeCodec {
   private static final int STATE_IDLE = 0; // Idle connections are ready to write request headers.
   private static final int STATE_OPEN_REQUEST_BODY = 1;
   private static final int STATE_WRITING_REQUEST_BODY = 2;
@@ -77,7 +77,7 @@ public final class Http1ExchangeCodec implements ExchangeCodec {
    */
   private Headers trailers;
 
-  public Http1ExchangeCodec(HttpClient client, Connection connection,
+  public Http1Codec(HttpClient client, Connection connection,
       BufferedSource source, BufferedSink sink) {
     this.client = client;
     this.connection = connection;
