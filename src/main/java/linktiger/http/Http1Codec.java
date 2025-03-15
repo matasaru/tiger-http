@@ -484,7 +484,7 @@ public final class Http1Codec {
       }
     }
 
-    @Override public void close() throws IOException {
+    @Override public void close() {
       if (closed) return;
       if (hasMoreChunks && !Util.discard(this, DISCARD_STREAM_TIMEOUT_MILLIS, MILLISECONDS)) {
         connection.noNewExchanges(); // Unread bytes remain on the stream.
