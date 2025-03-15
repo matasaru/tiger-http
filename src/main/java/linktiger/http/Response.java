@@ -159,7 +159,7 @@ public final class Response implements Closeable {
 
     // If the Content-Length or Transfer-Encoding headers disagree with the response code, the
     // response is malformed. For best compatibility, we honor the headers.
-    if (HttpHeaders.contentLength(this) != -1 || "chunked".equalsIgnoreCase(this.header("Transfer-Encoding"))) {
+    if (headers().contentLength() != -1 || "chunked".equalsIgnoreCase(this.header("Transfer-Encoding"))) {
       return true;
     }
 

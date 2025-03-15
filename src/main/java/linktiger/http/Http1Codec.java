@@ -140,7 +140,7 @@ public final class Http1Codec {
       return -1L;
     }
 
-    return HttpHeaders.contentLength(response);
+    return response.headers().contentLength();
   }
 
   public Source openResponseBodySource(Response response) {
@@ -152,7 +152,7 @@ public final class Http1Codec {
       return newChunkedSource(response.request().url());
     }
 
-    long contentLength = HttpHeaders.contentLength(response);
+    long contentLength = response.headers().contentLength();
     if (contentLength != -1) {
       return newFixedLengthSource(contentLength);
     }
@@ -281,7 +281,7 @@ public final class Http1Codec {
    * before proceeding.
    */
   public void skipConnectBody(Response response) throws IOException {
-    long contentLength = HttpHeaders.contentLength(response);
+    long contentLength = response.headers().contentLength();
     if (contentLength == -1L) return;
     Source body = newFixedLengthSource(contentLength);
     Util.skipAll(body, Integer.MAX_VALUE, TimeUnit.MILLISECONDS);

@@ -34,10 +34,6 @@ public final class HttpHeaders {
   private HttpHeaders() {
   }
 
-  public static long contentLength(Response response) {
-    return response.headers().contentLength();
-  }
-
   /**
    * Parse RFC 7235 challenges. This is awkward because we need to look ahead to know how to
    * interpret a token.
