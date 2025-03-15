@@ -417,7 +417,7 @@ public final class Http1Codec {
       return read;
     }
 
-    @Override public void close() throws IOException {
+    @Override public void close() {
       if (closed) return;
 
       if (bytesRemaining != 0 && !Util.discard(this, DISCARD_STREAM_TIMEOUT_MILLIS, MILLISECONDS)) {
