@@ -96,7 +96,7 @@ public final class Http1Codec {
     return connection;
   }
 
-  public Sink createRequestBody(Request request, long contentLength) throws IOException {
+  public Sink createRequestBody(Request request, long contentLength) {
     if ("chunked".equalsIgnoreCase(request.header("Transfer-Encoding"))) {
       // Stream a request body of unknown length.
       return newChunkedSink();
