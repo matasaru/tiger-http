@@ -35,17 +35,7 @@ public final class HttpHeaders {
   }
 
   public static long contentLength(Response response) {
-    return contentLength(response.headers());
-  }
-
-  public static long contentLength(Headers headers) {
-    String s = headers.get("Content-Length");
-    if (s == null) return -1;
-    try {
-      return Long.parseLong(s);
-    } catch (NumberFormatException e) {
-      return -1;
-    }
+    return response.headers().contentLength();
   }
 
   /**

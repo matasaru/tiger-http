@@ -82,6 +82,18 @@ public final class Headers {
     return value != null ? value.toInstant() : null;
   }
 
+  public long contentLength() {
+    String length = get("Content-Length");
+    if (length == null) {
+      return -1;
+    }
+    try {
+      return Long.parseLong(length);
+    } catch (NumberFormatException e) {
+      return -1;
+    }
+  }
+
   /** Returns the number of field values. */
   public int size() {
     return namesAndValues.length / 2;
