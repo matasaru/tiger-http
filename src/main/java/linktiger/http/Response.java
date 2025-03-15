@@ -23,6 +23,8 @@ import java.util.List;
 import static java.net.HttpURLConnection.HTTP_MOVED_PERM;
 import static java.net.HttpURLConnection.HTTP_MOVED_TEMP;
 import static java.net.HttpURLConnection.HTTP_MULT_CHOICE;
+import static java.net.HttpURLConnection.HTTP_NOT_MODIFIED;
+import static java.net.HttpURLConnection.HTTP_NO_CONTENT;
 import static java.net.HttpURLConnection.HTTP_PROXY_AUTH;
 import static java.net.HttpURLConnection.HTTP_SEE_OTHER;
 import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
@@ -139,6 +141,29 @@ public final class Response implements Closeable {
    */
   public ResponseBody body() {
     return body;
+  }
+
+  /** Returns true if the response must have a (possibly 0-length) body. See RFC 7231. */
+  public boolean hasBody() {
+    // HEAD requests never yield a body regardless of the response headers.
+    if (this.request().method().equals("HEAD")) {
+      return false;
+    }
+
+    int responseCode = this.code();
+    if ((responseCode < StatusLine.HTTP_CONTINUE || responseCode >= 200)
+        && responseCode != HTTP_NO_CONTENT
+        && responseCode != HTTP_NOT_MODIFIED) {
+      return true;
+    }
+
+    // If the Content-Length or Transfer-Encoding headers disagree with the response code, the
+    // response is malformed. For best compatibility, we honor the headers.
+    if (HttpHeaders.contentLength(this) != -1 || "chunked".equalsIgnoreCase(this.header("Transfer-Encoding"))) {
+      return true;
+    }
+
+    return false;
   }
 
   public Builder newBuilder() {

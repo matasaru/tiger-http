@@ -132,7 +132,7 @@ public final class Http1Codec {
   }
 
   public long reportedContentLength(Response response) {
-    if (!HttpHeaders.hasBody(response)) {
+    if (!response.hasBody()) {
       return 0L;
     }
 
@@ -144,7 +144,7 @@ public final class Http1Codec {
   }
 
   public Source openResponseBodySource(Response response) {
-    if (!HttpHeaders.hasBody(response)) {
+    if (!response.hasBody()) {
       return newFixedLengthSource(0);
     }
 

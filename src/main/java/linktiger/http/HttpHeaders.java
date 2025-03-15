@@ -26,9 +26,6 @@ import java.util.Map;
 import kio.Buffer;
 import kio.ByteString;
 
-import static java.net.HttpURLConnection.HTTP_NOT_MODIFIED;
-import static java.net.HttpURLConnection.HTTP_NO_CONTENT;
-
 /** Headers and utilities for internal use by OkHttp. */
 public final class HttpHeaders {
   private static final ByteString QUOTED_STRING_DELIMITERS = ByteString.encodeUtf8("\"\\");
@@ -226,29 +223,5 @@ public final class HttpHeaders {
     if (cookies.isEmpty()) return;
 
     cookieJar.saveFromResponse(url, cookies);
-  }
-
-  /** Returns true if the response must have a (possibly 0-length) body. See RFC 7231. */
-  public static boolean hasBody(Response response) {
-    // HEAD requests never yield a body regardless of the response headers.
-    if (response.request().method().equals("HEAD")) {
-      return false;
-    }
-
-    int responseCode = response.code();
-    if ((responseCode < StatusLine.HTTP_CONTINUE || responseCode >= 200)
-        && responseCode != HTTP_NO_CONTENT
-        && responseCode != HTTP_NOT_MODIFIED) {
-      return true;
-    }
-
-    // If the Content-Length or Transfer-Encoding headers disagree with the response code, the
-    // response is malformed. For best compatibility, we honor the headers.
-    if (contentLength(response) != -1
-        || "chunked".equalsIgnoreCase(response.header("Transfer-Encoding"))) {
-      return true;
-    }
-
-    return false;
   }
 }

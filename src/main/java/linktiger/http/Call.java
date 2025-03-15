@@ -207,7 +207,7 @@ public class Call {
             Response.Builder responseBuilder = networkResponse.newBuilder()
                     .request(request);
 
-            if (transparentGzip && "gzip".equalsIgnoreCase(networkResponse.header("Content-Encoding")) && HttpHeaders.hasBody(networkResponse)) {
+            if (transparentGzip && "gzip".equalsIgnoreCase(networkResponse.header("Content-Encoding")) && networkResponse.hasBody()) {
               GzipSource responseBody = new GzipSource(networkResponse.body().source());
               Headers strippedHeaders = networkResponse.headers().newBuilder()
                       .removeAll("Content-Encoding")
