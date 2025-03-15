@@ -134,7 +134,7 @@ public final class Transmitter {
       }
     }
 
-    ExchangeCodec codec = exchangeFinder.find(client, doExtensiveHealthChecks);
+    Http1Codec codec = exchangeFinder.find(client, doExtensiveHealthChecks);
     Exchange result = new Exchange(this, exchangeFinder, codec);
 
     synchronized (connectionPool) {

@@ -27,14 +27,14 @@ import kio.Source;
 
 /**
  * Transmits a single HTTP request and a response pair. This layers connection management and events
- * on {@link ExchangeCodec}, which handles the actual I/O.
+ * on {@link Http1Codec}, which handles the actual I/O.
  */
 public final class Exchange {
   final Transmitter transmitter;
   final ExchangeFinder finder;
-  final ExchangeCodec codec;
+  final Http1Codec codec;
 
-  public Exchange(Transmitter transmitter, ExchangeFinder finder, ExchangeCodec codec) {
+  public Exchange(Transmitter transmitter, ExchangeFinder finder, Http1Codec codec) {
     this.transmitter = transmitter;
     this.finder = finder;
     this.codec = codec;
@@ -82,16 +82,11 @@ public final class Exchange {
   }
 
   public ResponseBody openResponseBody(Response response) throws IOException {
-    try {
-      String contentType = response.header("Content-Type");
-      long contentLength = codec.reportedContentLength(response);
-      Source rawSource = codec.openResponseBodySource(response);
-      ResponseBodySource source = new ResponseBodySource(rawSource, contentLength);
-      return new ResponseBody(contentType, contentLength, new RealBufferedSource(source));
-    } catch (IOException e) {
-      trackFailure(e);
-      throw e;
-    }
+    String contentType = response.header("Content-Type");
+    long contentLength = codec.reportedContentLength(response);
+    Source rawSource = codec.openResponseBodySource(response);
+    ResponseBodySource source = new ResponseBodySource(rawSource, contentLength);
+    return new ResponseBody(contentType, contentLength, new RealBufferedSource(source));
   }
 
   public Headers trailers() throws IOException {

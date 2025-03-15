@@ -39,7 +39,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  *     <li>Open a sink to write the request body. Either {@linkplain #newKnownLengthSink known
  *         length} or {@link #newChunkedSink chunked}.
  *     <li>Write to and then close that sink.
- *     <li>{@linkplain ExchangeCodec#readResponseHeaders Read response headers}.
+ *     <li>{@linkplain #readResponseHeaders Read response headers}.
  *     <li>Open a source to read the response body. Either {@linkplain #newFixedLengthSource
  *         fixed-length}, {@linkplain #newChunkedSource chunked} or {@linkplain
  *         #newUnknownLengthSource unknown length}.
@@ -50,7 +50,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  * Exchanges that do not have a response body can call {@link #newFixedLengthSource(long)
  * newFixedLengthSource(0)} and may skip reading and closing that source.
  */
-public final class Http1Codec implements ExchangeCodec {
+public final class Http1Codec {
   private static final int STATE_IDLE = 0; // Idle connections are ready to write request headers.
   private static final int STATE_OPEN_REQUEST_BODY = 1;
   private static final int STATE_WRITING_REQUEST_BODY = 2;
@@ -59,6 +59,13 @@ public final class Http1Codec implements ExchangeCodec {
   private static final int STATE_READING_RESPONSE_BODY = 5;
   private static final int STATE_CLOSED = 6;
   private static final int HEADER_LIMIT = 256 * 1024;
+
+  /**
+   * The timeout to use while discarding a stream of input data. Since this is used for connection
+   * reuse, this timeout should be significantly less than the time it takes to establish a new
+   * connection.
+   */
+  private static final int DISCARD_STREAM_TIMEOUT_MILLIS = 100;
 
   /** The client that configures this stream. May be null for HTTPS proxy tunnels. */
   private final HttpClient client;
@@ -85,11 +92,11 @@ public final class Http1Codec implements ExchangeCodec {
     this.sink = sink;
   }
 
-  @Override public Connection connection() {
+  public Connection connection() {
     return connection;
   }
 
-  @Override public Sink createRequestBody(Request request, long contentLength) throws IOException {
+  public Sink createRequestBody(Request request, long contentLength) throws IOException {
     if ("chunked".equalsIgnoreCase(request.header("Transfer-Encoding"))) {
       // Stream a request body of unknown length.
       return newChunkedSink();
@@ -104,7 +111,7 @@ public final class Http1Codec implements ExchangeCodec {
         "Cannot stream a request body without chunked encoding or a known content length!");
   }
 
-  @Override public void cancel() {
+  public void cancel() {
     if (connection != null) connection.cancel();
   }
 
@@ -118,13 +125,13 @@ public final class Http1Codec implements ExchangeCodec {
    * output stream has been written to and closed. This ensures that the {@code Content-Length}
    * header field receives the proper value.
    */
-  @Override public void writeRequestHeaders(Request request) throws IOException {
+  public void writeRequestHeaders(Request request) throws IOException {
     String requestLine = RequestLine.get(
         request, connection.route().proxy().type());
     writeRequest(request.headers(), requestLine);
   }
 
-  @Override public long reportedContentLength(Response response) {
+  public long reportedContentLength(Response response) {
     if (!HttpHeaders.hasBody(response)) {
       return 0L;
     }
@@ -136,7 +143,7 @@ public final class Http1Codec implements ExchangeCodec {
     return HttpHeaders.contentLength(response);
   }
 
-  @Override public Source openResponseBodySource(Response response) {
+  public Source openResponseBodySource(Response response) {
     if (!HttpHeaders.hasBody(response)) {
       return newFixedLengthSource(0);
     }
@@ -153,7 +160,7 @@ public final class Http1Codec implements ExchangeCodec {
     return newUnknownLengthSource();
   }
 
-  @Override public Headers trailers() {
+  public Headers trailers() {
     if (state != STATE_CLOSED) {
       throw new IllegalStateException("too early; can't read the trailers yet");
     }
@@ -165,7 +172,7 @@ public final class Http1Codec implements ExchangeCodec {
     return state == STATE_CLOSED;
   }
 
-  @Override public void finishRequest() throws IOException {
+  public void finishRequest() throws IOException {
     sink.flush();
   }
 
@@ -183,7 +190,7 @@ public final class Http1Codec implements ExchangeCodec {
     state = STATE_OPEN_REQUEST_BODY;
   }
 
-  @Override public Response.Builder readResponseHeaders() throws IOException {
+  public Response.Builder readResponseHeaders() throws IOException {
     if (state != STATE_OPEN_REQUEST_BODY && state != STATE_READ_RESPONSE_HEADERS) {
       throw new IllegalStateException("state: " + state);
     }

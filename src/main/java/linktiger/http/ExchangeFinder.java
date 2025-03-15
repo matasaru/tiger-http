@@ -60,7 +60,7 @@ final class ExchangeFinder {
     this.routeSelector = new RouteSelector(address, connectionPool.routeDatabase);
   }
 
-  public ExchangeCodec find(HttpClient client, boolean doExtensiveHealthChecks) {
+  public Http1Codec find(HttpClient client, boolean doExtensiveHealthChecks) {
     int connectTimeout = client.connectTimeoutMillis();
     int readTimeout = client.readTimeoutMillis();
     int writeTimeout = client.writeTimeoutMillis();

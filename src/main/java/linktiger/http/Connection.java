@@ -433,7 +433,7 @@ public final class Connection {
     return false;
   }
 
-  ExchangeCodec newCodec(HttpClient client) throws SocketException {
+  Http1Codec newCodec(HttpClient client) throws SocketException {
     socket.setSoTimeout(client.readTimeoutMillis());
     source.timeout().timeout(client.readTimeoutMillis(), MILLISECONDS);
     sink.timeout().timeout(client.writeTimeoutMillis(), MILLISECONDS);
