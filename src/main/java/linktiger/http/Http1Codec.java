@@ -308,7 +308,7 @@ public final class Http1Codec {
       sink.flush();
     }
 
-    @Override public void close() throws IOException {
+    @Override public void close() {
       if (closed) return;
       closed = true;
       detachTimeout(timeout);
