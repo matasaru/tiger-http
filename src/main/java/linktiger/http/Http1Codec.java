@@ -513,7 +513,7 @@ public final class Http1Codec {
       return read;
     }
 
-    @Override public void close() throws IOException {
+    @Override public void close() {
       if (closed) return;
       if (!inputExhausted) {
         responseBodyComplete();
