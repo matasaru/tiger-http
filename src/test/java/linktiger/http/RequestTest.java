@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.HexFormat;
-import java.util.UUID;
 
 import kio.Buffer;
 import org.junit.Test;
@@ -177,111 +176,6 @@ public final class RequestTest {
       fail();
     } catch (IllegalArgumentException expected) {
     }
-  }
-
-  @Test public void noTag() {
-    Request request = new Request.Builder()
-        .url("https://square.com")
-        .build();
-    assertThat(request.tag()).isNull();
-    assertThat(request.tag(Object.class)).isNull();
-    assertThat(request.tag(UUID.class)).isNull();
-    assertThat(request.tag(String.class)).isNull();
-  }
-
-  @Test public void defaultTag() {
-    UUID tag = UUID.randomUUID();
-    Request request = new Request.Builder()
-        .url("https://square.com")
-        .tag(tag)
-        .build();
-    assertThat(request.tag()).isSameAs(tag);
-    assertThat(request.tag(Object.class)).isSameAs(tag);
-    assertThat(request.tag(UUID.class)).isNull();
-    assertThat(request.tag(String.class)).isNull();
-  }
-
-  @Test public void nullRemovesTag() {
-    Request request = new Request.Builder()
-        .url("https://square.com")
-        .tag("a")
-        .tag(null)
-        .build();
-    assertThat(request.tag()).isNull();
-  }
-
-  @Test public void removeAbsentTag() {
-    Request request = new Request.Builder()
-        .url("https://square.com")
-        .tag(null)
-        .build();
-    assertThat(request.tag()).isNull();
-  }
-
-  @Test public void objectTag() {
-    UUID tag = UUID.randomUUID();
-    Request request = new Request.Builder()
-        .url("https://square.com")
-        .tag(Object.class, tag)
-        .build();
-    assertThat(request.tag()).isSameAs(tag);
-    assertThat(request.tag(Object.class)).isSameAs(tag);
-    assertThat(request.tag(UUID.class)).isNull();
-    assertThat(request.tag(String.class)).isNull();
-  }
-
-  @Test public void typedTag() {
-    UUID uuidTag = UUID.randomUUID();
-    Request request = new Request.Builder()
-        .url("https://square.com")
-        .tag(UUID.class, uuidTag)
-        .build();
-    assertThat(request.tag()).isNull();
-    assertThat(request.tag(Object.class)).isNull();
-    assertThat(request.tag(UUID.class)).isSameAs(uuidTag);
-    assertThat(request.tag(String.class)).isNull();
-  }
-
-  @Test public void replaceOnlyTag() {
-    UUID uuidTag1 = UUID.randomUUID();
-    UUID uuidTag2 = UUID.randomUUID();
-    Request request = new Request.Builder()
-        .url("https://square.com")
-        .tag(UUID.class, uuidTag1)
-        .tag(UUID.class, uuidTag2)
-        .build();
-    assertThat(request.tag(UUID.class)).isSameAs(uuidTag2);
-  }
-
-  @Test public void multipleTags() {
-    UUID uuidTag = UUID.randomUUID();
-    String stringTag = "dilophosaurus";
-    Long longTag = 20170815L;
-    Object objectTag = new Object();
-    Request request = new Request.Builder()
-        .url("https://square.com")
-        .tag(Object.class, objectTag)
-        .tag(UUID.class, uuidTag)
-        .tag(String.class, stringTag)
-        .tag(Long.class, longTag)
-        .build();
-    assertThat(request.tag()).isSameAs(objectTag);
-    assertThat(request.tag(Object.class)).isSameAs(objectTag);
-    assertThat(request.tag(UUID.class)).isSameAs(uuidTag);
-    assertThat(request.tag(String.class)).isSameAs(stringTag);
-    assertThat(request.tag(Long.class)).isSameAs(longTag);
-  }
-
-  /** Confirm that we don't accidentally share the backing map between objects. */
-  @Test public void tagsAreImmutable() {
-    Request.Builder builder = new Request.Builder()
-        .url("https://square.com");
-    Request requestA = builder.tag(String.class, "a").build();
-    Request requestB = builder.tag(String.class, "b").build();
-    Request requestC = requestA.newBuilder().tag(String.class, "c").build();
-    assertThat(requestA.tag(String.class)).isSameAs("a");
-    assertThat(requestB.tag(String.class)).isSameAs("b");
-    assertThat(requestC.tag(String.class)).isSameAs("c");
   }
 
   private String bodyToHex(RequestBody body) throws IOException {

@@ -15,10 +15,7 @@
  */
 package linktiger.http;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * An HTTP request. Instances of this class are immutable if their {@link #body} is null or itself
@@ -29,14 +26,12 @@ public final class Request {
   final String method;
   final Headers headers;
   final RequestBody body;
-  final Map<Class<?>, Object> tags;
 
   Request(Builder builder) {
     this.url = builder.url;
     this.method = builder.method;
     this.headers = builder.headers.build();
     this.body = builder.body;
-    this.tags = Map.copyOf(builder.tags);
   }
 
   public Url url() {
@@ -63,26 +58,6 @@ public final class Request {
     return body;
   }
 
-  /**
-   * Returns the tag attached with {@code Object.class} as a key, or null if no tag is attached with
-   * that key.
-   *
-   * <p>Prior to OkHttp 3.11, this method never returned null if no tag was attached. Instead it
-   * returned either this request, or the request upon which this request was derived with {@link
-   * #newBuilder()}.
-   */
-  public Object tag() {
-    return tag(Object.class);
-  }
-
-  /**
-   * Returns the tag attached with {@code type} as a key, or null if no tag is attached with that
-   * key.
-   */
-  public <T> T tag(Class<? extends T> type) {
-    return type.cast(tags.get(type));
-  }
-
   public Builder newBuilder() {
     return new Builder(this);
   }
@@ -96,8 +71,6 @@ public final class Request {
         + method
         + ", url="
         + url
-        + ", tags="
-        + tags
         + '}';
   }
 
@@ -106,9 +79,6 @@ public final class Request {
     String method;
     Headers.Builder headers;
     RequestBody body;
-
-    /** A mutable map of tags, or an immutable empty map if we don't have any. */
-    Map<Class<?>, Object> tags = Collections.emptyMap();
 
     public Builder() {
       this.method = "GET";
@@ -119,9 +89,6 @@ public final class Request {
       this.url = request.url;
       this.method = request.method;
       this.body = request.body;
-      this.tags = request.tags.isEmpty()
-          ? Collections.emptyMap()
-          : new LinkedHashMap<>(request.tags);
       this.headers = request.headers.newBuilder();
     }
 
@@ -216,32 +183,6 @@ public final class Request {
       if (method.isEmpty()) throw new IllegalArgumentException("method.length() == 0");
       this.method = method;
       this.body = body;
-      return this;
-    }
-
-    /** Attaches {@code tag} to the request using {@code Object.class} as a key. */
-    public Builder tag(Object tag) {
-      return tag(Object.class, tag);
-    }
-
-    /**
-     * Attaches {@code tag} to the request using {@code type} as a key. Tags can be read from a
-     * request using {@link Request#tag}. Use null to remove any existing tag assigned for {@code
-     * type}.
-     *
-     * <p>Use this API to attach timing, debugging, or other application data to a request so that
-     * you may read it in interceptors, event listeners, or callbacks.
-     */
-    public <T> Builder tag(Class<? super T> type, T tag) {
-      if (type == null) throw new NullPointerException("type == null");
-
-      if (tag == null) {
-        tags.remove(type);
-      } else {
-        if (tags.isEmpty()) tags = new LinkedHashMap<>();
-        tags.put(type, type.cast(tag));
-      }
-
       return this;
     }
 
