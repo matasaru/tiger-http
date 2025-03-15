@@ -39,10 +39,7 @@ public final class HttpHeaders {
   }
 
   public static long contentLength(Headers headers) {
-    return stringToLong(headers.get("Content-Length"));
-  }
-
-  private static long stringToLong(String s) {
+    String s = headers.get("Content-Length");
     if (s == null) return -1;
     try {
       return Long.parseLong(s);
