@@ -67,10 +67,7 @@ public final class Http1Codec {
    */
   private static final int DISCARD_STREAM_TIMEOUT_MILLIS = 100;
 
-  /** The client that configures this stream. May be null for HTTPS proxy tunnels. */
-  private final HttpClient client;
-
-  /** The connection that carries this stream. */
+    /** The connection that carries this stream. */
   private final Connection connection;
 
   private final BufferedSource source;
@@ -78,15 +75,8 @@ public final class Http1Codec {
   private int state = STATE_IDLE;
   private long headerLimit = HEADER_LIMIT;
 
-  /**
-   * Received trailers. Null unless the response body uses chunked transfer-encoding and includes
-   * trailers. Undefined until the end of the response body.
-   */
-  private Headers trailers;
-
-  public Http1Codec(HttpClient client, Connection connection,
+  public Http1Codec(Connection connection,
       BufferedSource source, BufferedSink sink) {
-    this.client = client;
     this.connection = connection;
     this.source = source;
     this.sink = sink;
@@ -158,13 +148,6 @@ public final class Http1Codec {
     }
 
     return newUnknownLengthSource();
-  }
-
-  public Headers trailers() {
-    if (state != STATE_CLOSED) {
-      throw new IllegalStateException("too early; can't read the trailers yet");
-    }
-    return trailers != null ? trailers : Headers.EMPTY;
   }
 
   /** Returns true if this connection is closed. */
@@ -478,8 +461,7 @@ public final class Http1Codec {
       }
       if (bytesRemainingInChunk == 0L) {
         hasMoreChunks = false;
-        trailers = readHeaders();
-        client.cookieJar().receiveHeaders(url, trailers);
+        readHeaders(); // read the trailer headers the server might have sent
         responseBodyComplete();
       }
     }

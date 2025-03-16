@@ -1469,13 +1469,12 @@ public final class CallTest {
         (localIpAddress + ":" + server.getPort()));
   }
 
-  @Test public void clientReadsHeadersDataTrailersHttp1ChunkedTransferEncoding() throws Exception {
+  @Test public void clientReadsHeadersDataHttp1ChunkedTransferEncoding() throws Exception {
     MockResponse mockResponse = new MockResponse()
         .clearHeaders()
         .addHeader("h1", "v1")
         .addHeader("h2", "v2")
-        .setChunkedBody("HelloBonjour", 1024)
-        .setTrailers(okhttp3.Headers.of("trailers", "boom"));
+        .setChunkedBody("HelloBonjour", 1024);
     server.enqueue(mockResponse);
 
     Call call = client.newCall(new Request.Builder()
@@ -1492,7 +1491,6 @@ public final class CallTest {
     assertThat(source.readUtf8(7)).isEqualTo("Bonjour");
 
     assertThat(source.exhausted()).isTrue();
-    assertThat(response.trailers()).isEqualTo(Headers.of("trailers", "boom"));
   }
 
   @Test public void requestBodyThrowsUnrelatedToNetwork() throws Exception {

@@ -89,10 +89,6 @@ public final class Exchange {
     return new ResponseBody(contentType, contentLength, new RealBufferedSource(source));
   }
 
-  public Headers trailers() throws IOException {
-    return codec.trailers();
-  }
-
   public void noNewExchangesOnConnection() {
     codec.connection().noNewExchanges();
   }

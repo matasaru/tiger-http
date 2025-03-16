@@ -16,7 +16,6 @@
 package linktiger.http;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.List;
 
 import static java.net.HttpURLConnection.HTTP_NOT_MODIFIED;
@@ -117,15 +116,6 @@ public final class Response implements Closeable {
 
   public Headers headers() {
     return headers;
-  }
-
-  /**
-   * Returns the trailers after the HTTP response, which may be empty. It is an error to call this
-   * before the entire HTTP response body has been consumed.
-   */
-  public Headers trailers() throws IOException {
-    if (exchange == null) throw new IllegalStateException("trailers not available");
-    return exchange.trailers();
   }
 
   /**

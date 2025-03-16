@@ -340,7 +340,7 @@ public final class Connection {
     // Make an SSL Tunnel on the first message pair of each SSL + proxy connection.
     String requestLine = "CONNECT " + Util.hostHeader(url, true) + " HTTP/1.1";
     while (true) {
-      Http1Codec tunnelCodec = new Http1Codec(null, null, source, sink);
+      Http1Codec tunnelCodec = new Http1Codec(null, source, sink);
       source.timeout().timeout(readTimeout, MILLISECONDS);
       sink.timeout().timeout(writeTimeout, MILLISECONDS);
       tunnelCodec.writeRequest(tunnelRequest.headers(), requestLine);
@@ -437,7 +437,7 @@ public final class Connection {
     socket.setSoTimeout(client.readTimeoutMillis());
     source.timeout().timeout(client.readTimeoutMillis(), MILLISECONDS);
     sink.timeout().timeout(client.writeTimeoutMillis(), MILLISECONDS);
-    return new Http1Codec(client, this, source, sink);
+    return new Http1Codec(this, source, sink);
   }
 
   /** Returns the route used by this connection. */
