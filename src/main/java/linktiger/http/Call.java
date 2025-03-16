@@ -202,7 +202,7 @@ public class Call {
               exchange.noNewExchangesOnConnection();
             }
 
-            HttpHeaders.receiveHeaders(client.cookieJar(), request.url(), networkResponse.headers());
+            client.cookieJar().receiveHeaders(request.url(), networkResponse.headers());
 
             Response.Builder responseBuilder = networkResponse.newBuilder()
                     .request(request);

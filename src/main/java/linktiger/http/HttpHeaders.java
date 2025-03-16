@@ -198,13 +198,4 @@ public final class HttpHeaders {
     Arrays.fill(array, c);
     return new String(array);
   }
-
-  public static void receiveHeaders(CookieJar cookieJar, Url url, Headers headers) {
-    if (cookieJar == CookieJar.NO_COOKIES) return;
-
-    List<Cookie> cookies = Cookie.parseAll(url, headers);
-    if (cookies.isEmpty()) return;
-
-    cookieJar.saveFromResponse(url, cookies);
-  }
 }

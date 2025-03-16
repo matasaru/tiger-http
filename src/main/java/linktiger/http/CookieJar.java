@@ -59,4 +59,13 @@ public interface CookieJar {
    * {@linkplain Cookie#matches match} {@code url}.
    */
   List<Cookie> loadForRequest(Url url);
+
+  default void receiveHeaders(Url url, Headers headers) {
+    if (this == CookieJar.NO_COOKIES) return;
+
+    List<Cookie> cookies = Cookie.parseAll(url, headers);
+    if (cookies.isEmpty()) return;
+
+    this.saveFromResponse(url, cookies);
+  }
 }

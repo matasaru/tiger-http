@@ -479,7 +479,7 @@ public final class Http1Codec {
       if (bytesRemainingInChunk == 0L) {
         hasMoreChunks = false;
         trailers = readHeaders();
-        HttpHeaders.receiveHeaders(client.cookieJar(), url, trailers);
+        client.cookieJar().receiveHeaders(url, trailers);
         responseBodyComplete();
       }
     }
