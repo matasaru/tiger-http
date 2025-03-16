@@ -19,12 +19,8 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.List;
 
-import static java.net.HttpURLConnection.HTTP_MOVED_PERM;
-import static java.net.HttpURLConnection.HTTP_MOVED_TEMP;
-import static java.net.HttpURLConnection.HTTP_MULT_CHOICE;
 import static java.net.HttpURLConnection.HTTP_NOT_MODIFIED;
 import static java.net.HttpURLConnection.HTTP_NO_CONTENT;
-import static java.net.HttpURLConnection.HTTP_SEE_OTHER;
 
 /**
  * An HTTP response. Instances of this class are not immutable: the response body is a one-shot
@@ -165,21 +161,6 @@ public final class Response implements Closeable {
 
   public Builder newBuilder() {
     return new Builder(this);
-  }
-
-  /** Returns true if this response redirects to another resource. */
-  public boolean isRedirect() {
-    switch (code) {
-      case StatusLine.HTTP_PERM_REDIRECT:
-      case StatusLine.HTTP_TEMP_REDIRECT:
-      case HTTP_MULT_CHOICE:
-      case HTTP_MOVED_PERM:
-      case HTTP_MOVED_TEMP:
-      case HTTP_SEE_OTHER:
-        return true;
-      default:
-        return false;
-    }
   }
 
   /**
