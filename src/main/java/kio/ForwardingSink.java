@@ -11,7 +11,7 @@ public abstract class ForwardingSink implements Sink {
     this.delegate = delegate;
   }
 
-  @Override public void write(Buffer source, long byteCount) throws IOException {
+  @Override public void write(Buffer source, int byteCount) throws IOException {
     delegate.write(source, byteCount);
   }
 

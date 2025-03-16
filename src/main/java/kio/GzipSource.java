@@ -49,7 +49,7 @@ public final class GzipSource implements Source {
     this.inflaterSource = new InflaterSource(this.source, inflater);
   }
 
-  @Override public long read(Buffer sink, long byteCount) throws IOException {
+  @Override public int read(Buffer sink, int byteCount) throws IOException {
     if (byteCount < 0) throw new IllegalArgumentException("byteCount < 0: " + byteCount);
     if (byteCount == 0) return 0;
 
@@ -61,8 +61,8 @@ public final class GzipSource implements Source {
 
     // Attempt to read at least a byte of the body. If we do, we're done.
     if (section == SECTION_BODY) {
-      long offset = sink.size;
-      long result = inflaterSource.read(sink, byteCount);
+      int offset = sink.size;
+      int result = inflaterSource.read(sink, byteCount);
       if (result != -1) {
         updateCrc(sink, offset, result);
         return result;
@@ -123,7 +123,7 @@ public final class GzipSource implements Source {
     // |...original file name, zero-terminated...| (more-->)
     // +=========================================+
     if (((flags >> FNAME) & 1) == 1) {
-      long index = source.indexOf((byte) 0);
+      int index = source.indexOf((byte) 0);
       if (index == -1) throw new EOFException();
       if (fhcrc) updateCrc(source.buffer(), 0, index + 1);
       source.skip(index + 1);
@@ -134,7 +134,7 @@ public final class GzipSource implements Source {
     // |...file comment, zero-terminated...| (more-->)
     // +===================================+
     if (((flags >> FCOMMENT) & 1) == 1) {
-      long index = source.indexOf((byte) 0);
+      int index = source.indexOf((byte) 0);
       if (index == -1) throw new EOFException();
       if (fhcrc) updateCrc(source.buffer(), 0, index + 1);
       source.skip(index + 1);
@@ -168,7 +168,7 @@ public final class GzipSource implements Source {
   }
 
   /** Updates the CRC with the given bytes. */
-  private void updateCrc(Buffer buffer, long offset, long byteCount) {
+  private void updateCrc(Buffer buffer, int offset, int byteCount) {
     // Skip segments that we aren't checksumming.
     Segment s = buffer.head;
     for (; offset >= (s.limit - s.pos); s = s.next) {
@@ -177,8 +177,8 @@ public final class GzipSource implements Source {
 
     // Checksum one segment at a time.
     for (; byteCount > 0; s = s.next) {
-      int pos = (int) (s.pos + offset);
-      int toUpdate = (int) Math.min(s.limit - pos, byteCount);
+      int pos = s.pos + offset;
+      int toUpdate = Math.min(s.limit - pos, byteCount);
       crc.update(s.data, pos, toUpdate);
       byteCount -= toUpdate;
       offset = 0;

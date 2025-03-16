@@ -416,8 +416,8 @@ public final class URLConnectionTest {
         return null;
       }
 
-      @Override public long contentLength() {
-        return uploadKind == TransferKind.CHUNKED ? -1L : n;
+      @Override public int contentLength() {
+        return uploadKind == TransferKind.CHUNKED ? -1 : n;
       }
 
       @Override public void writeTo(BufferedSink sink) throws IOException {
@@ -1999,8 +1999,8 @@ public final class URLConnectionTest {
         return null;
       }
 
-      @Override public long contentLength() {
-        return 4L;
+      @Override public int contentLength() {
+        return 4;
       }
 
       @Override public void writeTo(BufferedSink sink) throws IOException {
@@ -2026,8 +2026,8 @@ public final class URLConnectionTest {
         return null;
       }
 
-      @Override public long contentLength() {
-        return 3L;
+      @Override public int contentLength() {
+        return 3;
       }
 
       @Override public void writeTo(BufferedSink sink) throws IOException {
@@ -2204,7 +2204,7 @@ public final class URLConnectionTest {
     server.setBodyLimit(0);
     server.enqueue(new MockResponse());
 
-    long contentLength = Integer.MAX_VALUE + 1L;
+    int contentLength = Integer.MAX_VALUE;
     Response response = getResponse(new Request.Builder()
         .url(server.url("/").toString())
         .post(new RequestBody() {
@@ -2212,14 +2212,14 @@ public final class URLConnectionTest {
             return null;
           }
 
-          @Override public long contentLength() {
+          @Override public int contentLength() {
             return contentLength;
           }
 
           @Override public void writeTo(BufferedSink sink) throws IOException {
             byte[] buffer = new byte[1024 * 1024];
-            for (long bytesWritten = 0; bytesWritten < contentLength; ) {
-              int byteCount = (int) Math.min(buffer.length, contentLength - bytesWritten);
+            for (int bytesWritten = 0; bytesWritten < contentLength; ) {
+              int byteCount = Math.min(buffer.length, contentLength - bytesWritten);
               bytesWritten += byteCount;
               sink.write(buffer, 0, byteCount);
             }
@@ -2231,7 +2231,7 @@ public final class URLConnectionTest {
 
     RecordedRequest request = server.takeRequest();
     Assertions.assertThat(request.getHeader("Content-Length")).isEqualTo(
-        Long.toString(contentLength));
+        Integer.toString(contentLength));
   }
 
   @Test public void testNoSslFallback() throws Exception {
@@ -2271,7 +2271,7 @@ public final class URLConnectionTest {
 
     Response response1 = getResponse(newRequest("/"));
     Assertions.assertThat(response1.code()).isEqualTo(
-        (long) HttpURLConnection.HTTP_NOT_MODIFIED);
+        HttpURLConnection.HTTP_NOT_MODIFIED);
     assertContent("", response1);
 
     Response response2 = getResponse(newRequest("/"));
@@ -2419,8 +2419,8 @@ public final class URLConnectionTest {
 
       @Override RequestBody newRequestBody(String body) {
         return new RequestBody() {
-          @Override public long contentLength() {
-            return -1L;
+          @Override public int contentLength() {
+            return -1;
           }
 
           @Override public MediaType contentType() {
@@ -2440,7 +2440,7 @@ public final class URLConnectionTest {
 
       @Override RequestBody newRequestBody(String body) {
         return new RequestBody() {
-          @Override public long contentLength() {
+          @Override public int contentLength() {
             return utf8size(body);
           }
 
@@ -2570,10 +2570,10 @@ public final class URLConnectionTest {
    * Returns the number of bytes used to encode {@code string} as UTF-8 when using {@link
    * ByteString#encodeUtf8} or {@link Buffer#writeUtf8(String)}.
    */
-  public static long utf8size(String string) {
+  public static int utf8size(String string) {
     int endIndex = string.length();
 
-    long result = 0;
+    int result = 0;
     for (int i = 0; i < endIndex;) {
       int c = string.charAt(i);
 

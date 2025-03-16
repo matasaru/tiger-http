@@ -47,7 +47,7 @@ public interface Source extends Closeable {
    * them to {@code sink}. Returns the number of bytes read, or -1 if this
    * source is exhausted.
    */
-  long read(Buffer sink, long byteCount) throws IOException;
+  int read(Buffer sink, int byteCount) throws IOException;
 
   /** Returns the timeout for this source. */
   Timeout timeout();

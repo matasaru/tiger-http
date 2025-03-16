@@ -21,12 +21,12 @@ public final class Okio {
     if (timeout == null) throw new IllegalArgumentException("timeout == null");
 
     return new Sink() {
-      @Override public void write(Buffer source, long byteCount) throws IOException {
+      @Override public void write(Buffer source, int byteCount) throws IOException {
         Util.checkOffsetAndCount(source.size, 0, byteCount);
         while (byteCount > 0) {
           timeout.throwIfReached();
           Segment head = source.head;
-          int toCopy = (int) Math.min(byteCount, head.limit - head.pos);
+          int toCopy = Math.min(byteCount, head.limit - head.pos);
           out.write(head.data, head.pos, toCopy);
 
           head.pos += toCopy;
@@ -80,12 +80,12 @@ public final class Okio {
     if (timeout == null) throw new IllegalArgumentException("timeout == null");
 
     return new Source() {
-      @Override public long read(Buffer sink, long byteCount) throws IOException {
+      @Override public int read(Buffer sink, int byteCount) throws IOException {
         if (byteCount < 0) throw new IllegalArgumentException("byteCount < 0: " + byteCount);
         if (byteCount == 0) return 0;
         timeout.throwIfReached();
         Segment tail = sink.writableSegment(1);
-        int maxToCopy = (int) Math.min(byteCount, Segment.SIZE - tail.limit);
+        int maxToCopy = Math.min(byteCount, Segment.SIZE - tail.limit);
         int bytesRead = in.read(tail.data, tail.limit, maxToCopy);
         if (bytesRead == -1) {
           if (tail.pos == tail.limit) {

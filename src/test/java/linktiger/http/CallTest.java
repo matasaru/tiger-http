@@ -1372,7 +1372,7 @@ public final class CallTest {
     assertThat(get.getHeader("Host")).isEqualTo("[::1]");
   }
 
-  private RequestBody requestBody(final boolean chunked, final long size, final int writeSize) {
+  private RequestBody requestBody(final boolean chunked, final int size, final int writeSize) {
     final byte[] buffer = new byte[writeSize];
     Arrays.fill(buffer, (byte) 'x');
 
@@ -1381,13 +1381,13 @@ public final class CallTest {
         return MediaType.get("text/plain; charset=utf-8");
       }
 
-      @Override public long contentLength() throws IOException {
-        return chunked ? -1L : size;
+      @Override public int contentLength() throws IOException {
+        return chunked ? -1 : size;
       }
 
       @Override public void writeTo(BufferedSink sink) throws IOException {
         for (int count = 0; count < size; count += writeSize) {
-          sink.write(buffer, 0, (int) Math.min(size - count, writeSize));
+          sink.write(buffer, 0, Math.min(size - count, writeSize));
         }
       }
     };
@@ -1518,7 +1518,7 @@ public final class CallTest {
         return null;
       }
 
-      @Override public long contentLength() throws IOException {
+      @Override public int contentLength() throws IOException {
         return 1;
       }
 

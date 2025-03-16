@@ -33,8 +33,8 @@ public final class InflaterSource implements Source {
     this.inflater = inflater;
   }
 
-  @Override public long read(
-      Buffer sink, long byteCount) throws IOException {
+  @Override public int read(
+      Buffer sink, int byteCount) throws IOException {
     if (byteCount < 0) throw new IllegalArgumentException("byteCount < 0: " + byteCount);
     if (closed) throw new IllegalStateException("closed");
     if (byteCount == 0) return 0;
@@ -45,7 +45,7 @@ public final class InflaterSource implements Source {
       // Decompress the inflater's compressed data into the sink.
       try {
         Segment tail = sink.writableSegment(1);
-        int toRead = (int) Math.min(byteCount, Segment.SIZE - tail.limit);
+        int toRead = Math.min(byteCount, Segment.SIZE - tail.limit);
         int bytesInflated = inflater.inflate(tail.data, tail.limit, toRead);
         if (bytesInflated > 0) {
           tail.limit += bytesInflated;

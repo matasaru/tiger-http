@@ -7,13 +7,13 @@ package kio;
 final class SegmentPool {
   /** The maximum number of bytes to pool. */
   // TODO: Is 64 KiB a good maximum size? Do we ever have that many idle segments?
-  static final long MAX_SIZE = 64 * 1024; // 64 KiB.
+  static final int MAX_SIZE = 64 * 1024; // 64 KiB.
 
   /** Singly-linked list of segments. */
   static Segment next;
 
   /** Total bytes in this pool. */
-  static long byteCount;
+  static int byteCount;
 
   private SegmentPool() {
   }

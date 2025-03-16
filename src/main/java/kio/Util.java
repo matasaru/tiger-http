@@ -5,7 +5,7 @@ final class Util {
   private Util() {
   }
 
-  public static void checkOffsetAndCount(long size, long offset, long byteCount) {
+  public static void checkOffsetAndCount(int size, int offset, int byteCount) {
     if ((offset | byteCount) < 0 || offset > size || size - offset < byteCount) {
       throw new ArrayIndexOutOfBoundsException(
           String.format("size=%s offset=%s byteCount=%s", size, offset, byteCount));

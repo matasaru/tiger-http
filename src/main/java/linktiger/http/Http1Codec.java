@@ -47,7 +47,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  * </ol>
  *
  * <p>Exchanges that do not have a request body may skip creating and closing the request body.
- * Exchanges that do not have a response body can call {@link #newFixedLengthSource(long)
+ * Exchanges that do not have a response body can call {@link #newFixedLengthSource(int)
  * newFixedLengthSource(0)} and may skip reading and closing that source.
  */
 public final class Http1Codec {
@@ -73,7 +73,7 @@ public final class Http1Codec {
   private final BufferedSource source;
   private final BufferedSink sink;
   private int state = STATE_IDLE;
-  private long headerLimit = HEADER_LIMIT;
+  private int headerLimit = HEADER_LIMIT;
 
   public Http1Codec(Connection connection,
       BufferedSource source, BufferedSink sink) {
@@ -86,13 +86,13 @@ public final class Http1Codec {
     return connection;
   }
 
-  public Sink createRequestBody(Request request, long contentLength) {
+  public Sink createRequestBody(Request request, int contentLength) {
     if ("chunked".equalsIgnoreCase(request.header("Transfer-Encoding"))) {
       // Stream a request body of unknown length.
       return newChunkedSink();
     }
 
-    if (contentLength != -1L) {
+    if (contentLength != -1) {
       // Stream a request body of a known length.
       return newKnownLengthSink();
     }
@@ -121,13 +121,13 @@ public final class Http1Codec {
     writeRequest(request.headers(), requestLine);
   }
 
-  public long reportedContentLength(Response response) {
+  public int reportedContentLength(Response response) {
     if (!response.hasBody()) {
-      return 0L;
+      return 0;
     }
 
     if ("chunked".equalsIgnoreCase(response.header("Transfer-Encoding"))) {
-      return -1L;
+      return -1;
     }
 
     return response.headers().contentLength();
@@ -142,7 +142,7 @@ public final class Http1Codec {
       return newChunkedSource(response.request().url());
     }
 
-    long contentLength = response.headers().contentLength();
+    int contentLength = response.headers().contentLength();
     if (contentLength != -1) {
       return newFixedLengthSource(contentLength);
     }
@@ -228,7 +228,7 @@ public final class Http1Codec {
     return new KnownLengthSink();
   }
 
-  private Source newFixedLengthSource(long length) {
+  private Source newFixedLengthSource(int length) {
     if (state != STATE_OPEN_RESPONSE_BODY) throw new IllegalStateException("state: " + state);
     state = STATE_READING_RESPONSE_BODY;
     return new FixedLengthSource(length);
@@ -264,7 +264,7 @@ public final class Http1Codec {
    * before proceeding.
    */
   public void skipConnectBody(Response response) throws IOException {
-    long contentLength = response.headers().contentLength();
+    int contentLength = response.headers().contentLength();
     if (contentLength == -1L) return;
     Source body = newFixedLengthSource(contentLength);
     Util.skipAll(body, Integer.MAX_VALUE, TimeUnit.MILLISECONDS);
@@ -280,7 +280,7 @@ public final class Http1Codec {
       return timeout;
     }
 
-    @Override public void write(Buffer source, long byteCount) throws IOException {
+    @Override public void write(Buffer source, int byteCount) throws IOException {
       if (closed) throw new IllegalStateException("closed");
       Util.checkOffsetAndCount(source.size(), 0, byteCount);
       sink.write(source, byteCount);
@@ -314,11 +314,11 @@ public final class Http1Codec {
       return timeout;
     }
 
-    @Override public void write(Buffer source, long byteCount) throws IOException {
+    @Override public void write(Buffer source, int byteCount) throws IOException {
       if (closed) throw new IllegalStateException("closed");
       if (byteCount == 0) return;
 
-      sink.writeHexadecimalUnsignedLong(byteCount);
+      sink.writeHexadecimalInt(byteCount);
       sink.writeUtf8("\r\n");
       sink.write(source, byteCount);
       sink.writeUtf8("\r\n");
@@ -346,7 +346,7 @@ public final class Http1Codec {
       return timeout;
     }
 
-    @Override public long read(Buffer sink, long byteCount) throws IOException {
+    @Override public int read(Buffer sink, int byteCount) throws IOException {
       try {
         return source.read(sink, byteCount);
       } catch (IOException e) {
@@ -371,21 +371,21 @@ public final class Http1Codec {
 
   /** An HTTP body with a fixed length specified in advance. */
   private class FixedLengthSource extends AbstractSource {
-    private long bytesRemaining;
+    private int bytesRemaining;
 
-    FixedLengthSource(long length) {
+    FixedLengthSource(int length) {
       bytesRemaining = length;
       if (bytesRemaining == 0) {
         responseBodyComplete();
       }
     }
 
-    @Override public long read(Buffer sink, long byteCount) throws IOException {
+    @Override public int read(Buffer sink, int byteCount) throws IOException {
       if (byteCount < 0) throw new IllegalArgumentException("byteCount < 0: " + byteCount);
       if (closed) throw new IllegalStateException("closed");
       if (bytesRemaining == 0) return -1;
 
-      long read = super.read(sink, Math.min(bytesRemaining, byteCount));
+      int read = super.read(sink, Math.min(bytesRemaining, byteCount));
       if (read == -1) {
         connection.noNewExchanges(); // The server didn't supply the promised content length.
         ProtocolException e = new ProtocolException("unexpected end of stream");
@@ -414,16 +414,16 @@ public final class Http1Codec {
 
   /** An HTTP body with alternating chunk sizes and chunk bodies. */
   private class ChunkedSource extends AbstractSource {
-    private static final long NO_CHUNK_YET = -1L;
+    private static final int NO_CHUNK_YET = -1;
     private final Url url;
-    private long bytesRemainingInChunk = NO_CHUNK_YET;
+    private int bytesRemainingInChunk = NO_CHUNK_YET;
     private boolean hasMoreChunks = true;
 
     ChunkedSource(Url url) {
       this.url = url;
     }
 
-    @Override public long read(Buffer sink, long byteCount) throws IOException {
+    @Override public int read(Buffer sink, int byteCount) throws IOException {
       if (byteCount < 0) throw new IllegalArgumentException("byteCount < 0: " + byteCount);
       if (closed) throw new IllegalStateException("closed");
       if (!hasMoreChunks) return -1;
@@ -433,7 +433,7 @@ public final class Http1Codec {
         if (!hasMoreChunks) return -1;
       }
 
-      long read = super.read(sink, Math.min(byteCount, bytesRemainingInChunk));
+      int read = super.read(sink, Math.min(byteCount, bytesRemainingInChunk));
       if (read == -1) {
         connection.noNewExchanges(); // The server didn't supply the promised chunk length.
         ProtocolException e = new ProtocolException("unexpected end of stream");
@@ -450,7 +450,7 @@ public final class Http1Codec {
         source.readUtf8LineStrict();
       }
       try {
-        bytesRemainingInChunk = source.readHexadecimalUnsignedLong();
+        bytesRemainingInChunk = source.readHexadecimalInt();
         String extensions = source.readUtf8LineStrict().trim();
         if (bytesRemainingInChunk < 0 || (!extensions.isEmpty() && !extensions.startsWith(";"))) {
           throw new ProtocolException("expected chunk size and optional extensions but was \""
@@ -480,13 +480,13 @@ public final class Http1Codec {
   private class UnknownLengthSource extends AbstractSource {
     private boolean inputExhausted;
 
-    @Override public long read(Buffer sink, long byteCount)
+    @Override public int read(Buffer sink, int byteCount)
         throws IOException {
       if (byteCount < 0) throw new IllegalArgumentException("byteCount < 0: " + byteCount);
       if (closed) throw new IllegalStateException("closed");
       if (inputExhausted) return -1;
 
-      long read = super.read(sink, byteCount);
+      int read = super.read(sink, byteCount);
       if (read == -1) {
         inputExhausted = true;
         responseBodyComplete();

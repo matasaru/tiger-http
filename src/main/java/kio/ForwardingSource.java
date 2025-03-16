@@ -16,7 +16,7 @@ public abstract class ForwardingSource implements Source {
     return delegate;
   }
 
-  @Override public long read(Buffer sink, long byteCount) throws IOException {
+  @Override public int read(Buffer sink, int byteCount) throws IOException {
     return delegate.read(sink, byteCount);
   }
 

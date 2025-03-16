@@ -130,9 +130,9 @@ public class Call {
                 requestBuilder.header("Content-Type", contentType.toString());
               }
 
-              long contentLength = body.contentLength();
+              int contentLength = body.contentLength();
               if (contentLength != -1) {
-                requestBuilder.header("Content-Length", Long.toString(contentLength));
+                requestBuilder.header("Content-Length", Integer.toString(contentLength));
                 requestBuilder.removeHeader("Transfer-Encoding");
               }
               else {
@@ -215,7 +215,7 @@ public class Call {
                       .build();
               responseBuilder.headers(strippedHeaders);
               String contentType = networkResponse.header("Content-Type");
-              responseBuilder.body(new ResponseBody(contentType, -1L, new RealBufferedSource(responseBody)));
+              responseBuilder.body(new ResponseBody(contentType, -1, new RealBufferedSource(responseBody)));
             }
 
             response = responseBuilder.build();

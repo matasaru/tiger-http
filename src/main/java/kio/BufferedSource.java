@@ -25,13 +25,13 @@ public interface BufferedSource extends Source  {
    * Returns when the buffer contains at least {@code byteCount} bytes. Throws an
    * {@link java.io.EOFException} if the source is exhausted before the required bytes can be read.
    */
-  void require(long byteCount) throws IOException;
+  void require(int byteCount) throws IOException;
 
   /**
    * Returns true when the buffer contains at least {@code byteCount} bytes, expanding it as
    * necessary. Returns false if the source is exhausted before the requested bytes can be read.
    */
-  boolean request(long byteCount) throws IOException;
+  boolean request(int byteCount) throws IOException;
 
   /** Removes a byte from this source and returns it. */
   byte readByte() throws IOException;
@@ -121,30 +121,30 @@ public interface BufferedSource extends Source  {
   int readIntLe() throws IOException;
 
   /**
-   * Reads a long form this source in hexadecimal form (i.e., as a string in base 16). This will
+   * Reads an int form this source in hexadecimal form (i.e., as a string in base 16). This will
    * iterate until a non-hexadecimal character is found. <pre>{@code
    *
    *   Buffer buffer = new Buffer()
    *       .writeUtf8("ffff CAFEBABE 10");
    *
-   *   assertEquals(65535L, buffer.readHexadecimalUnsignedLong());
+   *   assertEquals(65535, buffer.readHexadecimalInt());
    *   assertEquals(' ', buffer.readByte());
-   *   assertEquals(0xcafebabeL, buffer.readHexadecimalUnsignedLong());
+   *   assertEquals(0xcafebabe, buffer.readHexadecimalInt());
    *   assertEquals(' ', buffer.readByte());
-   *   assertEquals(0x10L, buffer.readHexadecimalUnsignedLong());
+   *   assertEquals(0x10, buffer.readHexadecimalInt());
    * }</pre>
    *
-   * @throws NumberFormatException if the found hexadecimal does not fit into a {@code long} or
+   * @throws NumberFormatException if the found hexadecimal does not fit into a {@code int} or
    * hexadecimal was not found.
    */
-  long readHexadecimalUnsignedLong() throws IOException;
+  int readHexadecimalInt() throws IOException;
 
   /**
    * Reads and discards {@code byteCount} bytes from this source. Throws an
    * {@link java.io.EOFException} if the source is exhausted before the
    * requested bytes can be skipped.
    */
-  void skip(long byteCount) throws IOException;
+  void skip(int byteCount) throws IOException;
 
   /** Removes all bytes from this and returns them as a byte array. */
   byte[] readByteArray() throws IOException;
@@ -193,7 +193,7 @@ public interface BufferedSource extends Source  {
    *   assertEquals(0, buffer.size());
    * }</pre>
    */
-  String readUtf8(long byteCount) throws IOException;
+  String readUtf8(int byteCount) throws IOException;
 
   /**
    * Removes and returns characters up to but not including the next line break. A line break is
@@ -228,7 +228,7 @@ public interface BufferedSource extends Source  {
    *   assertEquals("12345", buffer.readUtf8LineStrict(5));
    * }</pre>
    */
-  String readUtf8LineStrict(long limit) throws IOException;
+  String readUtf8LineStrict(int limit) throws IOException;
 
   /** Removes all bytes from this, decodes them as {@code charset}, and returns the string. */
   String readString(Charset charset) throws IOException;
@@ -237,10 +237,10 @@ public interface BufferedSource extends Source  {
    * Removes {@code byteCount} bytes from this, decodes them as {@code charset}, and returns the
    * string.
    */
-  String readString(long byteCount, Charset charset) throws IOException;
+  String readString(int byteCount, Charset charset) throws IOException;
 
   /** Equivalent to {@link #indexOf(byte, long) indexOf(b, 0)}. */
-  long indexOf(byte b) throws IOException;
+  int indexOf(byte b) throws IOException;
 
   /**
    * Returns the index of {@code b} if it is found in the range of {@code fromIndex} inclusive
@@ -250,7 +250,7 @@ public interface BufferedSource extends Source  {
    * <p>The scan terminates at either {@code toIndex} or the end of the buffer, whichever comes
    * first. The maximum number of bytes scanned is {@code toIndex-fromIndex}.
    */
-  long indexOf(byte b, long fromIndex, long toIndex) throws IOException;
+  int indexOf(byte b, int fromIndex, int toIndex) throws IOException;
 
   /** Returns an input stream that reads from this source. */
   InputStream inputStream();

@@ -30,7 +30,7 @@ public interface BufferedSink extends Sink {
   void writeAll(Source source) throws IOException;
 
   /** Removes {@code byteCount} bytes from {@code source} and appends them to this sink. */
-  BufferedSink write(Source source, long byteCount) throws IOException;
+  BufferedSink write(Source source, int byteCount) throws IOException;
 
   /**
    * Encodes {@code string} in UTF-8 and writes it to this sink. <pre>{@code
@@ -68,19 +68,19 @@ public interface BufferedSink extends Sink {
   BufferedSink writeByte(int b) throws IOException;
 
   /**
-   * Writes a long to this sink in hexadecimal form (i.e., as a string in base 16). <pre>{@code
+   * Writes an int to this sink in hexadecimal form (i.e., as a string in base 16). <pre>{@code
    *
    *   Buffer buffer = new Buffer();
-   *   buffer.writeHexadecimalUnsignedLong(65535L);
+   *   buffer.writeHexadecimalInt(65535);
    *   buffer.writeByte(' ');
-   *   buffer.writeHexadecimalUnsignedLong(0xcafebabeL);
+   *   buffer.writeHexadecimalInt(0xcafebabe);
    *   buffer.writeByte(' ');
-   *   buffer.writeHexadecimalUnsignedLong(0x10L);
+   *   buffer.writeHexadecimalInt(0x10);
    *
    *   assertEquals("ffff cafebabe 10", buffer.readUtf8());
    * }</pre>
    */
-  BufferedSink writeHexadecimalUnsignedLong(long v) throws IOException;
+  BufferedSink writeHexadecimalInt(int v) throws IOException;
 
   /**
    * Writes all buffered data to the underlying sink, if one exists. Then that sink is recursively

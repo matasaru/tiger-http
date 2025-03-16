@@ -54,7 +54,7 @@ public final class Exchange {
   }
 
   public Sink createRequestBody(Request request) throws IOException {
-    long contentLength = request.body().contentLength();
+    int contentLength = request.body().contentLength();
     Sink rawRequestBody = codec.createRequestBody(request, contentLength);
     return new RequestBodySink(rawRequestBody, contentLength);
   }
@@ -83,7 +83,7 @@ public final class Exchange {
 
   public ResponseBody openResponseBody(Response response) throws IOException {
     String contentType = response.header("Content-Type");
-    long contentLength = codec.reportedContentLength(response);
+    int contentLength = codec.reportedContentLength(response);
     Source rawSource = codec.openResponseBodySource(response);
     ResponseBodySource source = new ResponseBodySource(rawSource, contentLength);
     return new ResponseBody(contentType, contentLength, new RealBufferedSource(source));
@@ -117,16 +117,16 @@ public final class Exchange {
   private final class RequestBodySink extends ForwardingSink {
     private boolean completed;
     /** The exact number of bytes to be written, or -1L if that is unknown. */
-    private long contentLength;
-    private long bytesReceived;
+    private int contentLength;
+    private int bytesReceived;
     private boolean closed;
 
-    RequestBodySink(Sink delegate, long contentLength) {
+    RequestBodySink(Sink delegate, int contentLength) {
       super(delegate);
       this.contentLength = contentLength;
     }
 
-    @Override public void write(Buffer source, long byteCount) throws IOException {
+    @Override public void write(Buffer source, int byteCount) throws IOException {
       if (closed) throw new IllegalStateException("closed");
       if (contentLength != -1L && bytesReceived + byteCount > contentLength) {
         throw new ProtocolException("expected " + contentLength
@@ -171,12 +171,12 @@ public final class Exchange {
 
   /** A response body that fires events when it completes. */
   final class ResponseBodySource extends ForwardingSource {
-    private final long contentLength;
-    private long bytesReceived;
+    private final int contentLength;
+    private int bytesReceived;
     private boolean completed;
     private boolean closed;
 
-    ResponseBodySource(Source delegate, long contentLength) {
+    ResponseBodySource(Source delegate, int contentLength) {
       super(delegate);
       this.contentLength = contentLength;
 
@@ -185,16 +185,16 @@ public final class Exchange {
       }
     }
 
-    @Override public long read(Buffer sink, long byteCount) throws IOException {
+    @Override public int read(Buffer sink, int byteCount) throws IOException {
       if (closed) throw new IllegalStateException("closed");
       try {
-        long read = delegate().read(sink, byteCount);
-        if (read == -1L) {
+        int read = delegate().read(sink, byteCount);
+        if (read == -1) {
           complete(null);
-          return -1L;
+          return -1;
         }
 
-        long newBytesReceived = bytesReceived + read;
+        int newBytesReceived = bytesReceived + read;
         if (contentLength != -1L && newBytesReceived > contentLength) {
           throw new ProtocolException("expected " + contentLength
               + " bytes but received " + newBytesReceived);

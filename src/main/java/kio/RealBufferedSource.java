@@ -20,17 +20,17 @@ public final class RealBufferedSource implements BufferedSource {
     return buffer;
   }
 
-  @Override public long read(Buffer sink, long byteCount) throws IOException {
+  @Override public int read(Buffer sink, int byteCount) throws IOException {
     if (sink == null) throw new IllegalArgumentException("sink == null");
     if (byteCount < 0) throw new IllegalArgumentException("byteCount < 0: " + byteCount);
     if (closed) throw new IllegalStateException("closed");
 
     if (buffer.size == 0) {
-      long read = source.read(buffer, Segment.SIZE);
+      int read = source.read(buffer, Segment.SIZE);
       if (read == -1) return -1;
     }
 
-    long toRead = Math.min(byteCount, buffer.size);
+    int toRead = Math.min(byteCount, buffer.size);
     return buffer.read(sink, toRead);
   }
 
@@ -39,11 +39,11 @@ public final class RealBufferedSource implements BufferedSource {
     return buffer.exhausted() && source.read(buffer, Segment.SIZE) == -1;
   }
 
-  @Override public void require(long byteCount) throws IOException {
+  @Override public void require(int byteCount) throws IOException {
     if (!request(byteCount)) throw new EOFException();
   }
 
-  @Override public boolean request(long byteCount) throws IOException {
+  @Override public boolean request(int byteCount) throws IOException {
     if (byteCount < 0) throw new IllegalArgumentException("byteCount < 0: " + byteCount);
     if (closed) throw new IllegalStateException("closed");
     while (buffer.size < byteCount) {
@@ -69,7 +69,7 @@ public final class RealBufferedSource implements BufferedSource {
       // The underlying source is exhausted. Copy the bytes we got before rethrowing.
       int offset = 0;
       while (buffer.size > 0) {
-        int read = buffer.read(sink, offset, (int) buffer.size);
+        int read = buffer.read(sink, offset, buffer.size);
         if (read == -1) throw new AssertionError();
         offset += read;
       }
@@ -83,7 +83,7 @@ public final class RealBufferedSource implements BufferedSource {
     return buffer.readUtf8();
   }
 
-  @Override public String readUtf8(long byteCount) throws IOException {
+  @Override public String readUtf8(int byteCount) throws IOException {
     require(byteCount);
     return buffer.readUtf8(byteCount);
   }
@@ -95,22 +95,22 @@ public final class RealBufferedSource implements BufferedSource {
     return buffer.readString(charset);
   }
 
-  @Override public String readString(long byteCount, Charset charset) throws IOException {
+  @Override public String readString(int byteCount, Charset charset) throws IOException {
     require(byteCount);
     if (charset == null) throw new IllegalArgumentException("charset == null");
     return buffer.readString(byteCount, charset);
   }
 
   @Override public String readUtf8LineStrict() throws IOException {
-    return readUtf8LineStrict(Long.MAX_VALUE);
+    return readUtf8LineStrict(Integer.MAX_VALUE);
   }
 
-  @Override public String readUtf8LineStrict(long limit) throws IOException {
+  @Override public String readUtf8LineStrict(int limit) throws IOException {
     if (limit < 0) throw new IllegalArgumentException("limit < 0: " + limit);
-    long scanLength = limit == Long.MAX_VALUE ? Long.MAX_VALUE : limit + 1;
-    long newline = indexOf((byte) '\n', 0, scanLength);
+    int scanLength = limit == Integer.MAX_VALUE ? Integer.MAX_VALUE : limit + 1;
+    int newline = indexOf((byte) '\n', 0, scanLength);
     if (newline != -1) return buffer.readUtf8Line(newline);
-    if (scanLength < Long.MAX_VALUE
+    if (scanLength < Integer.MAX_VALUE
         && request(scanLength) && buffer.getByte(scanLength - 1) == '\r'
         && request(scanLength + 1) && buffer.getByte(scanLength) == '\n') {
       return buffer.readUtf8Line(scanLength); // The line was 'limit' UTF-8 bytes followed by \r\n.
@@ -141,7 +141,7 @@ public final class RealBufferedSource implements BufferedSource {
     return buffer.readIntLe();
   }
 
-  @Override public long readHexadecimalUnsignedLong() throws IOException {
+  @Override public int readHexadecimalInt() throws IOException {
     require(1);
 
     for (int pos = 0; request(pos + 1); pos++) {
@@ -156,26 +156,26 @@ public final class RealBufferedSource implements BufferedSource {
       }
     }
 
-    return buffer.readHexadecimalUnsignedLong();
+    return buffer.readHexadecimalInt();
   }
 
-  @Override public void skip(long byteCount) throws IOException {
+  @Override public void skip(int byteCount) throws IOException {
     if (closed) throw new IllegalStateException("closed");
     while (byteCount > 0) {
       if (buffer.size == 0 && source.read(buffer, Segment.SIZE) == -1) {
         throw new EOFException();
       }
-      long toSkip = Math.min(byteCount, buffer.size());
+      int toSkip = Math.min(byteCount, buffer.size());
       buffer.skip(toSkip);
       byteCount -= toSkip;
     }
   }
 
-  @Override public long indexOf(byte b) throws IOException {
-    return indexOf(b, 0, Long.MAX_VALUE);
+  @Override public int indexOf(byte b) throws IOException {
+    return indexOf(b, 0, Integer.MAX_VALUE);
   }
 
-  @Override public long indexOf(byte b, long fromIndex, long toIndex) throws IOException {
+  @Override public int indexOf(byte b, int fromIndex, int toIndex) throws IOException {
     if (closed) throw new IllegalStateException("closed");
     if (fromIndex < 0 || toIndex < fromIndex) {
       throw new IllegalArgumentException(
@@ -183,18 +183,18 @@ public final class RealBufferedSource implements BufferedSource {
     }
 
     while (fromIndex < toIndex) {
-      long result = buffer.indexOf(b, fromIndex, toIndex);
-      if (result != -1L) return result;
+      int result = buffer.indexOf(b, fromIndex, toIndex);
+      if (result != -1) return result;
 
       // The byte wasn't in the buffer. Give up if we've already reached our target size or if the
       // underlying stream is exhausted.
-      long lastBufferSize = buffer.size;
-      if (lastBufferSize >= toIndex || source.read(buffer, Segment.SIZE) == -1) return -1L;
+      int lastBufferSize = buffer.size;
+      if (lastBufferSize >= toIndex || source.read(buffer, Segment.SIZE) == -1) return -1;
 
       // Continue the search from where we left off.
       fromIndex = Math.max(fromIndex, lastBufferSize);
     }
-    return -1L;
+    return -1;
   }
 
   @Override public InputStream inputStream() {
@@ -202,7 +202,7 @@ public final class RealBufferedSource implements BufferedSource {
       @Override public int read() throws IOException {
         if (closed) throw new IOException("closed");
         if (buffer.size == 0) {
-          long count = source.read(buffer, Segment.SIZE);
+          int count = source.read(buffer, Segment.SIZE);
           if (count == -1) return -1;
         }
         return buffer.readByte() & 0xff;
@@ -213,7 +213,7 @@ public final class RealBufferedSource implements BufferedSource {
         Util.checkOffsetAndCount(data.length, offset, byteCount);
 
         if (buffer.size == 0) {
-          long count = source.read(buffer, Segment.SIZE);
+          int count = source.read(buffer, Segment.SIZE);
           if (count == -1) return -1;
         }
 
@@ -222,7 +222,7 @@ public final class RealBufferedSource implements BufferedSource {
 
       @Override public int available() throws IOException {
         if (closed) throw new IOException("closed");
-        return (int) Math.min(buffer.size, Integer.MAX_VALUE);
+        return buffer.size;
       }
 
       @Override public void close() throws IOException {

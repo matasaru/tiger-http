@@ -30,7 +30,7 @@ import java.io.IOException;
  */
 public interface Sink extends Closeable, Flushable {
   /** Removes {@code byteCount} bytes from {@code source} and appends them to this. */
-  void write(Buffer source, long byteCount) throws IOException;
+  void write(Buffer source, int byteCount) throws IOException;
 
   /** Pushes all buffered bytes to their final destination. */
   @Override void flush() throws IOException;

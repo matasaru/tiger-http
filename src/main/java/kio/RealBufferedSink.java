@@ -17,7 +17,7 @@ public final class RealBufferedSink implements BufferedSink {
     return buffer;
   }
 
-  @Override public void write(Buffer source, long byteCount)
+  @Override public void write(Buffer source, int byteCount)
       throws IOException {
     if (closed) throw new IllegalStateException("closed");
     buffer.write(source, byteCount);
@@ -62,9 +62,9 @@ public final class RealBufferedSink implements BufferedSink {
     }
   }
 
-  @Override public BufferedSink write(Source source, long byteCount) throws IOException {
+  @Override public BufferedSink write(Source source, int byteCount) throws IOException {
     while (byteCount > 0) {
-      long read = source.read(buffer, byteCount);
+      int read = source.read(buffer, byteCount);
       if (read == -1) throw new EOFException();
       byteCount -= read;
       emitCompleteSegments();
@@ -78,22 +78,22 @@ public final class RealBufferedSink implements BufferedSink {
     return emitCompleteSegments();
   }
 
-  @Override public BufferedSink writeHexadecimalUnsignedLong(long v) throws IOException {
+  @Override public BufferedSink writeHexadecimalInt(int v) throws IOException {
     if (closed) throw new IllegalStateException("closed");
-    buffer.writeHexadecimalUnsignedLong(v);
+    buffer.writeHexadecimalInt(v);
     return emitCompleteSegments();
   }
 
   @Override public BufferedSink emitCompleteSegments() throws IOException {
     if (closed) throw new IllegalStateException("closed");
-    long byteCount = buffer.completeSegmentByteCount();
+    int byteCount = buffer.completeSegmentByteCount();
     if (byteCount > 0) sink.write(buffer, byteCount);
     return this;
   }
 
   @Override public void emit() throws IOException {
     if (closed) throw new IllegalStateException("closed");
-    long byteCount = buffer.size();
+    int byteCount = buffer.size();
     if (byteCount > 0) sink.write(buffer, byteCount);
   }
 

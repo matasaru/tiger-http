@@ -131,21 +131,6 @@ public final class ResponseBodyTest {
     }
   }
 
-  @Test public void bytesThrowsMoreThanIntMaxValue() {
-    ResponseBody body = new ResponseBody(null, Integer.MAX_VALUE + 1L, null) {
-      @Override public BufferedSource source() {
-        throw new AssertionError();
-      }
-    };
-    try {
-      body.bytes();
-      fail();
-    } catch (IOException e) {
-      assertThat(e.getMessage()).isEqualTo(
-          "Cannot buffer entire body for content length: 2147483648");
-    }
-  }
-
   @Test public void byteStreamEmpty() throws IOException {
     ResponseBody body = body("");
     InputStream bytes = body.byteStream();

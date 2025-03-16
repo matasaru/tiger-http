@@ -56,7 +56,7 @@ public final class Util {
   private Util() {
   }
 
-  public static void checkOffsetAndCount(long arrayLength, long offset, long count) {
+  public static void checkOffsetAndCount(int arrayLength, int offset, int count) {
     if ((offset | count) < 0 || offset > arrayLength || arrayLength - offset < count) {
       throw new ArrayIndexOutOfBoundsException();
     }
@@ -419,7 +419,7 @@ public final class Util {
       } else {
         if (i > 0) result.writeByte(':');
         int group = (address[i] & 0xff) << 8 | address[i + 1] & 0xff;
-        result.writeHexadecimalUnsignedLong(group);
+        result.writeHexadecimalInt(group);
         i += 2;
       }
     }

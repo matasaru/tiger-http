@@ -35,7 +35,7 @@ public class ForwardingRequestBody extends RequestBody {
     return delegate.contentType();
   }
 
-  @Override public long contentLength() throws IOException {
+  @Override public int contentLength() throws IOException {
     return delegate.contentLength();
   }
 

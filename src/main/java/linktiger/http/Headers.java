@@ -82,13 +82,13 @@ public final class Headers {
     return value != null ? value.toInstant() : null;
   }
 
-  public long contentLength() {
+  public int contentLength() {
     String length = get("Content-Length");
     if (length == null) {
       return -1;
     }
     try {
-      return Long.parseLong(length);
+      return Integer.parseInt(length);
     } catch (NumberFormatException e) {
       return -1;
     }
@@ -135,10 +135,10 @@ public final class Headers {
   /**
    * Returns the number of bytes required to encode these headers.
    */
-  public long byteCount() {
+  public int byteCount() {
     // Each header name has 2 bytes of overhead for ': ' and every header value has 2 bytes of
     // overhead for '\r\n'.
-    long result = namesAndValues.length * 2;
+    int result = namesAndValues.length * 2;
 
     for (int i = 0, size = namesAndValues.length; i < size; i++) {
       result += namesAndValues[i].length();

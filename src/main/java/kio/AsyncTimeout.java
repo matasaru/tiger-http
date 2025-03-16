@@ -140,12 +140,12 @@ public class AsyncTimeout extends Timeout {
    */
   public final Sink sink(final Sink sink) {
     return new Sink() {
-      @Override public void write(Buffer source, long byteCount) throws IOException {
+      @Override public void write(Buffer source, int byteCount) throws IOException {
         Util.checkOffsetAndCount(source.size, 0, byteCount);
 
-        while (byteCount > 0L) {
+        while (byteCount > 0) {
           // Count how many bytes to write. This loop guarantees we split on a segment boundary.
-          long toWrite = 0L;
+          int toWrite = 0;
           for (Segment s = source.head; toWrite < TIMEOUT_WRITE_SIZE; s = s.next) {
             int segmentSize = s.limit - s.pos;
             toWrite += segmentSize;
@@ -212,11 +212,11 @@ public class AsyncTimeout extends Timeout {
    */
   public final Source source(final Source source) {
     return new Source() {
-      @Override public long read(Buffer sink, long byteCount) throws IOException {
+      @Override public int read(Buffer sink, int byteCount) throws IOException {
         boolean throwOnTimeout = false;
         enter();
         try {
-          long result = source.read(sink, byteCount);
+          int result = source.read(sink, byteCount);
           throwOnTimeout = true;
           return result;
         } catch (IOException e) {

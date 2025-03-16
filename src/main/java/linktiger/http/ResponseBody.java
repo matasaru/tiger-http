@@ -87,10 +87,10 @@ public class ResponseBody implements Closeable {
    * by malformed content types.
    */
   private final String contentType;
-  private final long contentLength;
+  private final int contentLength;
   private final BufferedSource source;
 
-  public ResponseBody(String contentType, long contentLength, BufferedSource source) {
+  public ResponseBody(String contentType, int contentLength, BufferedSource source) {
     this.contentType = contentType;
     this.contentLength = contentLength;
     this.source = source;
@@ -104,7 +104,7 @@ public class ResponseBody implements Closeable {
    * Returns the number of bytes in that will returned by {@link #bytes}, or {@link #byteStream}, or
    * -1 if unknown.
    */
-  public long contentLength() {
+  public int contentLength() {
     return contentLength;
   }
 
@@ -124,10 +124,7 @@ public class ResponseBody implements Closeable {
    * possibility for your response.
    */
   public final byte[] bytes() throws IOException {
-    long contentLength = contentLength();
-    if (contentLength > Integer.MAX_VALUE) {
-      throw new IOException("Cannot buffer entire body for content length: " + contentLength);
-    }
+    int contentLength = contentLength();
 
     byte[] bytes;
     try (BufferedSource source = source()) {
