@@ -12,20 +12,6 @@ final class Util {
     }
   }
 
-  public static short reverseBytesShort(short s) {
-    int i = s & 0xffff;
-    int reversed = (i & 0xff00) >>> 8
-        |          (i & 0x00ff)  << 8;
-    return (short) reversed;
-  }
-
-  public static int reverseBytesInt(int i) {
-    return (i & 0xff000000) >>> 24
-        |  (i & 0x00ff0000) >>>  8
-        |  (i & 0x0000ff00)  <<  8
-        |  (i & 0x000000ff)  << 24;
-  }
-
   /**
    * Throws {@code t}, even if the declared throws clause doesn't permit it.
    * This is a terrible – but terribly convenient – hack that makes it easy to

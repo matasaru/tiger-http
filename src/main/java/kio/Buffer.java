@@ -263,11 +263,18 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
   }
 
   @Override public short readShortLe() {
-    return Util.reverseBytesShort(readShort());
+    int i = readShort() & 0xffff;
+    int reversed = (i & 0xff00) >>> 8
+        |          (i & 0x00ff)  << 8;
+    return (short) reversed;
   }
 
   @Override public int readIntLe() {
-    return Util.reverseBytesInt(readInt());
+    int i = readInt();
+    return (i & 0xff000000) >>> 24
+        |  (i & 0x00ff0000) >>>  8
+        |  (i & 0x0000ff00)  <<  8
+        |  (i & 0x000000ff)  << 24;
   }
 
   @Override public int readHexadecimalInt() {
