@@ -252,26 +252,6 @@ public interface BufferedSource extends Source  {
    */
   long indexOf(byte b, long fromIndex, long toIndex) throws IOException;
 
-  /** Equivalent to {@link #indexOfElement(ByteString, long) indexOfElement(targetBytes, 0)}. */
-  long indexOfElement(ByteString targetBytes) throws IOException;
-
-  /**
-   * Returns the first index in this buffer that is at or after {@code fromIndex} and that contains
-   * any of the bytes in {@code targetBytes}. This expands the buffer as necessary until a target
-   * byte is found. This reads an unbounded number of bytes into the buffer. Returns -1 if the
-   * stream is exhausted before the requested byte is found. <pre>{@code
-   *
-   *   ByteString ANY_VOWEL = ByteString.encodeUtf8("AEOIUaeoiu");
-   *
-   *   Buffer buffer = new Buffer();
-   *   buffer.writeUtf8("Dr. Alan Grant");
-   *
-   *   assertEquals(4,  buffer.indexOfElement(ANY_VOWEL));    // 'A' in 'Alan'.
-   *   assertEquals(11, buffer.indexOfElement(ANY_VOWEL, 9)); // 'a' in 'Grant'.
-   * }</pre>
-   */
-  long indexOfElement(ByteString targetBytes, long fromIndex) throws IOException;
-
   /** Returns an input stream that reads from this source. */
   InputStream inputStream();
 }
