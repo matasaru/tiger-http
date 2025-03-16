@@ -20,7 +20,6 @@ import java.net.ProtocolException;
 
 /** An HTTP response status line like "HTTP/1.1 200 OK". */
 public final class StatusLine {
-  public static final int HTTP_CONTINUE = 100;
 
   public final Protocol protocol;
   public final int code;

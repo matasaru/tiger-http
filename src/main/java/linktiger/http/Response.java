@@ -132,7 +132,7 @@ public final class Response implements Closeable {
     }
 
     int responseCode = this.code();
-    if ((responseCode < StatusLine.HTTP_CONTINUE || responseCode >= 200)
+    if ((responseCode < 100 || responseCode >= 200)
         && responseCode != HTTP_NO_CONTENT
         && responseCode != HTTP_NOT_MODIFIED) {
       return true;
