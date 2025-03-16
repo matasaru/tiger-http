@@ -17,7 +17,6 @@ package linktiger.http;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 import static java.net.HttpURLConnection.HTTP_MOVED_PERM;
@@ -25,9 +24,7 @@ import static java.net.HttpURLConnection.HTTP_MOVED_TEMP;
 import static java.net.HttpURLConnection.HTTP_MULT_CHOICE;
 import static java.net.HttpURLConnection.HTTP_NOT_MODIFIED;
 import static java.net.HttpURLConnection.HTTP_NO_CONTENT;
-import static java.net.HttpURLConnection.HTTP_PROXY_AUTH;
 import static java.net.HttpURLConnection.HTTP_SEE_OTHER;
-import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
 
 /**
  * An HTTP response. Instances of this class are not immutable: the response body is a one-shot
@@ -183,29 +180,6 @@ public final class Response implements Closeable {
       default:
         return false;
     }
-  }
-
-  /**
-   * Returns the RFC 7235 authorization challenges appropriate for this response's code. If the
-   * response code is 401 unauthorized, this returns the "WWW-Authenticate" challenges. If the
-   * response code is 407 proxy unauthorized, this returns the "Proxy-Authenticate" challenges.
-   * Otherwise this returns an empty list of challenges.
-   *
-   * <p>If a challenge uses the {@code token68} variant instead of auth params, there is exactly one
-   * auth param in the challenge at key {@code null}. Invalid headers and challenges are ignored.
-   * No semantic validation is done, for example that {@code Basic} auth must have a {@code realm}
-   * auth param, this is up to the caller that interprets these challenges.
-   */
-  public List<Challenge> challenges() {
-    String responseField;
-    if (code == HTTP_UNAUTHORIZED) {
-      responseField = "WWW-Authenticate";
-    } else if (code == HTTP_PROXY_AUTH) {
-      responseField = "Proxy-Authenticate";
-    } else {
-      return Collections.emptyList();
-    }
-    return HttpHeaders.parseChallenges(headers(), responseField);
   }
 
   /**
