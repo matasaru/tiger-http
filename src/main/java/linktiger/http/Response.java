@@ -38,7 +38,6 @@ public final class Response implements Closeable {
   final ResponseBody body;
   final long sentRequestAtMillis;
   final long receivedResponseAtMillis;
-  final Exchange exchange;
 
   Response(Builder builder) {
     this.request = builder.request;
@@ -50,7 +49,6 @@ public final class Response implements Closeable {
     this.body = builder.body;
     this.sentRequestAtMillis = builder.sentRequestAtMillis;
     this.receivedResponseAtMillis = builder.receivedResponseAtMillis;
-    this.exchange = builder.exchange;
   }
 
   /**
@@ -169,10 +167,6 @@ public final class Response implements Closeable {
     return receivedResponseAtMillis;
   }
 
-  public Exchange exchange() {
-    return exchange;
-  }
-
   /**
    * Closes the response body. Equivalent to {@code body().close()}.
    */
@@ -221,7 +215,6 @@ public final class Response implements Closeable {
       this.body = response.body;
       this.sentRequestAtMillis = response.sentRequestAtMillis;
       this.receivedResponseAtMillis = response.receivedResponseAtMillis;
-      this.exchange = response.exchange;
     }
 
     public Builder request(Request request) {
