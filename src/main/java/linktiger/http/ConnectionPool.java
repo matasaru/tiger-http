@@ -45,7 +45,11 @@ public final class ConnectionPool {
    */
   private static final Executor executor = new ThreadPoolExecutor(0 /* corePoolSize */,
           Integer.MAX_VALUE /* maximumPoolSize */, 60L /* keepAliveTime */, TimeUnit.SECONDS,
-          new SynchronousQueue<>(), Util.threadFactory("OkHttp ConnectionPool", true));
+          new SynchronousQueue<>(), runnable -> {
+            Thread result = new Thread(runnable, "OkHttp ConnectionPool");
+            result.setDaemon(true);
+            return result;
+          });
 
   /** The maximum number of idle connections for each address. */
   private final int maxIdleConnections;

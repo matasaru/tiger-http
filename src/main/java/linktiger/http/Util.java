@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Locale;
 import java.util.TimeZone;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -99,14 +98,6 @@ public final class Util {
         source.timeout().deadlineNanoTime(now + originalDuration);
       }
     }
-  }
-
-  public static ThreadFactory threadFactory(String name, boolean daemon) {
-    return runnable -> {
-      Thread result = new Thread(runnable, name);
-      result.setDaemon(daemon);
-      return result;
-    };
   }
 
   public static String hostHeader(Url url, boolean includeDefaultPort) {
