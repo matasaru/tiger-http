@@ -75,6 +75,11 @@ public final class CancelTest {
             return null;
           }
 
+          @Override
+          public int contentLength() throws IOException {
+            return 10;
+          }
+
           @Override public void writeTo(BufferedSink sink) throws IOException {
             for (int i = 0; i < 10; i++) {
               sink.writeByte(0);

@@ -577,6 +577,11 @@ public final class CallTest {
         return MediaType.get("text/plain");
       }
 
+      @Override
+      public int contentLength() {
+        return 3;
+      }
+
       @Override public void writeTo(BufferedSink sink) throws IOException {
         sink.writeUtf8("abc");
         sink.timeout().deadline(5, TimeUnit.SECONDS);
@@ -593,6 +598,11 @@ public final class CallTest {
     RequestBody requestBody2 = new RequestBody() {
       @Override public MediaType contentType() {
         return MediaType.get("text/plain");
+      }
+
+      @Override
+      public int contentLength() {
+        return 3;
       }
 
       @Override public void writeTo(BufferedSink sink) throws IOException {
@@ -1302,41 +1312,18 @@ public final class CallTest {
         .assertFailure(UnknownHostException.class);
   }
 
-  @Test public void uploadBodySmallChunkedEncoding() throws Exception {
-    upload(true, 1048576, 256);
-    RecordedRequest recordedRequest = server.takeRequest();
-    assertThat(recordedRequest.getBodySize()).isEqualTo(1048576);
-    assertThat(recordedRequest.getChunkSizes().isEmpty()).isFalse();
-  }
-
-  @Test public void uploadBodyLargeChunkedEncoding() throws Exception {
-    upload(true, 1048576, 65536);
-    RecordedRequest recordedRequest = server.takeRequest();
-    assertThat(recordedRequest.getBodySize()).isEqualTo(1048576);
-    assertThat(recordedRequest.getChunkSizes().isEmpty()).isFalse();
-  }
-
-  @Test public void uploadBodySmallFixedLength() throws Exception {
-    upload(false, 1048576, 256);
-    RecordedRequest recordedRequest = server.takeRequest();
-    assertThat(recordedRequest.getBodySize()).isEqualTo(1048576);
-    assertThat(recordedRequest.getChunkSizes().isEmpty()).isTrue();
-  }
-
-  @Test public void uploadBodyLargeFixedLength() throws Exception {
-    upload(false, 1048576, 65536);
-    RecordedRequest recordedRequest = server.takeRequest();
-    assertThat(recordedRequest.getBodySize()).isEqualTo(1048576);
-    assertThat(recordedRequest.getChunkSizes().isEmpty()).isTrue();
-  }
-
-  private void upload(
-      final boolean chunked, final int size, final int writeSize) throws Exception {
+  @Test public void uploadBody() throws Exception {
     server.enqueue(new MockResponse());
+
+    byte[] buffer = new byte[1048576];
+    Arrays.fill(buffer, (byte) 'x');
+
     executeSynchronously(new Request.Builder()
         .url(server.url("/").toString())
-        .post(requestBody(chunked, size, writeSize))
+        .post(RequestBody.create(MediaType.get("text/plain; charset=utf-8"), buffer))
         .build());
+    RecordedRequest recordedRequest = server.takeRequest();
+    assertThat(recordedRequest.getBodySize()).isEqualTo(1048576);
   }
 
   /** https://github.com/square/okhttp/issues/2344 */
@@ -1370,27 +1357,6 @@ public final class CallTest {
     RecordedRequest get = server.takeRequest();
     assertThat(get.getRequestLine()).isEqualTo("GET / HTTP/1.1");
     assertThat(get.getHeader("Host")).isEqualTo("[::1]");
-  }
-
-  private RequestBody requestBody(final boolean chunked, final int size, final int writeSize) {
-    final byte[] buffer = new byte[writeSize];
-    Arrays.fill(buffer, (byte) 'x');
-
-    return new RequestBody() {
-      @Override public MediaType contentType() {
-        return MediaType.get("text/plain; charset=utf-8");
-      }
-
-      @Override public int contentLength() throws IOException {
-        return chunked ? -1 : size;
-      }
-
-      @Override public void writeTo(BufferedSink sink) throws IOException {
-        for (int count = 0; count < size; count += writeSize) {
-          sink.write(buffer, 0, Math.min(size - count, writeSize));
-        }
-      }
-    };
   }
 
   @Test public void emptyResponseBody() throws Exception {
@@ -1501,6 +1467,11 @@ public final class CallTest {
         .post(new RequestBody() {
           @Override public MediaType contentType() {
             return null;
+          }
+
+          @Override
+          public int contentLength() {
+            return 0;
           }
 
           @Override public void writeTo(BufferedSink sink) throws IOException {

@@ -17,7 +17,6 @@ package linktiger.http;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.net.HttpURLConnection;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.mockwebserver.MockResponse;
@@ -141,6 +140,11 @@ public final class WholeOperationTimeoutTest {
     return new RequestBody() {
       @Override public MediaType contentType() {
         return MediaType.parse("text/plain");
+      }
+
+      @Override
+      public int contentLength() {
+        return 6;
       }
 
       @Override public void writeTo(BufferedSink sink) throws IOException {

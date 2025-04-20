@@ -55,7 +55,7 @@ public final class Exchange {
 
   public Sink createRequestBody(Request request) throws IOException {
     int contentLength = request.body().contentLength();
-    Sink rawRequestBody = codec.createRequestBody(request, contentLength);
+    Sink rawRequestBody = codec.createRequestBody();
     return new RequestBodySink(rawRequestBody, contentLength);
   }
 

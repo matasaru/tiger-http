@@ -130,15 +130,8 @@ public class Call {
                 requestBuilder.header("Content-Type", contentType.toString());
               }
 
-              int contentLength = body.contentLength();
-              if (contentLength != -1) {
-                requestBuilder.header("Content-Length", Integer.toString(contentLength));
-                requestBuilder.removeHeader("Transfer-Encoding");
-              }
-              else {
-                requestBuilder.header("Transfer-Encoding", "chunked");
-                requestBuilder.removeHeader("Content-Length");
-              }
+              requestBuilder.header("Content-Length", Integer.toString(body.contentLength()));
+              requestBuilder.removeHeader("Transfer-Encoding");
             }
 
             if (request.header("Host") == null) {

@@ -82,6 +82,11 @@ public final class ThreadInterruptTest {
             return null;
           }
 
+          @Override
+          public int contentLength() {
+            return 10;
+          }
+
           @Override public void writeTo(BufferedSink sink) throws IOException {
             for (int i = 0; i < 10; i++) {
               sink.writeByte(0);

@@ -54,8 +54,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import kio.Buffer;
-import kio.ByteString;
 import okhttp3.internal.Internal;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -66,7 +64,6 @@ import kio.BufferedSink;
 import kio.BufferedSource;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
-import org.junit.AssumptionViolatedException;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -261,14 +258,6 @@ public final class URLConnectionTest {
   }
 
   @Test public void requestBodySurvivesRetriesWithFixedLength() throws Exception {
-    testRequestBodySurvivesRetries(TransferKind.FIXED_LENGTH);
-  }
-
-  @Test public void requestBodySurvivesRetriesWithChunkedStreaming() throws Exception {
-    testRequestBodySurvivesRetries(TransferKind.CHUNKED);
-  }
-
-  private void testRequestBodySurvivesRetries(TransferKind transferKind) throws Exception {
     server.enqueue(new MockResponse()
         .setBody("abc"));
 
@@ -282,7 +271,7 @@ public final class URLConnectionTest {
 
     Request request = new Request.Builder()
         .url(server.url("/def").toString())
-        .post(transferKind.newRequestBody("body"))
+        .post(RequestBody.create(null, "body".getBytes(UTF_8)))
         .build();
     Response response = getResponse(request);
     assertContent("abc", response);
@@ -378,75 +367,6 @@ public final class URLConnectionTest {
     RecordedRequest requestAfter = server.takeRequest();
     Assertions.assertThat(requestAfter.getSequenceNumber() == 0
             || server.getRequestCount() == 3 && server.takeRequest().getSequenceNumber() == 0).isTrue();
-  }
-
-  enum WriteKind {BYTE_BY_BYTE, SMALL_BUFFERS, LARGE_BUFFERS}
-
-  @Test public void chunkedUpload_byteByByte() throws Exception {
-    doUpload(TransferKind.CHUNKED, WriteKind.BYTE_BY_BYTE);
-  }
-
-  @Test public void chunkedUpload_smallBuffers() throws Exception {
-    doUpload(TransferKind.CHUNKED, WriteKind.SMALL_BUFFERS);
-  }
-
-  @Test public void chunkedUpload_largeBuffers() throws Exception {
-    doUpload(TransferKind.CHUNKED, WriteKind.LARGE_BUFFERS);
-  }
-
-  @Test public void fixedLengthUpload_byteByByte() throws Exception {
-    doUpload(TransferKind.FIXED_LENGTH, WriteKind.BYTE_BY_BYTE);
-  }
-
-  @Test public void fixedLengthUpload_smallBuffers() throws Exception {
-    doUpload(TransferKind.FIXED_LENGTH, WriteKind.SMALL_BUFFERS);
-  }
-
-  @Test public void fixedLengthUpload_largeBuffers() throws Exception {
-    doUpload(TransferKind.FIXED_LENGTH, WriteKind.LARGE_BUFFERS);
-  }
-
-  private void doUpload(TransferKind uploadKind, WriteKind writeKind) throws Exception {
-    int n = 512 * 1024;
-    server.setBodyLimit(0);
-    server.enqueue(new MockResponse());
-
-    RequestBody requestBody = new RequestBody() {
-      @Override public MediaType contentType() {
-        return null;
-      }
-
-      @Override public int contentLength() {
-        return uploadKind == TransferKind.CHUNKED ? -1 : n;
-      }
-
-      @Override public void writeTo(BufferedSink sink) throws IOException {
-        if (writeKind == WriteKind.BYTE_BY_BYTE) {
-          for (int i = 0; i < n; ++i) {
-            sink.writeByte('x');
-          }
-        } else {
-          byte[] buf = new byte[writeKind == WriteKind.SMALL_BUFFERS ? 256 : 64 * 1024];
-          Arrays.fill(buf, (byte) 'x');
-          for (int i = 0; i < n; i += buf.length) {
-            sink.write(buf, 0, Math.min(buf.length, n - i));
-          }
-        }
-      }
-    };
-
-    Response response = getResponse(new Request.Builder()
-        .url(server.url("/").toString())
-        .post(requestBody)
-        .build());
-    Assertions.assertThat(response.code()).isEqualTo(200);
-    RecordedRequest request = server.takeRequest();
-    Assertions.assertThat(request.getBodySize()).isEqualTo(n);
-    if (uploadKind == TransferKind.CHUNKED) {
-      Assertions.assertThat(request.getChunkSizes().size() > 0).isTrue();
-    } else {
-      Assertions.assertThat(request.getChunkSizes().isEmpty()).isTrue();
-    }
   }
 
   @Test public void connectViaHttps() throws Exception {
@@ -1381,21 +1301,6 @@ public final class URLConnectionTest {
     Assertions.assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(0);
   }
 
-  @Test public void setChunkedStreamingMode() throws Exception {
-    server.enqueue(new MockResponse());
-
-    Response response = getResponse(new Request.Builder()
-        .url(server.url("/").toString())
-        .post(TransferKind.CHUNKED.newRequestBody("ABCDEFGHIJKLMNOPQ"))
-        .build());
-    Assertions.assertThat(response.code()).isEqualTo(200);
-
-    RecordedRequest request = server.takeRequest();
-    Assertions.assertThat(request.getBody().readUtf8()).isEqualTo("ABCDEFGHIJKLMNOPQ");
-    Assertions.assertThat(request.getChunkSizes()).isEqualTo(
-        Arrays.asList("ABCDEFGHIJKLMNOPQ".length()));
-  }
-
   @Test public void setValidRequestMethod() {
     assertMethodForbidsRequestBody("GET");
     assertMethodPermitsRequestBody("DELETE");
@@ -1496,19 +1401,11 @@ public final class URLConnectionTest {
     assertContent("mp3 data", response);
   }
 
-  @Test public void secureFixedLengthStreaming() throws Exception {
-    testSecureStreamingPost(TransferKind.FIXED_LENGTH);
-  }
-
-  @Test public void secureChunkedStreaming() throws Exception {
-    testSecureStreamingPost(TransferKind.CHUNKED);
-  }
-
   /**
    * Users have reported problems using HTTPS with streaming request bodies.
    * http://code.google.com/p/android/issues/detail?id=12860
    */
-  private void testSecureStreamingPost(TransferKind streamingMode) throws Exception {
+  @Test public void testSecureStreamingPost() throws Exception {
     server.useHttps(handshakeCertificates.sslSocketFactory(), false);
     server.enqueue(new MockResponse()
         .setBody("Success!"));
@@ -1520,19 +1417,13 @@ public final class URLConnectionTest {
         .build();
     Response response = getResponse(new Request.Builder()
         .url(server.url("/").toString())
-        .post(streamingMode.newRequestBody("ABCD"))
+        .post(RequestBody.create(null, "ABCD".getBytes(UTF_8)))
         .build());
     Assertions.assertThat(readAscii(response.body().byteStream(), Integer.MAX_VALUE)).isEqualTo(
         "Success!");
 
     RecordedRequest request = server.takeRequest();
     Assertions.assertThat(request.getRequestLine()).isEqualTo("POST / HTTP/1.1");
-    if (streamingMode == TransferKind.FIXED_LENGTH) {
-      Assertions.assertThat(request.getChunkSizes()).isEqualTo(
-          Collections.<Integer>emptyList());
-    } else if (streamingMode == TransferKind.CHUNKED) {
-      Assertions.assertThat(request.getChunkSizes()).isEqualTo(Arrays.asList(4));
-    }
     Assertions.assertThat(request.getBody().readUtf8()).isEqualTo("ABCD");
   }
 
@@ -1627,6 +1518,11 @@ public final class URLConnectionTest {
             return null;
           }
 
+          @Override
+          public int contentLength() throws IOException {
+            return 2 * 1024 * 1024;
+          }
+
           @Override public void writeTo(BufferedSink sink) throws IOException {
             byte[] data = new byte[2 * 1024 * 1024]; // 2 MiB.
             sink.write(data);
@@ -1638,20 +1534,6 @@ public final class URLConnectionTest {
       fail();
     } catch (SocketTimeoutException expected) {
     }
-  }
-
-  @Test public void setChunkedEncodingAsRequestProperty() throws Exception {
-    server.enqueue(new MockResponse());
-
-    Response response = getResponse(new Request.Builder()
-        .url(server.url("/").toString())
-        .header("Transfer-encoding", "chunked")
-        .post(TransferKind.CHUNKED.newRequestBody("ABC"))
-        .build());
-    Assertions.assertThat(response.code()).isEqualTo(200);
-
-    RecordedRequest request = server.takeRequest();
-    Assertions.assertThat(request.getBody().readUtf8()).isEqualTo("ABC");
   }
 
   @Test public void connectionCloseInRequest() throws Exception {
@@ -1703,31 +1585,19 @@ public final class URLConnectionTest {
     Assertions.assertThat(in.read()).isEqualTo(-1);
   }
 
-  @Test public void flushAfterStreamTransmittedWithChunkedEncoding() throws IOException {
-    testFlushAfterStreamTransmitted(TransferKind.CHUNKED);
-  }
-
-  @Test public void flushAfterStreamTransmittedWithFixedLength() throws IOException {
-    testFlushAfterStreamTransmitted(TransferKind.FIXED_LENGTH);
-  }
-
-  @Test public void flushAfterStreamTransmittedWithNoLengthHeaders() throws IOException {
-    testFlushAfterStreamTransmitted(TransferKind.END_OF_STREAM);
-  }
-
   /**
    * We explicitly permit apps to close the upload stream even after it has been transmitted.  We
    * also permit flush so that buffered streams can do a no-op flush when they are closed.
    * http://b/3038470
    */
-  private void testFlushAfterStreamTransmitted(TransferKind transferKind) throws IOException {
+  @Test public void testFlushAfterStreamTransmitted() throws IOException {
     server.enqueue(new MockResponse()
         .setBody("abc"));
 
     AtomicReference<BufferedSink> sinkReference = new AtomicReference<>();
     Response response = getResponse(new Request.Builder()
         .url(server.url("/").toString())
-        .post(new ForwardingRequestBody(transferKind.newRequestBody("def")) {
+        .post(new ForwardingRequestBody(RequestBody.create(null, "def".getBytes(UTF_8))) {
           @Override public void writeTo(BufferedSink sink) throws IOException {
             sinkReference.set(sink);
             super.writeTo(sink);
@@ -1894,31 +1764,15 @@ public final class URLConnectionTest {
     Assertions.assertThat(in.read()).isEqualTo(-1);
   }
 
-  @Test public void postFailsWithBufferedRequestForSmallRequest() throws Exception {
-    reusedConnectionFailsWithPost(TransferKind.END_OF_STREAM, 1024);
-  }
-
-  @Test public void postFailsWithBufferedRequestForLargeRequest() throws Exception {
-    reusedConnectionFailsWithPost(TransferKind.END_OF_STREAM, 16384);
-  }
-
-  @Test public void postFailsWithChunkedRequestForSmallRequest() throws Exception {
-    reusedConnectionFailsWithPost(TransferKind.CHUNKED, 1024);
-  }
-
-  @Test public void postFailsWithChunkedRequestForLargeRequest() throws Exception {
-    reusedConnectionFailsWithPost(TransferKind.CHUNKED, 16384);
-  }
-
   @Test public void postFailsWithFixedLengthRequestForSmallRequest() throws Exception {
-    reusedConnectionFailsWithPost(TransferKind.FIXED_LENGTH, 1024);
+    reusedConnectionFailsWithPost(1024);
   }
 
   @Test public void postFailsWithFixedLengthRequestForLargeRequest() throws Exception {
-    reusedConnectionFailsWithPost(TransferKind.FIXED_LENGTH, 16384);
+    reusedConnectionFailsWithPost(16384);
   }
 
-  private void reusedConnectionFailsWithPost(TransferKind transferKind, int requestSize)
+  private void reusedConnectionFailsWithPost(int requestSize)
       throws Exception {
     server.enqueue(new MockResponse()
         .setBody("A")
@@ -1942,15 +1796,13 @@ public final class URLConnectionTest {
       try {
         Response response = getResponse(new Request.Builder()
             .url(server.url("/b").toString())
-            .post(transferKind.newRequestBody(requestBody))
+            .post(RequestBody.create(null, requestBody.getBytes(UTF_8)))
             .build());
         assertContent("B", response);
         break;
       } catch (IOException socketException) {
         // If there's a socket exception, this must have a streamed request body.
         Assertions.assertThat(j).isEqualTo(0);
-        Assertions.assertThat(transferKind == TransferKind.CHUNKED
-                || transferKind == TransferKind.FIXED_LENGTH).isTrue();
       }
     }
 
@@ -1988,60 +1840,6 @@ public final class URLConnectionTest {
     RecordedRequest post2 = server.takeRequest();
     Assertions.assertThat(post2.getBody().readUtf8()).isEqualTo("body!");
     Assertions.assertThat(post2.getSequenceNumber()).isEqualTo(0);
-  }
-
-  @Test public void fullyBufferedPostIsTooShort() {
-    server.enqueue(new MockResponse()
-        .setBody("A"));
-
-    RequestBody requestBody = new RequestBody() {
-      @Override public MediaType contentType() {
-        return null;
-      }
-
-      @Override public int contentLength() {
-        return 4;
-      }
-
-      @Override public void writeTo(BufferedSink sink) throws IOException {
-        sink.writeUtf8("abc");
-      }
-    };
-    try {
-      getResponse(new Request.Builder()
-          .url(server.url("/b").toString())
-          .post(requestBody)
-          .build());
-      fail();
-    } catch (IOException expected) {
-    }
-  }
-
-  @Test public void fullyBufferedPostIsTooLong() {
-    server.enqueue(new MockResponse()
-        .setBody("A"));
-
-    RequestBody requestBody = new RequestBody() {
-      @Override public MediaType contentType() {
-        return null;
-      }
-
-      @Override public int contentLength() {
-        return 3;
-      }
-
-      @Override public void writeTo(BufferedSink sink) throws IOException {
-        sink.writeUtf8("abcd");
-      }
-    };
-    try {
-      getResponse(new Request.Builder()
-          .url(server.url("/b").toString())
-          .post(requestBody)
-          .build());
-      fail();
-    } catch (IOException expected) {
-    }
   }
 
   @Test @Ignore public void testPooledConnectionsDetectHttp10() {
@@ -2198,40 +1996,6 @@ public final class URLConnectionTest {
     Assertions.assertThat(zeroLengthPayload.getMethod()).isEqualTo(method);
     Assertions.assertThat(zeroLengthPayload.getHeader("content-length")).isEqualTo("0");
     Assertions.assertThat(zeroLengthPayload.getBodySize()).isEqualTo(0L);
-  }
-
-  @Test public void veryLargeFixedLengthRequest() throws Exception {
-    server.setBodyLimit(0);
-    server.enqueue(new MockResponse());
-
-    int contentLength = Integer.MAX_VALUE;
-    Response response = getResponse(new Request.Builder()
-        .url(server.url("/").toString())
-        .post(new RequestBody() {
-          @Override public MediaType contentType() {
-            return null;
-          }
-
-          @Override public int contentLength() {
-            return contentLength;
-          }
-
-          @Override public void writeTo(BufferedSink sink) throws IOException {
-            byte[] buffer = new byte[1024 * 1024];
-            for (int bytesWritten = 0; bytesWritten < contentLength; ) {
-              int byteCount = Math.min(buffer.length, contentLength - bytesWritten);
-              bytesWritten += byteCount;
-              sink.write(buffer, 0, byteCount);
-            }
-          }
-        })
-        .build());
-
-    assertContent("", response);
-
-    RecordedRequest request = server.takeRequest();
-    Assertions.assertThat(request.getHeader("Content-Length")).isEqualTo(
-        Integer.toString(contentLength));
   }
 
   @Test public void testNoSslFallback() throws Exception {
@@ -2416,42 +2180,10 @@ public final class URLConnectionTest {
       @Override void setBody(MockResponse response, okio.Buffer content, int chunkSize) {
         response.setChunkedBody(content, chunkSize);
       }
-
-      @Override RequestBody newRequestBody(String body) {
-        return new RequestBody() {
-          @Override public int contentLength() {
-            return -1;
-          }
-
-          @Override public MediaType contentType() {
-            return null;
-          }
-
-          @Override public void writeTo(BufferedSink sink) throws IOException {
-            sink.writeUtf8(body);
-          }
-        };
-      }
     },
     FIXED_LENGTH {
       @Override void setBody(MockResponse response, okio.Buffer content, int chunkSize) {
         response.setBody(content);
-      }
-
-      @Override RequestBody newRequestBody(String body) {
-        return new RequestBody() {
-          @Override public int contentLength() {
-            return utf8size(body);
-          }
-
-          @Override public MediaType contentType() {
-            return null;
-          }
-
-          @Override public void writeTo(BufferedSink sink) throws IOException {
-            sink.writeUtf8(body);
-          }
-        };
       }
     },
     END_OF_STREAM {
@@ -2460,15 +2192,9 @@ public final class URLConnectionTest {
         response.setSocketPolicy(DISCONNECT_AT_END);
         response.removeHeader("Content-Length");
       }
-
-      @Override RequestBody newRequestBody(String body) {
-        throw new AssumptionViolatedException("END_OF_STREAM not implemented for requests");
-      }
     };
 
     abstract void setBody(MockResponse response, okio.Buffer content, int chunkSize) throws IOException;
-
-    abstract RequestBody newRequestBody(String body);
 
     void setBody(MockResponse response, String content, int chunkSize) throws IOException {
       setBody(response, new okio.Buffer().writeUtf8(content), chunkSize);
@@ -2566,47 +2292,4 @@ public final class URLConnectionTest {
     return new FallbackTestClientSocketFactory(handshakeCertificates.sslSocketFactory());
   }
 
-  /**
-   * Returns the number of bytes used to encode {@code string} as UTF-8 when using {@link
-   * ByteString#encodeUtf8} or {@link Buffer#writeUtf8(String)}.
-   */
-  public static int utf8size(String string) {
-    int endIndex = string.length();
-
-    int result = 0;
-    for (int i = 0; i < endIndex;) {
-      int c = string.charAt(i);
-
-      if (c < 0x80) {
-        // A 7-bit character with 1 byte.
-        result++;
-        i++;
-
-      } else if (c < 0x800) {
-        // An 11-bit character with 2 bytes.
-        result += 2;
-        i++;
-
-      } else if (c < 0xd800 || c > 0xdfff) {
-        // A 16-bit character with 3 bytes.
-        result += 3;
-        i++;
-
-      } else {
-        int low = i + 1 < endIndex ? string.charAt(i + 1) : 0;
-        if (c > 0xdbff || low < 0xdc00 || low > 0xdfff) {
-          // A malformed surrogate, which yields '?'.
-          result++;
-          i++;
-
-        } else {
-          // A 21-bit character with 4 bytes.
-          result += 4;
-          i += 2;
-        }
-      }
-    }
-
-    return result;
-  }
 }

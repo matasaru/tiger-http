@@ -36,8 +36,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  *
  * <ol>
  *     <li>{@linkplain #writeRequest Send request headers}.
- *     <li>Open a sink to write the request body. Either {@linkplain #newKnownLengthSink known
- *         length} or {@link #newChunkedSink chunked}.
+ *     <li>Open a sink to write the request body.
  *     <li>Write to and then close that sink.
  *     <li>{@linkplain #readResponseHeaders Read response headers}.
  *     <li>Open a source to read the response body. Either {@linkplain #newFixedLengthSource
@@ -86,19 +85,8 @@ public final class Http1Codec {
     return connection;
   }
 
-  public Sink createRequestBody(Request request, int contentLength) {
-    if ("chunked".equalsIgnoreCase(request.header("Transfer-Encoding"))) {
-      // Stream a request body of unknown length.
-      return newChunkedSink();
-    }
-
-    if (contentLength != -1) {
-      // Stream a request body of a known length.
-      return newKnownLengthSink();
-    }
-
-    throw new IllegalStateException(
-        "Cannot stream a request body without chunked encoding or a known content length!");
+  public Sink createRequestBody() {
+    return newKnownLengthSink();
   }
 
   public void cancel() {
@@ -216,12 +204,6 @@ public final class Http1Codec {
     return headers.build();
   }
 
-  private Sink newChunkedSink() {
-    if (state != STATE_OPEN_REQUEST_BODY) throw new IllegalStateException("state: " + state);
-    state = STATE_WRITING_REQUEST_BODY;
-    return new ChunkedSink();
-  }
-
   private Sink newKnownLengthSink() {
     if (state != STATE_OPEN_REQUEST_BODY) throw new IllegalStateException("state: " + state);
     state = STATE_WRITING_REQUEST_BODY;
@@ -294,45 +276,6 @@ public final class Http1Codec {
     @Override public void close() {
       if (closed) return;
       closed = true;
-      detachTimeout(timeout);
-      state = STATE_READ_RESPONSE_HEADERS;
-    }
-  }
-
-  /**
-   * An HTTP body with alternating chunk sizes and chunk bodies. It is the caller's responsibility
-   * to buffer chunks; typically by using a buffered sink with this sink.
-   */
-  private final class ChunkedSink implements Sink {
-    private final ForwardingTimeout timeout = new ForwardingTimeout(sink.timeout());
-    private boolean closed;
-
-    ChunkedSink() {
-    }
-
-    @Override public Timeout timeout() {
-      return timeout;
-    }
-
-    @Override public void write(Buffer source, int byteCount) throws IOException {
-      if (closed) throw new IllegalStateException("closed");
-      if (byteCount == 0) return;
-
-      sink.writeHexadecimalInt(byteCount);
-      sink.writeUtf8("\r\n");
-      sink.write(source, byteCount);
-      sink.writeUtf8("\r\n");
-    }
-
-    @Override public synchronized void flush() throws IOException {
-      if (closed) return; // Don't throw; this stream might have been closed on the caller's behalf.
-      sink.flush();
-    }
-
-    @Override public synchronized void close() throws IOException {
-      if (closed) return;
-      closed = true;
-      sink.writeUtf8("0\r\n\r\n");
       detachTimeout(timeout);
       state = STATE_READ_RESPONSE_HEADERS;
     }
