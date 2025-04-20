@@ -1512,35 +1512,6 @@ public final class CallTest {
     executeSynchronously(request).assertFailure("boom");
   }
 
-  private void makeFailingCall() {
-    RequestBody requestBody = new RequestBody() {
-      @Override public MediaType contentType() {
-        return null;
-      }
-
-      @Override public int contentLength() throws IOException {
-        return 1;
-      }
-
-      @Override public void writeTo(BufferedSink sink) throws IOException {
-        throw new IOException("write body fail!");
-      }
-    };
-    HttpClient nonRetryingClient = client.newBuilder()
-        .retryOnConnectionFailure(false)
-        .build();
-    Call call = nonRetryingClient.newCall(new Request.Builder()
-        .url(server.url("/").toString())
-        .post(requestBody)
-        .build());
-    try {
-      call.execute();
-      fail();
-    } catch (IOException expected) {
-      assertThat(expected.getMessage()).isEqualTo("write body fail!");
-    }
-  }
-
   private RecordedResponse executeSynchronously(String path, String... headers) throws IOException {
     Request.Builder builder = new Request.Builder();
     builder.url(server.url(path).toString());
