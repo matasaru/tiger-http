@@ -19,11 +19,11 @@ import java.io.IOException;
 import java.net.ProtocolException;
 
 import kio.Buffer;
-import kio.ForwardingSink;
 import kio.ForwardingSource;
 import kio.RealBufferedSource;
 import kio.Sink;
 import kio.Source;
+import kio.Timeout;
 
 /**
  * Transmits a single HTTP request and a response pair. This layers connection management and events
@@ -114,7 +114,8 @@ public final class Exchange {
   }
 
   /** A request body that fires events when it completes. */
-  private final class RequestBodySink extends ForwardingSink {
+  private final class RequestBodySink implements Sink {
+    private final Sink delegate;
     private boolean completed;
     /** The exact number of bytes to be written, or -1L if that is unknown. */
     private int contentLength;
@@ -122,7 +123,7 @@ public final class Exchange {
     private boolean closed;
 
     RequestBodySink(Sink delegate, int contentLength) {
-      super(delegate);
+      this.delegate = delegate;
       this.contentLength = contentLength;
     }
 
@@ -133,7 +134,7 @@ public final class Exchange {
             + " bytes but received " + (bytesReceived + byteCount));
       }
       try {
-        super.write(source, byteCount);
+        delegate.write(source, byteCount);
         this.bytesReceived += byteCount;
       } catch (IOException e) {
         throw complete(e);
@@ -142,10 +143,14 @@ public final class Exchange {
 
     @Override public void flush() throws IOException {
       try {
-        super.flush();
+        delegate.flush();
       } catch (IOException e) {
         throw complete(e);
       }
+    }
+
+    @Override public Timeout timeout() {
+      return delegate.timeout();
     }
 
     @Override public void close() throws IOException {
@@ -155,7 +160,7 @@ public final class Exchange {
         throw new ProtocolException("unexpected end of stream");
       }
       try {
-        super.close();
+        delegate.close();
         complete(null);
       } catch (IOException e) {
         throw complete(e);
@@ -166,6 +171,10 @@ public final class Exchange {
       if (completed) return e;
       completed = true;
       return bodyComplete(false, true, e);
+    }
+
+    @Override public String toString() {
+      return getClass().getSimpleName() + "(" + delegate + ")";
     }
   }
 
