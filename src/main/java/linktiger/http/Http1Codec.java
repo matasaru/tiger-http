@@ -127,7 +127,7 @@ public final class Http1Codec {
     }
 
     if ("chunked".equalsIgnoreCase(response.header("Transfer-Encoding"))) {
-      return newChunkedSource(response.request().url());
+      return newChunkedSource();
     }
 
     int contentLength = response.headers().contentLength();
@@ -216,10 +216,10 @@ public final class Http1Codec {
     return new FixedLengthSource(length);
   }
 
-  private Source newChunkedSource(Url url) {
+  private Source newChunkedSource() {
     if (state != STATE_OPEN_RESPONSE_BODY) throw new IllegalStateException("state: " + state);
     state = STATE_READING_RESPONSE_BODY;
-    return new ChunkedSource(url);
+    return new ChunkedSource();
   }
 
   private Source newUnknownLengthSource() {
@@ -358,13 +358,8 @@ public final class Http1Codec {
   /** An HTTP body with alternating chunk sizes and chunk bodies. */
   private class ChunkedSource extends AbstractSource {
     private static final int NO_CHUNK_YET = -1;
-    private final Url url;
-    private int bytesRemainingInChunk = NO_CHUNK_YET;
+      private int bytesRemainingInChunk = NO_CHUNK_YET;
     private boolean hasMoreChunks = true;
-
-    ChunkedSource(Url url) {
-      this.url = url;
-    }
 
     @Override public int read(Buffer sink, int byteCount) throws IOException {
       if (byteCount < 0) throw new IllegalArgumentException("byteCount < 0: " + byteCount);
