@@ -77,16 +77,7 @@ public final class ThreadInterruptTest {
 
     Call call = client.newCall(new Request.Builder()
         .url(server.url("/").toString())
-        .post(new RequestBody() {
-          @Override public MediaType contentType() {
-            return null;
-          }
-
-          @Override
-          public int contentLength() {
-            return 10;
-          }
-
+        .post(new RequestBody(new byte[10], null) {
           @Override public void writeTo(BufferedSink sink) throws IOException {
             for (int i = 0; i < 10; i++) {
               sink.writeByte(0);

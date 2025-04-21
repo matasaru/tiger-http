@@ -17,7 +17,6 @@ package linktiger.http;
 
 import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.HexFormat;
 
 import kio.Buffer;
@@ -31,7 +30,7 @@ public final class RequestTest {
 
   @Test public void byteArray() throws Exception {
     MediaType contentType = MediaType.get("text/plain");
-    RequestBody body = RequestBody.create(contentType, "abc".getBytes(UTF_8));
+    RequestBody body = new RequestBody("abc".getBytes(UTF_8), contentType);
     assertThat(body.contentType()).isEqualTo(contentType);
     assertThat(body.contentLength()).isEqualTo(3);
     assertThat(bodyToHex(body)).isEqualTo("616263");
@@ -41,7 +40,7 @@ public final class RequestTest {
   /** Common verbs used for apis such as GitHub, AWS, and Google Cloud. */
   @Test public void crudVerbs() throws IOException {
     MediaType contentType = MediaType.get("application/json");
-    RequestBody body = RequestBody.create(contentType, "{}".getBytes(StandardCharsets.UTF_8));
+    RequestBody body = new RequestBody("{}".getBytes(UTF_8), contentType);
 
     Request get = new Request.Builder().url("http://localhost/api").get().build();
     assertThat(get.method()).isEqualTo("GET");

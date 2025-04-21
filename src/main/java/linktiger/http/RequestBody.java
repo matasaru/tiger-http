@@ -19,40 +19,35 @@ import java.io.IOException;
 
 import kio.BufferedSink;
 
-public abstract class RequestBody {
+public class RequestBody {
 
-  public static final RequestBody EMPTY = RequestBody.create(null, Util.EMPTY_BYTE_ARRAY);
+  public static final RequestBody EMPTY = new RequestBody(Util.EMPTY_BYTE_ARRAY, null);
+  private final byte[] content;
+  private final MediaType contentType;
+
+  public RequestBody(byte[] content, MediaType contentType) {
+    this.content = content;
+    this.contentType = contentType;
+  }
+
+  public byte[] content() {
+    return content;
+  }
 
   /** Returns the Content-Type header for this body. */
-  public abstract MediaType contentType();
+  public MediaType contentType() {
+    return contentType;
+  }
 
   /**
-   * Returns the number of bytes that will be written to {@code sink} in a call to {@link #writeTo},
-   * or -1 if that count is unknown.
+   * Returns the number of bytes that will be written to {@code sink} in a call to {@link #writeTo}.
    */
-  public int contentLength() throws IOException {
-    return -1;
+  public int contentLength() {
+    return content.length;
   }
 
   /** Writes the content of this request to {@code sink}. */
-  public abstract void writeTo(BufferedSink sink) throws IOException;
-
-  /** Returns a new request body that transmits {@code content}. */
-  public static RequestBody create(final MediaType contentType, final byte[] content) {
-    if (content == null) throw new NullPointerException("content == null");
-    Util.checkOffsetAndCount(content.length, 0, content.length);
-    return new RequestBody() {
-      @Override public MediaType contentType() {
-        return contentType;
-      }
-
-      @Override public int contentLength() {
-        return content.length;
-      }
-
-      @Override public void writeTo(BufferedSink sink) throws IOException {
-        sink.write(content, 0, content.length);
-      }
-    };
+  public void writeTo(BufferedSink sink) throws IOException {
+    sink.write(content);
   }
 }

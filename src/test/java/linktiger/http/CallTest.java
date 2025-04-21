@@ -246,9 +246,10 @@ public final class CallTest {
   @Test public void post() throws Exception {
     server.enqueue(new MockResponse().setBody("abc"));
 
+    final MediaType contentType = MediaType.get("text/plain");
     Request request = new Request.Builder()
         .url(server.url("/").toString())
-        .post(RequestBody.create(MediaType.get("text/plain"), "def".getBytes(StandardCharsets.UTF_8)))
+        .post(new RequestBody("def".getBytes(StandardCharsets.UTF_8), contentType))
         .build();
 
     executeSynchronously(request)
@@ -272,7 +273,7 @@ public final class CallTest {
 
     Request request = new Request.Builder()
         .url(server.url("/").toString())
-        .method("POST", RequestBody.create(null, new byte[0]))
+        .method("POST", new RequestBody(new byte[0], null))
         .build();
 
     executeSynchronously(request)
@@ -318,9 +319,10 @@ public final class CallTest {
   @Test public void deleteWithRequestBody() throws Exception {
     server.enqueue(new MockResponse().setBody("abc"));
 
+    final MediaType contentType = MediaType.get("text/plain");
     Request request = new Request.Builder()
         .url(server.url("/").toString())
-        .method("DELETE", RequestBody.create(MediaType.get("text/plain"), "def".getBytes(StandardCharsets.UTF_8)))
+        .method("DELETE", new RequestBody("def".getBytes(StandardCharsets.UTF_8), contentType))
         .build();
 
     executeSynchronously(request)
@@ -335,9 +337,10 @@ public final class CallTest {
   @Test public void put() throws Exception {
     server.enqueue(new MockResponse().setBody("abc"));
 
+    final MediaType contentType = MediaType.get("text/plain");
     Request request = new Request.Builder()
         .url(server.url("/").toString())
-        .put(RequestBody.create(MediaType.get("text/plain"), "def".getBytes(StandardCharsets.UTF_8)))
+        .put(new RequestBody("def".getBytes(StandardCharsets.UTF_8), contentType))
         .build();
 
     executeSynchronously(request)
@@ -359,9 +362,10 @@ public final class CallTest {
   @Test public void patch() throws Exception {
     server.enqueue(new MockResponse().setBody("abc"));
 
+    final MediaType contentType = MediaType.get("text/plain");
     Request request = new Request.Builder()
         .url(server.url("/").toString())
-        .patch(RequestBody.create(MediaType.get("text/plain"), "def".getBytes(StandardCharsets.UTF_8)))
+        .patch(new RequestBody("def".getBytes(StandardCharsets.UTF_8), contentType))
         .build();
 
     executeSynchronously(request)
@@ -383,9 +387,10 @@ public final class CallTest {
   @Test public void customMethodWithBody() throws Exception {
     server.enqueue(new MockResponse().setBody("abc"));
 
+    final MediaType contentType = MediaType.get("text/plain");
     Request request = new Request.Builder()
         .url(server.url("/").toString())
-        .method("CUSTOM", RequestBody.create(MediaType.get("text/plain"), "def".getBytes(StandardCharsets.UTF_8)))
+        .method("CUSTOM", new RequestBody("def".getBytes(StandardCharsets.UTF_8), contentType))
         .build();
 
     executeSynchronously(request)
@@ -404,7 +409,7 @@ public final class CallTest {
 
     Request request = new Request.Builder()
         .url(server.url("/").toString())
-        .method("POST", RequestBody.create(null, "abc".getBytes(StandardCharsets.UTF_8)))
+        .method("POST", new RequestBody("abc".getBytes(StandardCharsets.UTF_8), null))
         .build();
 
     executeSynchronously(request).assertCode(200);
@@ -572,18 +577,9 @@ public final class CallTest {
     server.enqueue(new MockResponse());
 
     // Call 1: set a deadline on the request body.
-    RequestBody requestBody1 = new RequestBody() {
-      @Override public MediaType contentType() {
-        return MediaType.get("text/plain");
-      }
-
-      @Override
-      public int contentLength() {
-        return 3;
-      }
-
+    RequestBody requestBody1 = new RequestBody("abc".getBytes(StandardCharsets.UTF_8), MediaType.get("text/plain")) {
       @Override public void writeTo(BufferedSink sink) throws IOException {
-        sink.writeUtf8("abc");
+        super.writeTo(sink);
         sink.timeout().deadline(5, TimeUnit.SECONDS);
       }
     };
@@ -595,19 +591,10 @@ public final class CallTest {
     assertThat(response1.code()).isEqualTo(200);
 
     // Call 2: check for the absence of a deadline on the request body.
-    RequestBody requestBody2 = new RequestBody() {
-      @Override public MediaType contentType() {
-        return MediaType.get("text/plain");
-      }
-
-      @Override
-      public int contentLength() {
-        return 3;
-      }
-
+    RequestBody requestBody2 = new RequestBody("def".getBytes(StandardCharsets.UTF_8), MediaType.get("text/plain")) {
       @Override public void writeTo(BufferedSink sink) throws IOException {
         assertThat(sink.timeout().hasDeadline()).isFalse();
-        sink.writeUtf8("def");
+        super.writeTo(sink);
       }
     };
     Request request2 = new Request.Builder()
@@ -847,9 +834,10 @@ public final class CallTest {
     Response response1 = client.newCall(request1).execute();
     assertThat(response1.body().bytes()).isEqualTo("abc".getBytes(StandardCharsets.UTF_8));
 
+    final MediaType contentType = MediaType.get("text/plain");
     Request request2 = new Request.Builder()
         .url(server.url("/").toString())
-        .post(RequestBody.create(MediaType.get("text/plain"), "body!".getBytes(StandardCharsets.UTF_8)))
+        .post(new RequestBody("body!".getBytes(StandardCharsets.UTF_8), contentType))
         .build();
     Response response2 = client.newCall(request2).execute();
     assertThat(response2.body().bytes()).isEqualTo("def".getBytes(StandardCharsets.UTF_8));
@@ -1068,9 +1056,10 @@ public final class CallTest {
     server.enqueue(new MockResponse()
         .setStatus("HTTP/1.1 100 Continue"));
 
+    final MediaType contentType = MediaType.get("text/plain");
     Request request = new Request.Builder()
         .url(server.url("/").toString())
-        .post(RequestBody.create(MediaType.get("text/plain"), "abc".getBytes(StandardCharsets.UTF_8)))
+        .post(new RequestBody("abc".getBytes(StandardCharsets.UTF_8), contentType))
         .build();
 
     client.newCall(request).execute();
@@ -1293,9 +1282,10 @@ public final class CallTest {
         .build();
     server2.shutdown();
 
+    final MediaType contentType = MediaType.get("text/plain");
     Request request = new Request.Builder()
         .url(server.url("/").toString())
-        .post(RequestBody.create(MediaType.get("text/plain"), "abc".getBytes(StandardCharsets.UTF_8)))
+        .post(new RequestBody("abc".getBytes(StandardCharsets.UTF_8), contentType))
         .build();
 
     executeSynchronously(request);
@@ -1318,9 +1308,10 @@ public final class CallTest {
     byte[] buffer = new byte[1048576];
     Arrays.fill(buffer, (byte) 'x');
 
+    final MediaType contentType = MediaType.get("text/plain; charset=utf-8");
     executeSynchronously(new Request.Builder()
         .url(server.url("/").toString())
-        .post(RequestBody.create(MediaType.get("text/plain; charset=utf-8"), buffer))
+        .post(new RequestBody(buffer, contentType))
         .build());
     RecordedRequest recordedRequest = server.takeRequest();
     assertThat(recordedRequest.getBodySize()).isEqualTo(1048576);
@@ -1464,16 +1455,7 @@ public final class CallTest {
 
     Request request = new Request.Builder()
         .url(server.url("/").toString())
-        .post(new RequestBody() {
-          @Override public MediaType contentType() {
-            return null;
-          }
-
-          @Override
-          public int contentLength() {
-            return 0;
-          }
-
+        .post(new RequestBody(new byte[0], null) {
           @Override public void writeTo(BufferedSink sink) throws IOException {
             throw new IOException("boom");
           }

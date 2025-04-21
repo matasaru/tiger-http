@@ -137,16 +137,7 @@ public final class WholeOperationTimeoutTest {
   }
 
   private RequestBody sleepingRequestBody(final int sleepMillis) {
-    return new RequestBody() {
-      @Override public MediaType contentType() {
-        return MediaType.parse("text/plain");
-      }
-
-      @Override
-      public int contentLength() {
-        return 6;
-      }
-
+    return new RequestBody(new byte[6], MediaType.parse("text/plain")) {
       @Override public void writeTo(BufferedSink sink) throws IOException {
         try {
           sink.writeUtf8("abc");

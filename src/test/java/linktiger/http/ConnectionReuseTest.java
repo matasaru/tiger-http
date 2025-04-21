@@ -140,9 +140,10 @@ public final class ConnectionReuseTest {
     // Give the socket a chance to become stale.
     Thread.sleep(250);
 
+    final MediaType contentType = MediaType.get("text/plain");
     Request requestB = new Request.Builder()
         .url(server.url("/").toString())
-        .post(RequestBody.create(MediaType.get("text/plain"), "b".getBytes(StandardCharsets.UTF_8)))
+        .post(new RequestBody("b".getBytes(StandardCharsets.UTF_8), contentType))
         .build();
     Response responseB = client.newCall(requestB).execute();
     assertThat(responseB.body().bytes()).isEqualTo("b".getBytes(StandardCharsets.UTF_8));

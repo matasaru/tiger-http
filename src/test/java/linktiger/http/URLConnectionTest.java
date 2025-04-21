@@ -29,7 +29,6 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -271,7 +270,7 @@ public final class URLConnectionTest {
 
     Request request = new Request.Builder()
         .url(server.url("/def").toString())
-        .post(RequestBody.create(null, "body".getBytes(UTF_8)))
+        .post(new RequestBody("body".getBytes(UTF_8), null))
         .build();
     Response response = getResponse(request);
     assertContent("abc", response);
@@ -1324,7 +1323,7 @@ public final class URLConnectionTest {
   private void assertMethodPermitsRequestBody(String requestMethod) {
     Request request = new Request.Builder()
         .url(server.url("/").toString())
-        .method(requestMethod, RequestBody.create(null, "abc".getBytes(StandardCharsets.UTF_8)))
+        .method(requestMethod, new RequestBody("abc".getBytes(UTF_8), null))
         .build();
     Assertions.assertThat(request.method()).isEqualTo(requestMethod);
   }
@@ -1333,7 +1332,7 @@ public final class URLConnectionTest {
     try {
       new Request.Builder()
           .url(server.url("/").toString())
-          .method(requestMethod, RequestBody.create(null, "abc".getBytes(StandardCharsets.UTF_8)))
+          .method(requestMethod, new RequestBody("abc".getBytes(UTF_8), null))
           .build();
     } catch (IllegalArgumentException expected) {
     }
@@ -1417,7 +1416,7 @@ public final class URLConnectionTest {
         .build();
     Response response = getResponse(new Request.Builder()
         .url(server.url("/").toString())
-        .post(RequestBody.create(null, "ABCD".getBytes(UTF_8)))
+        .post(new RequestBody("ABCD".getBytes(UTF_8), null))
         .build());
     Assertions.assertThat(readAscii(response.body().byteStream(), Integer.MAX_VALUE)).isEqualTo(
         "Success!");
@@ -1513,21 +1512,7 @@ public final class URLConnectionTest {
 
     Request request = new Request.Builder()
         .url(server.url("/").toString())
-        .post(new RequestBody() {
-          @Override public MediaType contentType() {
-            return null;
-          }
-
-          @Override
-          public int contentLength() throws IOException {
-            return 2 * 1024 * 1024;
-          }
-
-          @Override public void writeTo(BufferedSink sink) throws IOException {
-            byte[] data = new byte[2 * 1024 * 1024]; // 2 MiB.
-            sink.write(data);
-          }
-        })
+        .post(new RequestBody(new byte[2 * 1024 * 1024] /* 2 MiB */, null))
         .build();
     try {
       getResponse(request);
@@ -1597,7 +1582,7 @@ public final class URLConnectionTest {
     AtomicReference<BufferedSink> sinkReference = new AtomicReference<>();
     Response response = getResponse(new Request.Builder()
         .url(server.url("/").toString())
-        .post(new ForwardingRequestBody(RequestBody.create(null, "def".getBytes(UTF_8))) {
+        .post(new RequestBody("def".getBytes(UTF_8), null) {
           @Override public void writeTo(BufferedSink sink) throws IOException {
             sinkReference.set(sink);
             super.writeTo(sink);
@@ -1688,7 +1673,7 @@ public final class URLConnectionTest {
         .setBody("A"));
     Response response = getResponse(new Request.Builder()
         .url(server.url("/").toString())
-        .post(RequestBody.create(null, "ABC".getBytes(StandardCharsets.UTF_8)))
+        .post(new RequestBody("ABC".getBytes(UTF_8), null))
         .build());
     Assertions.assertThat(readAscii(response.body().byteStream(), Integer.MAX_VALUE)).isEqualTo(
         "A");
@@ -1796,7 +1781,7 @@ public final class URLConnectionTest {
       try {
         Response response = getResponse(new Request.Builder()
             .url(server.url("/b").toString())
-            .post(RequestBody.create(null, requestBody.getBytes(UTF_8)))
+            .post(new RequestBody(requestBody.getBytes(UTF_8), null))
             .build());
         assertContent("B", response);
         break;
@@ -1826,7 +1811,7 @@ public final class URLConnectionTest {
 
     Response post = getResponse(new Request.Builder()
         .url(server.url("/").toString())
-        .post(RequestBody.create(null, "body!".getBytes(StandardCharsets.UTF_8)))
+        .post(new RequestBody("body!".getBytes(UTF_8), null))
         .build());
     assertContent("def", post);
 
@@ -1989,7 +1974,7 @@ public final class URLConnectionTest {
 
     Response response = getResponse(new Request.Builder()
         .url(server.url("/").toString())
-        .method(method, RequestBody.create(null, "".getBytes(StandardCharsets.UTF_8)))
+        .method(method, new RequestBody("".getBytes(UTF_8), null))
         .build());
     assertContent("", response);
     RecordedRequest zeroLengthPayload = server.takeRequest();
@@ -2058,7 +2043,7 @@ public final class URLConnectionTest {
 
     Response response = getResponse(new Request.Builder()
         .url(server.url("/").toString())
-        .delete(RequestBody.create(null, "BODY".getBytes(StandardCharsets.UTF_8)))
+        .delete(new RequestBody("BODY".getBytes(UTF_8), null))
         .build());
     Assertions.assertThat(response.code()).isEqualTo(200);
 
