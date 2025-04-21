@@ -39,13 +39,6 @@ public class RequestBody {
     return contentType;
   }
 
-  /**
-   * Returns the number of bytes that will be written to {@code sink} in a call to {@link #writeTo}.
-   */
-  public int contentLength() {
-    return content.length;
-  }
-
   /** Writes the content of this request to {@code sink}. */
   public void writeTo(BufferedSink sink) throws IOException {
     sink.write(content);

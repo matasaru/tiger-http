@@ -130,7 +130,7 @@ public class Call {
                 requestBuilder.header("Content-Type", contentType.toString());
               }
 
-              requestBuilder.header("Content-Length", Integer.toString(body.contentLength()));
+              requestBuilder.header("Content-Length", Integer.toString(body.content().length));
               requestBuilder.removeHeader("Transfer-Encoding");
             }
 

@@ -32,7 +32,7 @@ public final class RequestTest {
     MediaType contentType = MediaType.get("text/plain");
     RequestBody body = new RequestBody("abc".getBytes(UTF_8), contentType);
     assertThat(body.contentType()).isEqualTo(contentType);
-    assertThat(body.contentLength()).isEqualTo(3);
+    assertThat(body.content().length).isEqualTo(3);
     assertThat(bodyToHex(body)).isEqualTo("616263");
     assertThat(bodyToHex(body)).overridingErrorMessage("Retransmit body").isEqualTo("616263");
   }
@@ -52,7 +52,7 @@ public final class RequestTest {
 
     Request delete = new Request.Builder().url("http://localhost/api").delete().build();
     assertThat(delete.method()).isEqualTo("DELETE");
-    assertThat(delete.body().contentLength()).isEqualTo(0L);
+    assertThat(delete.body().content().length).isEqualTo(0L);
 
     Request post = new Request.Builder().url("http://localhost/api").post(body).build();
     assertThat(post.method()).isEqualTo("POST");
