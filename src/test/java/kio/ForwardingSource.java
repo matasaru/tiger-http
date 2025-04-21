@@ -11,11 +11,6 @@ public abstract class ForwardingSource implements Source {
     this.delegate = delegate;
   }
 
-  /** {@link Source} to which this instance is delegating. */
-  public final Source delegate() {
-    return delegate;
-  }
-
   @Override public int read(Buffer sink, int byteCount) throws IOException {
     return delegate.read(sink, byteCount);
   }

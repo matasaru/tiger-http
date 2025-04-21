@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.net.ProtocolException;
 
 import kio.Buffer;
-import kio.ForwardingSource;
 import kio.RealBufferedSource;
 import kio.Sink;
 import kio.Source;
@@ -179,14 +178,15 @@ public final class Exchange {
   }
 
   /** A response body that fires events when it completes. */
-  final class ResponseBodySource extends ForwardingSource {
+  final class ResponseBodySource implements Source {
+    private final Source delegate;
     private final int contentLength;
     private int bytesReceived;
     private boolean completed;
     private boolean closed;
 
     ResponseBodySource(Source delegate, int contentLength) {
-      super(delegate);
+      this.delegate = delegate;
       this.contentLength = contentLength;
 
       if (contentLength == 0L) {
@@ -197,7 +197,7 @@ public final class Exchange {
     @Override public int read(Buffer sink, int byteCount) throws IOException {
       if (closed) throw new IllegalStateException("closed");
       try {
-        int read = delegate().read(sink, byteCount);
+        int read = delegate.read(sink, byteCount);
         if (read == -1) {
           complete(null);
           return -1;
@@ -220,11 +220,15 @@ public final class Exchange {
       }
     }
 
+    @Override public Timeout timeout() {
+      return delegate.timeout();
+    }
+
     @Override public void close() throws IOException {
       if (closed) return;
       closed = true;
       try {
-        super.close();
+        delegate.close();
         complete(null);
       } catch (IOException e) {
         throw complete(e);
