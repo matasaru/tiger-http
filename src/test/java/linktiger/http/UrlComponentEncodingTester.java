@@ -16,12 +16,12 @@
 package linktiger.http;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import kio.Buffer;
-import kio.ByteString;
 
 import static org.junit.Assert.fail;
 
@@ -292,10 +292,10 @@ class UrlComponentEncodingTester {
 
     PERCENT {
       public String encode(int codePoint) {
-        ByteString utf8 = ByteString.encodeUtf8(IDENTITY.encode(codePoint));
+        byte[] bytes = IDENTITY.encode(codePoint).getBytes(StandardCharsets.UTF_8);
         Buffer percentEncoded = new Buffer();
-        for (int i = 0; i < utf8.size(); i++) {
-          percentEncoded.writeUtf8(Util.format("%%%02X", utf8.getByte(i) & 0xff));
+        for (byte b : bytes) {
+          percentEncoded.writeUtf8(Util.format("%%%02X", b & 0xff));
         }
         return percentEncoded.readUtf8();
       }

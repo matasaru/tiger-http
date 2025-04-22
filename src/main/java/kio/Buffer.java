@@ -26,7 +26,6 @@ import java.util.HexFormat;
 public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
   private static final byte[] DIGITS =
       { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
-  static final int REPLACEMENT_CHARACTER = '\ufffd';
 
   Segment head;
   int size;

@@ -15,26 +15,16 @@
  */
 package linktiger.http;
 
-import kio.ByteString;
-
 /** HTTP header: the name is an ASCII string, but the value can be UTF-8. */
 public final class Header {
 
   /** Name in case-insensitive ASCII encoding. */
-  public final ByteString name;
+  public final String name;
   /** Value in UTF-8 encoding. */
-  public final ByteString value;
+  public final String value;
 
   // TODO: search for toLowerCase and consider moving logic here.
   public Header(String name, String value) {
-    this(ByteString.encodeUtf8(name), ByteString.encodeUtf8(value));
-  }
-
-  public Header(ByteString name, String value) {
-    this(name, ByteString.encodeUtf8(value));
-  }
-
-  public Header(ByteString name, ByteString value) {
     this.name = name;
     this.value = value;
   }
@@ -55,6 +45,6 @@ public final class Header {
   }
 
   @Override public String toString() {
-    return Util.format("%s: %s", name.utf8(), value.utf8());
+    return Util.format("%s: %s", name, value);
   }
 }
