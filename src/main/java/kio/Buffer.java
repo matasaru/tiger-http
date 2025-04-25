@@ -3,7 +3,6 @@ package kio;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HexFormat;
@@ -112,35 +111,6 @@ public final class Buffer implements BufferedSource, BufferedSink, Cloneable {
       byteCount -= copy.limit - copy.pos;
       offset = 0;
     }
-  }
-
-  /** Write the contents of this to {@code out}. */
-  public Buffer writeTo(OutputStream out) throws IOException {
-    return writeTo(out, size);
-  }
-
-  /** Write {@code byteCount} bytes from this to {@code out}. */
-  public Buffer writeTo(OutputStream out, int byteCount) throws IOException {
-    if (out == null) throw new IllegalArgumentException("out == null");
-    Util.checkOffsetAndCount(size, 0, byteCount);
-
-    Segment s = head;
-    while (byteCount > 0) {
-      int toCopy = Math.min(byteCount, s.limit - s.pos);
-      out.write(s.data, s.pos, toCopy);
-
-      s.pos += toCopy;
-      size -= toCopy;
-      byteCount -= toCopy;
-
-      if (s.pos == s.limit) {
-        Segment toRecycle = s;
-        head = s = toRecycle.pop();
-        SegmentPool.recycle(toRecycle);
-      }
-    }
-
-    return this;
   }
 
   /**
