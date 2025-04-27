@@ -15,14 +15,16 @@
  */
 package linktiger.http;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.zip.GZIPInputStream;
 
 import kio.Buffer;
-import kio.BufferedSource;
-import kio.GzipSource;
-import kio.Okio;
-import kio.RealBufferedSource;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -107,46 +109,46 @@ public final class PublicSuffixDatabaseTest {
   }
 
   @Test public void allPublicSuffixes() throws IOException {
-    InputStream resource = PublicSuffixDatabaseTest.class
-        .getResourceAsStream(PublicSuffixDatabase.PUBLIC_SUFFIX_RESOURCE);
-    BufferedSource source = new RealBufferedSource(new GzipSource(Okio.source(resource)));
-    int length = source.readInt();
-    Buffer buffer = new Buffer();
-    buffer.write(source, length);
-    resource.close();
+    InputStream resource = PublicSuffixDatabase.class.getResourceAsStream(PublicSuffixDatabase.PUBLIC_SUFFIX_RESOURCE);
+    if (resource == null) return;
 
-    while (!buffer.exhausted()) {
-      String publicSuffix = buffer.readUtf8LineStrict();
-      if (publicSuffix.contains("*")) {
+    var stream = new DataInputStream(new GZIPInputStream(new BufferedInputStream(resource)));
+    int length = stream.readInt();
+    var bytes = stream.readNBytes(length);
+    stream.close();
+
+    var str = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(bytes)));
+    String line;
+    while ((line = str.readLine()) != null) {
+      if (line.contains("*")) {
         // A wildcard rule, let's replace the wildcard with a value.
-        publicSuffix = publicSuffix.replaceAll("\\*", "square");
+        line = line.replaceAll("\\*", "square");
       }
-      assertThat(publicSuffixDatabase.getEffectiveTldPlusOne(publicSuffix)).isNull();
+      assertThat(publicSuffixDatabase.getEffectiveTldPlusOne(line)).isNull();
 
-      String test = "foobar." + publicSuffix;
+      String test = "foobar." + line;
       assertThat(publicSuffixDatabase.getEffectiveTldPlusOne(test)).isEqualTo(test);
     }
   }
 
   @Test public void publicSuffixExceptions() throws IOException {
-    InputStream resource = PublicSuffixDatabaseTest.class
-        .getResourceAsStream(PublicSuffixDatabase.PUBLIC_SUFFIX_RESOURCE);
-    BufferedSource source = new RealBufferedSource(new GzipSource(Okio.source(resource)));
-    int length = source.readInt();
-    source.skip(length);
+    InputStream resource = PublicSuffixDatabase.class.getResourceAsStream(PublicSuffixDatabase.PUBLIC_SUFFIX_RESOURCE);
+    if (resource == null) return;
 
-    length = source.readInt();
-    Buffer buffer = new Buffer();
-    buffer.write(source, length);
-    resource.close();
+    var stream = new DataInputStream(new GZIPInputStream(new BufferedInputStream(resource)));
+    int length = stream.readInt();
+    stream.skipNBytes(length);
+    length = stream.readInt();
+    var bytes = stream.readNBytes(length);
+    stream.close();
 
-    while (!buffer.exhausted()) {
-      String exception = buffer.readUtf8LineStrict();
-      assertThat(publicSuffixDatabase.getEffectiveTldPlusOne(exception)).isEqualTo(
-          exception);
+    var str = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(bytes)));
+    String line;
+    while ((line = str.readLine()) != null) {
+      assertThat(publicSuffixDatabase.getEffectiveTldPlusOne(line)).isEqualTo(line);
 
-      String test = "foobar." + exception;
-      assertThat(publicSuffixDatabase.getEffectiveTldPlusOne(test)).isEqualTo(exception);
+      String test = "foobar." + line;
+      assertThat(publicSuffixDatabase.getEffectiveTldPlusOne(test)).isEqualTo(line);
     }
   }
 

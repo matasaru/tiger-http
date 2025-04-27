@@ -15,21 +15,28 @@
  */
 package linktiger.http;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
+import java.io.PrintWriter;
 import java.net.IDN;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import kio.BufferedSource;
-import kio.GzipSource;
-import kio.Okio;
-import kio.RealBufferedSource;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * A database of public suffixes provided by
@@ -55,8 +62,7 @@ public final class PublicSuffixDatabase {
   private final CountDownLatch readCompleteLatch = new CountDownLatch(1);
 
   // The lists are held as a large array of UTF-8 bytes. This is to avoid allocating lots of strings
-  // that will likely never be used. Each rule is separated by '\n'. Please see the
-  // PublicSuffixListGenerator class for how these lists are generated.
+  // that will likely never be used. Each rule is separated by '\n'.
   // Guarded by this.
   private byte[] publicSuffixListBytes;
   private byte[] publicSuffixExceptionListBytes;
@@ -132,7 +138,7 @@ public final class PublicSuffixDatabase {
     // Break apart the domain into UTF-8 labels, i.e. foo.bar.com turns into [foo, bar, com].
     byte[][] domainLabelsUtf8Bytes = new byte[domainLabels.length][];
     for (int i = 0; i < domainLabels.length; i++) {
-      domainLabelsUtf8Bytes[i] = domainLabels[i].getBytes(UTF_8);
+      domainLabelsUtf8Bytes[i] = domainLabels[i].getBytes(StandardCharsets.UTF_8);
     }
 
     // Start by looking for exact matches. We start at the leftmost label. For example, foo.bar.com
@@ -275,7 +281,7 @@ public final class PublicSuffixDatabase {
           low = mid + end + 1;
         } else {
           // Found a match.
-          match = new String(bytesToSearch, mid, publicSuffixLength, UTF_8);
+          match = new String(bytesToSearch, mid, publicSuffixLength, StandardCharsets.UTF_8);
           break;
         }
       }
@@ -317,14 +323,12 @@ public final class PublicSuffixDatabase {
     InputStream resource = PublicSuffixDatabase.class.getResourceAsStream(PUBLIC_SUFFIX_RESOURCE);
     if (resource == null) return;
 
-    try (BufferedSource bufferedSource = new RealBufferedSource(new GzipSource(Okio.source(resource)))) {
-      int totalBytes = bufferedSource.readInt();
-      publicSuffixListBytes = new byte[totalBytes];
-      bufferedSource.readFully(publicSuffixListBytes);
+    try (var stream = new DataInputStream(new GZIPInputStream(new BufferedInputStream(resource)))) {
+      int length = stream.readInt();
+      publicSuffixListBytes = stream.readNBytes(length);
 
-      int totalExceptionBytes = bufferedSource.readInt();
-      publicSuffixExceptionListBytes = new byte[totalExceptionBytes];
-      bufferedSource.readFully(publicSuffixExceptionListBytes);
+      length = stream.readInt();
+      publicSuffixExceptionListBytes = stream.readNBytes(length);
     }
 
     synchronized (this) {
@@ -341,5 +345,88 @@ public final class PublicSuffixDatabase {
     this.publicSuffixExceptionListBytes = publicSuffixExceptionListBytes;
     listRead.set(true);
     readCompleteLatch.countDown();
+  }
+
+  static class Generator {
+
+    private static final Path RESOURCE_DIR = Path.of("src", "main", "resources", "linktiger", "http");
+
+    private static final String EXCEPTION_RULE_MARKER = "!";
+    private static final String WILDCARD_CHAR = "*";
+
+    public static void main(String... args) throws IOException {
+      var client = new HttpClient.Builder().build();
+      var request = new Request.Builder()
+          .url("https://publicsuffix.org/list/public_suffix_list.dat")
+          .build();
+      SortedSet<String> sortedRules = new TreeSet<>();
+      SortedSet<String> sortedExceptionRules = new TreeSet<>();
+      try (Response response = client.newCall(request).execute()) {
+        var source = response.body().source().inputStream();
+        var reader = new BufferedReader(new InputStreamReader(source));
+        for (var line = reader.readLine(); line != null; line = reader.readLine()) {
+          if (line.trim().isEmpty() || line.startsWith("//")) continue;
+
+          if (line.contains(WILDCARD_CHAR)) {
+            assertWildcardRule(line);
+          }
+
+          if (line.startsWith(EXCEPTION_RULE_MARKER)) {
+            line = line.substring(1);
+            sortedExceptionRules.add(line);
+          }
+          else {
+            sortedRules.add(line);
+          }
+        }
+
+        Files.createDirectories(RESOURCE_DIR);
+
+        try (var stream = new DataOutputStream(new GZIPOutputStream(Files.newOutputStream(RESOURCE_DIR.resolve(PUBLIC_SUFFIX_RESOURCE))))) {
+          var bytes = byteArray(sortedRules);
+          stream.writeInt(bytes.length);
+          stream.write(bytes);
+
+          bytes = byteArray(sortedExceptionRules);
+          stream.writeInt(bytes.length);
+          stream.write(bytes);
+        }
+      }
+    }
+
+    /**
+     * These assertions ensure the {@link PublicSuffixDatabase} remains correct. The specification is
+     * very flexible regarding wildcard rules, but this flexibility is not something currently used
+     * in practice. To simplify the implementation, we've avoided implementing the flexible rules in
+     * favor of supporting what's actually used in practice. That means if these assertions ever fail,
+     * the implementation will need to be revisited to support a more flexible rule.
+     */
+    private static void assertWildcardRule(String rule) {
+      if (rule.indexOf(WILDCARD_CHAR) != 0) {
+        throw new RuntimeException("Wildcard Assertion Failure: " + rule + "\nA wildcard rule was "
+            + "added with a wildcard that is not in leftmost position! We'll need to change the "
+            + PublicSuffixDatabase.class.getName() + " to handle this.");
+      }
+      if (rule.indexOf(WILDCARD_CHAR, 1) != -1) {
+        throw new RuntimeException("Wildcard Assertion Failure: " + rule + "\nA wildcard rule was "
+            + "added with multiple wildcards! We'll need to change "
+            + PublicSuffixDatabase.class.getName() + " to handle this.");
+      }
+      if (rule.length() == 1) {
+        throw new RuntimeException("Wildcard Assertion Failure: " + rule + "\nA wildcard rule was "
+            + "added that wildcards the first level! We'll need to change the "
+            + PublicSuffixDatabase.class.getName() + " to handle this.");
+      }
+    }
+
+    private static byte[] byteArray(SortedSet<String> rules) {
+      var stream = new ByteArrayOutputStream();
+      try (var writer = new PrintWriter(stream)) {
+        for (var rule : rules) {
+          writer.println(rule);
+        }
+      }
+      return stream.toByteArray();
+    }
   }
 }
