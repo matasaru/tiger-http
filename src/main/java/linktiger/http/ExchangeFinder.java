@@ -69,7 +69,7 @@ final class ExchangeFinder {
     try {
       Connection resultConnection = findHealthyConnection(connectTimeout, readTimeout,
           writeTimeout, connectionRetryEnabled, doExtensiveHealthChecks);
-      return resultConnection.newCodec(client);
+      return resultConnection.newCodec(readTimeout, writeTimeout);
     } catch (RouteException e) {
       trackFailure();
       throw e;

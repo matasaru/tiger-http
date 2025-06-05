@@ -433,10 +433,10 @@ public final class Connection {
     return false;
   }
 
-  Http1Codec newCodec(HttpClient client) throws SocketException {
-    socket.setSoTimeout(client.readTimeoutMillis());
-    source.timeout().timeout(client.readTimeoutMillis(), MILLISECONDS);
-    sink.timeout().timeout(client.writeTimeoutMillis(), MILLISECONDS);
+  Http1Codec newCodec(int readTimeoutMillis, int writeTimeoutMillis) throws SocketException {
+    socket.setSoTimeout(readTimeoutMillis);
+    source.timeout().timeout(readTimeoutMillis, MILLISECONDS);
+    sink.timeout().timeout(writeTimeoutMillis, MILLISECONDS);
     return new Http1Codec(this, source, sink);
   }
 
