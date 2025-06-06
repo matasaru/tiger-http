@@ -60,12 +60,7 @@ final class ExchangeFinder {
     this.routeSelector = new RouteSelector(address, connectionPool.routeDatabase);
   }
 
-  public Http1Codec find(HttpClient client, boolean doExtensiveHealthChecks) {
-    int connectTimeout = client.connectTimeoutMillis();
-    int readTimeout = client.readTimeoutMillis();
-    int writeTimeout = client.writeTimeoutMillis();
-    boolean connectionRetryEnabled = client.retryOnConnectionFailure();
-
+  public Http1Codec find(int connectTimeout, int readTimeout, int writeTimeout, boolean connectionRetryEnabled, boolean doExtensiveHealthChecks) {
     try {
       Connection resultConnection = findHealthyConnection(connectTimeout, readTimeout,
           writeTimeout, connectionRetryEnabled, doExtensiveHealthChecks);
