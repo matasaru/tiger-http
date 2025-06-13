@@ -47,8 +47,6 @@ import java.util.TreeSet;
  */
 public final class Headers {
 
-  public static final Headers EMPTY = of();
-
   private final String[] namesAndValues;
 
   Headers(Builder builder) {
