@@ -192,14 +192,6 @@ public final class Headers {
     return result.toString();
   }
 
-  public List<Header> toList() {
-    List<Header> result = new ArrayList<>();
-    for (int i = 0; i < size(); i++) {
-      result.add(new Header(name(i), value(i)));
-    }
-    return result;
-  }
-
   private static String get(String[] namesAndValues, String name) {
     for (int i = namesAndValues.length - 2; i >= 0; i -= 2) {
       if (name.equalsIgnoreCase(namesAndValues[i])) {
