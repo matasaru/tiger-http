@@ -60,15 +60,6 @@ public final class Headers {
     return get(namesAndValues, name);
   }
 
-  /**
-   * Returns the last value corresponding to the specified field parsed as an HTTP date, or null if
-   * either the field is absent or cannot be parsed as a date.
-   */
-  public Date getDate(String name) {
-    String value = get(name);
-    return value != null ? HttpDate.parse(value) : null;
-  }
-
   public int contentLength() {
     String length = get("Content-Length");
     if (length == null) {
