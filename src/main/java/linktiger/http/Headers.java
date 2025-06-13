@@ -69,15 +69,6 @@ public final class Headers {
     return value != null ? HttpDate.parse(value) : null;
   }
 
-  /**
-   * Returns the last value corresponding to the specified field parsed as an HTTP date, or null if
-   * either the field is absent or cannot be parsed as a date.
-   */
-  public Instant getInstant(String name) {
-    Date value = getDate(name);
-    return value != null ? value.toInstant() : null;
-  }
-
   public int contentLength() {
     String length = get("Content-Length");
     if (length == null) {
