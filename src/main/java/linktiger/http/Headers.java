@@ -23,10 +23,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
@@ -192,20 +190,6 @@ public final class Headers {
       result.append(name(i)).append(": ").append(value(i)).append("\n");
     }
     return result.toString();
-  }
-
-  public Map<String, List<String>> toMultimap() {
-    Map<String, List<String>> result = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-    for (int i = 0, size = size(); i < size; i++) {
-      String name = name(i).toLowerCase(Locale.US);
-      List<String> values = result.get(name);
-      if (values == null) {
-        values = new ArrayList<>(2);
-        result.put(name, values);
-      }
-      values.add(value(i));
-    }
-    return result;
   }
 
   public List<Header> toList() {
