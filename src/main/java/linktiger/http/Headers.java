@@ -24,8 +24,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * The header fields of a single HTTP message. Values are uninterpreted strings; use {@code Request}
@@ -85,15 +83,6 @@ public final class Headers {
   /** Returns the value at {@code index}. */
   public String value(int index) {
     return namesAndValues[index * 2 + 1];
-  }
-
-  /** Returns an immutable case-insensitive set of header names. */
-  public Set<String> names() {
-    TreeSet<String> result = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-    for (int i = 0, size = size(); i < size; i++) {
-      result.add(name(i));
-    }
-    return Collections.unmodifiableSet(result);
   }
 
   /** Returns an immutable list of the header values for {@code name}. */
