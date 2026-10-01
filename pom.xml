@@ -55,7 +55,7 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.16.0</version>
         <configuration>
-          <release>26</release>
+          <release>27</release>
           <compilerArgs>
             <arg>-Xlint:all</arg>
           </compilerArgs>
